@@ -1,13 +1,41 @@
 <!doctype html>
-<html lang="en">
+<html class="no-js" lang="en">
 <head>
   <meta charset="utf-8">
-  <title>MyAppAngular</title>
-  <base href="/">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>Sufee Admin - HTML5 Admin Template</title>
+  <meta name="description" content="Sufee Admin - HTML5 Admin Template">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="icon" type="image/x-icon" href="favicon.ico">
+
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Edmin</title>
+	<link type="text/css" href="assets/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+	<link type="text/css" href="assets/bootstrap/css/bootstrap-responsive.min.css" rel="stylesheet">
+	<link type="text/css" href="assets/css/theme.css" rel="stylesheet">
+	<link type="text/css" href="assets/images/icons/css/font-awesome.css" rel="stylesheet">
+	<link type="text/css" href='http://fonts.googleapis.com/css?family=Open+Sans:400italic,600italic,400,600' rel='stylesheet'>
+
+
 </head>
 <body>
+  
+  
   <app-root></app-root>
+
+  <script type="text/javascript" src="assets/scripts/jquery-1.9.1.min.js"></script>
+	<script type="text/javascript" src="assets/scripts/jquery-ui-1.10.1.custom.min.js"></script>
+	<script type="text/javascript" src="assets/bootstrap/js/bootstrap.min.js"></script>
+	<script type="text/javascript" src="assets/scripts/datatables/jquery.dataTables.js"></script>
+	<script>
+		$(document).ready(function() {
+			$('.datatable-1').dataTable();
+			$('.dataTables_paginate').addClass("btn-group datatable-pagination");
+			$('.dataTables_paginate > a').wrapInner('<span />');
+			$('.dataTables_paginate > a:first-child').append('<i class="icon-chevron-left shaded"></i>');
+			$('.dataTables_paginate > a:last-child').append('<i class="icon-chevron-right shaded"></i>');
+		} );
+	</script>
+ 
 </body>
 </html>
