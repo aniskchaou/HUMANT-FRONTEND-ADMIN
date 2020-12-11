@@ -92,7 +92,7 @@
 
 <div  *ngIf="hasRoute('login')">
     <div class="module module-login span4 offset4">
-        <form class="form-vertical" action="/dashboard">
+      
             <div class="module-head">
                 <img src="assets/images/logo.png" align="middle">
             </div>
@@ -112,12 +112,12 @@
             <div class="module-foot">
                 <div class="control-group">
                     <div class="controls clearfix">
-                        <button type="submit" class="btn btn-primary pull-right">Connexion</button>
+                        <button routerLink="/dashboard" type="submit" class="btn btn-primary pull-right">Connexion</button>
                       
                     </div>
                 </div>
             </div>
-        </form>
+        
     </div>
 </div>
 

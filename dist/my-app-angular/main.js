@@ -1535,31 +1535,29 @@ function AppComponent_div_2_Template(rf, ctx) { if (rf & 1) {
 function AppComponent_div_3_Template(rf, ctx) { if (rf & 1) {
     _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵelementStart"](0, "div");
     _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵelementStart"](1, "div", 35);
-    _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵelementStart"](2, "form", 36);
-    _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵelementStart"](3, "div", 37);
-    _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵelement"](4, "img", 38);
+    _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵelementStart"](2, "div", 36);
+    _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵelement"](3, "img", 37);
     _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵelementEnd"]();
-    _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵelementStart"](5, "div", 39);
-    _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵelementStart"](6, "small");
-    _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵtext"](7, "login : admin / mp : admin");
+    _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵelementStart"](4, "div", 38);
+    _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵelementStart"](5, "small");
+    _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵtext"](6, "login : admin / mp : admin");
     _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵelementEnd"]();
+    _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵelementStart"](7, "div", 39);
     _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵelementStart"](8, "div", 40);
-    _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵelementStart"](9, "div", 41);
-    _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵelement"](10, "input", 42);
+    _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵelement"](9, "input", 41);
     _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵelementEnd"]();
     _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵelementEnd"]();
+    _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵelementStart"](10, "div", 39);
     _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵelementStart"](11, "div", 40);
-    _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵelementStart"](12, "div", 41);
-    _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵelement"](13, "input", 43);
+    _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵelement"](12, "input", 42);
     _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵelementEnd"]();
     _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵelementEnd"]();
     _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵelementEnd"]();
-    _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵelementStart"](14, "div", 44);
-    _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵelementStart"](15, "div", 40);
-    _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵelementStart"](16, "div", 45);
-    _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵelementStart"](17, "button", 46);
-    _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵtext"](18, "Connexion");
-    _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵelementEnd"]();
+    _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵelementStart"](13, "div", 43);
+    _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵelementStart"](14, "div", 39);
+    _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵelementStart"](15, "div", 44);
+    _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵelementStart"](16, "button", 45);
+    _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵtext"](17, "Connexion");
     _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵelementEnd"]();
     _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵelementEnd"]();
     _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵelementEnd"]();
@@ -1579,11 +1577,11 @@ class AppComponent {
     }
 }
 AppComponent.ɵfac = function AppComponent_Factory(t) { return new (t || AppComponent)(_angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdirectiveInject"](_angular_router__WEBPACK_IMPORTED_MODULE_1__["Router"])); };
-AppComponent.ɵcmp = _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdefineComponent"]({ type: AppComponent, selectors: [["app-root"]], decls: 4, vars: 4, consts: [["class", "navbar navbar-fixed-top", 4, "ngIf"], ["class", "wrapper", 4, "ngIf"], ["class", "footer", 4, "ngIf"], [4, "ngIf"], [1, "navbar", "navbar-fixed-top"], [1, "navbar-inner"], [1, "container"], ["data-toggle", "collapse", "data-target", ".navbar-inverse-collapse", 1, "btn", "btn-navbar"], [1, "icon-reorder", "shaded"], [1, "brand"], ["src", "assets/images/logo.png", "height", "80", "width", "120"], [1, "nav-collapse", "collapse", "navbar-inverse-collapse"], [1, "nav", "nav-icons"], [1, "active"], ["href", "#"], [1, "icon-envelope"], [1, "icon-eye-open"], [1, "icon-bar-chart"], ["action", "#", 1, "navbar-search", "pull-left", "input-append"], ["type", "text", 1, "span3"], ["type", "button", 1, "btn"], [1, "icon-search"], [1, "nav", "pull-right"], [1, "nav-user", "dropdown"], ["href", "#", "data-toggle", "dropdown", 1, "dropdown-toggle"], ["src", "assets/images/user.png", 1, "nav-avatar"], [1, "caret"], [1, "dropdown-menu"], [1, "divider"], [1, "wrapper"], [1, "row"], [1, "span9"], [1, "content"], [1, "footer"], [1, "copyright"], [1, "module", "module-login", "span4", "offset4"], ["action", "/dashboard", 1, "form-vertical"], [1, "module-head"], ["src", "assets/images/logo.png", "align", "middle"], [1, "module-body"], [1, "control-group"], [1, "controls", "row-fluid"], ["type", "text", "id", "inputEmail", "value", "admin", "placeholder", "Username", 1, "span12"], ["type", "password", "id", "inputPassword", "value", "admin", "placeholder", "Password", 1, "span12"], [1, "module-foot"], [1, "controls", "clearfix"], ["type", "submit", 1, "btn", "btn-primary", "pull-right"]], template: function AppComponent_Template(rf, ctx) { if (rf & 1) {
+AppComponent.ɵcmp = _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdefineComponent"]({ type: AppComponent, selectors: [["app-root"]], decls: 4, vars: 4, consts: [["class", "navbar navbar-fixed-top", 4, "ngIf"], ["class", "wrapper", 4, "ngIf"], ["class", "footer", 4, "ngIf"], [4, "ngIf"], [1, "navbar", "navbar-fixed-top"], [1, "navbar-inner"], [1, "container"], ["data-toggle", "collapse", "data-target", ".navbar-inverse-collapse", 1, "btn", "btn-navbar"], [1, "icon-reorder", "shaded"], [1, "brand"], ["src", "assets/images/logo.png", "height", "80", "width", "120"], [1, "nav-collapse", "collapse", "navbar-inverse-collapse"], [1, "nav", "nav-icons"], [1, "active"], ["href", "#"], [1, "icon-envelope"], [1, "icon-eye-open"], [1, "icon-bar-chart"], ["action", "#", 1, "navbar-search", "pull-left", "input-append"], ["type", "text", 1, "span3"], ["type", "button", 1, "btn"], [1, "icon-search"], [1, "nav", "pull-right"], [1, "nav-user", "dropdown"], ["href", "#", "data-toggle", "dropdown", 1, "dropdown-toggle"], ["src", "assets/images/user.png", 1, "nav-avatar"], [1, "caret"], [1, "dropdown-menu"], [1, "divider"], [1, "wrapper"], [1, "row"], [1, "span9"], [1, "content"], [1, "footer"], [1, "copyright"], [1, "module", "module-login", "span4", "offset4"], [1, "module-head"], ["src", "assets/images/logo.png", "align", "middle"], [1, "module-body"], [1, "control-group"], [1, "controls", "row-fluid"], ["type", "text", "id", "inputEmail", "value", "admin", "placeholder", "Username", 1, "span12"], ["type", "password", "id", "inputPassword", "value", "admin", "placeholder", "Password", 1, "span12"], [1, "module-foot"], [1, "controls", "clearfix"], ["routerLink", "/dashboard", "type", "submit", 1, "btn", "btn-primary", "pull-right"]], template: function AppComponent_Template(rf, ctx) { if (rf & 1) {
         _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵtemplate"](0, AppComponent_div_0_Template, 41, 0, "div", 0);
         _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵtemplate"](1, AppComponent_div_1_Template, 9, 0, "div", 1);
         _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵtemplate"](2, AppComponent_div_2_Template, 5, 0, "div", 2);
-        _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵtemplate"](3, AppComponent_div_3_Template, 19, 0, "div", 3);
+        _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵtemplate"](3, AppComponent_div_3_Template, 18, 0, "div", 3);
     } if (rf & 2) {
         _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵproperty"]("ngIf", !ctx.hasRoute("login"));
         _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵadvance"](1);
@@ -1592,7 +1590,7 @@ AppComponent.ɵcmp = _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdefineCompo
         _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵproperty"]("ngIf", !ctx.hasRoute("login"));
         _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵadvance"](1);
         _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵproperty"]("ngIf", ctx.hasRoute("login"));
-    } }, directives: [_angular_common__WEBPACK_IMPORTED_MODULE_2__["NgIf"], _template_navigation_navigation_component__WEBPACK_IMPORTED_MODULE_3__["NavigationComponent"], _angular_router__WEBPACK_IMPORTED_MODULE_1__["RouterOutlet"]], styles: ["\n/*# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6IiIsImZpbGUiOiJhcHAuY29tcG9uZW50LmNzcyJ9 */"] });
+    } }, directives: [_angular_common__WEBPACK_IMPORTED_MODULE_2__["NgIf"], _template_navigation_navigation_component__WEBPACK_IMPORTED_MODULE_3__["NavigationComponent"], _angular_router__WEBPACK_IMPORTED_MODULE_1__["RouterOutlet"], _angular_router__WEBPACK_IMPORTED_MODULE_1__["RouterLink"]], styles: ["\n/*# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6IiIsImZpbGUiOiJhcHAuY29tcG9uZW50LmNzcyJ9 */"] });
 /*@__PURE__*/ (function () { _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵsetClassMetadata"](AppComponent, [{
         type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Component"],
         args: [{
