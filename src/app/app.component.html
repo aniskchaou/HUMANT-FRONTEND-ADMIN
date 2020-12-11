@@ -1,25 +1,25 @@
-<div class="navbar navbar-fixed-top">
+<div class="navbar navbar-fixed-top" *ngIf="!hasRoute('login')">
     <div class="navbar-inner">
         <div class="container">
             <a class="btn btn-navbar" data-toggle="collapse" data-target=".navbar-inverse-collapse">
                 <i class="icon-reorder shaded"></i>
             </a>
 
-              <a class="brand" href="index.html">
-                  <img src="assets/images/logo.png" height="80" width="120">
-              </a>
+            <a class="brand">
+                <img src="assets/images/logo.png" height="80" width="120">
+            </a>
 
             <div class="nav-collapse collapse navbar-inverse-collapse">
                 <ul class="nav nav-icons">
                     <li class="active"><a href="#">
-                        <i class="icon-envelope"></i>
-                    </a></li>
+                            <i class="icon-envelope"></i>
+                        </a></li>
                     <li><a href="#">
-                        <i class="icon-eye-open"></i>
-                    </a></li>
+                            <i class="icon-eye-open"></i>
+                        </a></li>
                     <li><a href="#">
-                        <i class="icon-bar-chart"></i>
-                    </a></li>
+                            <i class="icon-bar-chart"></i>
+                        </a></li>
                 </ul>
 
                 <form class="navbar-search pull-left input-append" action="#">
@@ -28,34 +28,20 @@
                         <i class="icon-search"></i>
                     </button>
                 </form>
-            
+
                 <ul class="nav pull-right">
-                    <li class="dropdown">
-                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">Dropdown <b class="caret"></b></a>
-                        <ul class="dropdown-menu">
-                            <li><a href="#">Item No. 1</a></li>
-                            
-                            <li><a href="#">Don't Click</a></li>
-                            <li class="divider"></li>
-                            <li class="nav-header">Example Header</li>
-                            <li><a href="#">A Separated link</a></li>
-                                                        </ul>
-                    </li>
                     
-                    <li><a href="#">
-                        Support
-                    </a></li>
                     <li class="nav-user dropdown">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown">
                             <img src="assets/images/user.png" class="nav-avatar" />
                             <b class="caret"></b>
                         </a>
                         <ul class="dropdown-menu">
-                            <li><a href="#">Your Profile</a></li>
-                            <li><a href="#">Edit Profile</a></li>
-                            <li><a href="#">Account Settings</a></li>
+                            <li><a href="#">Mon Profile</a></li>
+                            <li><a href="#">Editer Profile</a></li>
+                            <li><a href="#">Paramètres</a></li>
                             <li class="divider"></li>
-                            <li><a href="#">Logout</a></li>
+                            <li><a href="#">Déconnexion</a></li>
                         </ul>
                     </li>
                 </ul>
@@ -66,76 +52,35 @@
 
 
 
-<div class="wrapper">
+<div class="wrapper" *ngIf="!hasRoute('login')">
     <div class="container">
         <div class="row">
-             <app-navigation></app-navigation>
+            <app-navigation></app-navigation>
 
 
             <div class="span9">
                 <div class="content">
 
-                    
 
-                    <div class="module">
-                        <div class="module-head">
-                            <h3>Employés</h3>
-                        </div>
-                        <div class="module-body table">
-                            <table cellpadding="0" cellspacing="0" border="0" class="datatable-1 table table-bordered table-striped	 display" width="100%">
-                                <thead>
-                                    <tr>
-                                        <th>Nom</th>
-                                        <th>Email</th>
-                                        <th>Télephone</th>
-                                        <th>Date de naissance</th>
-                                        <th>Sexe</th>
-                                        <th>Désignation</th>
-                                        <th>Département</th>
-                                        <th>Salaire</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr class="odd gradeX">
-                                        <td>Nom</td>
-                                        <td>Internet
-                                             Explorer 4.0</td>
-                                        <td>Win 95+</td>
-                                        <td class="center"> 4</td>
-                                        <td class="center">X</td>
-                                        <td class="center">X</td>
-                                        <td class="center">X</td>
-                                        <td class="center">X</td>
-                                    </tr>
-                                
-                                </tbody>
-                                <tfoot>
-                                    <tr>
-                                        <th>Nom</th>
-                                        <th>Email</th>
-                                        <th>Télephone</th>
-                                        <th>Date de naissance</th>
-                                        <th>Sexe</th>
-                                        <th>Désignation</th>
-                                        <th>Département</th>
-                                        <th>Salaire</th>
-                                    </tr>
-                                </tfoot>
-                            </table>
-                        </div>
-                    </div><!--/.module-->
 
-                <br />
-                    
-                </div><!--/.content-->
-            </div><!--/.span9-->
+                     
+                    <router-outlet></router-outlet>>
+
+                    <br />
+
+                </div>
+                <!--/.content-->
+            </div>
+            <!--/.span9-->
         </div>
-    </div><!--/.container-->
-</div><!--/.wrapper-->
+    </div>
+    <!--/.container-->
+</div>
+<!--/.wrapper-->
 
-<div class="footer">
+<div class="footer" *ngIf="!hasRoute('login')">
     <div class="container">
-         
+
 
         <b class="copyright">&copy; 2014 Edmin - EGrappler.com </b> All rights reserved.
     </div>
@@ -145,3 +90,70 @@
 
 
 
+<div  *ngIf="hasRoute('login')">
+    <div class="module module-login span4 offset4">
+        <form class="form-vertical" action="/dashboard">
+            <div class="module-head">
+                <img src="assets/images/logo.png" align="middle">
+            </div>
+            <div class="module-body">
+                <small>login : admin / mp : admin</small>
+                <div class="control-group">
+                    <div class="controls row-fluid">
+                        <input class="span12" type="text" id="inputEmail"  value="admin" placeholder="Username">
+                    </div>
+                </div>
+                <div class="control-group">
+                    <div class="controls row-fluid">
+                        <input class="span12" type="password" id="inputPassword" value="admin"  placeholder="Password">
+                    </div>
+                </div>
+            </div>
+            <div class="module-foot">
+                <div class="control-group">
+                    <div class="controls clearfix">
+                        <button type="submit" class="btn btn-primary pull-right">Connexion</button>
+                      
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" src="../assets/scripts/jquery-1.9.1.min.js"></script>
+<script type="text/javascript" src="../assets/scripts/jquery-ui-1.10.1.custom.min.js"></script>
+<script type="text/javascript" src="../assets/bootstrap/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="../assets/scripts/datatables/jquery.dataTables.js"></script>
+<script>
+    $(document).ready(function() {
+        $('.datatable-1').dataTable();
+        $('.dataTables_paginate').addClass("btn-group datatable-pagination");
+        $('.dataTables_paginate > a').wrapInner('<span />');
+        $('.dataTables_paginate > a:first-child').append('<i class="icon-chevron-left shaded"></i>');
+        $('.dataTables_paginate > a:last-child').append('<i class="icon-chevron-right shaded"></i>');
+    } );
+</script>
