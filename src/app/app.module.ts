@@ -26,6 +26,8 @@ import { DepartementComponent } from './content/departement/departement.componen
 import { DesignationComponent } from './content/designation/designation.component';
 import { ConfigurationComponent } from './content/configuration/configuration.component';
 import { LoginComponent } from './content/login/login.component';
+import { ProfileComponent } from './content/profile/profile.component';
+import { EditprofileComponent } from './content/editprofile/editprofile.component';
 
 const routes:Routes=[
 
@@ -49,6 +51,8 @@ const routes:Routes=[
   {path:'warning',component:WarningComponent,pathMatch:'full'},
   {path:'dashboard',component:DashboardComponent,pathMatch:'full'},
   {path:'login',component:LoginComponent,pathMatch:'full'},
+  {path:'profile',component:ProfileComponent,pathMatch:'full'},
+  {path:'editprofile',component:EditprofileComponent,pathMatch:'full'},
   {path:'',redirectTo:'login',pathMatch:'full'},
   {path:'**',redirectTo:'login',pathMatch:'full'}]
 
@@ -77,6 +81,8 @@ const routes:Routes=[
     DesignationComponent,
     ConfigurationComponent,
     LoginComponent,
+    ProfileComponent,
+    EditprofileComponent,
     
   ],
   imports: [

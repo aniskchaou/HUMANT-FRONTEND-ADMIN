@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <title>Sufee Admin - HTML5 Admin Template</title>
+  <title>Humant</title>
   <meta name="description" content="Sufee Admin - HTML5 Admin Template">
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
@@ -19,11 +19,25 @@
 
 <link rel="stylesheet" href="styles.css"></head>
 <body>
-  
+ 
   
   <app-root></app-root>
 
-
- 
+  <script src="assets/scripts/jquery-1.9.1.min.js"></script>
+  <script type="text/javascript" src="assets/scripts/jquery-ui-1.10.1.custom.min.js"></script>
+  <script type="text/javascript" src="assets/bootstrap/js/bootstrap.min.js"></script>
+  <script type="text/javascript" src="assets/scripts/datatables/jquery.dataTables.js"></script>
+  
+  <script>
+    
+      $(document).ready(function() {
+          $('table').dataTable();
+          $('.dataTables_paginate').addClass("btn-group datatable-pagination");
+          $('.dataTables_paginate > a').wrapInner('<span />');
+          $('.dataTables_paginate > a:first-child').append('<i class="icon-chevron-left shaded"></i>');
+          $('.dataTables_paginate > a:last-child').append('<i class="icon-chevron-right shaded"></i>');
+      } );
+  </script>
+  
 <script src="runtime.js" defer></script><script src="polyfills.js" defer></script><script src="vendor.js" defer></script><script src="main.js" defer></script></body>
 </html>

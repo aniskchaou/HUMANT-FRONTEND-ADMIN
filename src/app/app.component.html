@@ -30,18 +30,18 @@
                 </form>
 
                 <ul class="nav pull-right">
-                    
+                 
                     <li class="nav-user dropdown">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown">
-                            <img src="assets/images/user.png" class="nav-avatar" />
+                            <img src="../assets/images/user.png" class="nav-avatar" />
                             <b class="caret"></b>
                         </a>
                         <ul class="dropdown-menu">
-                            <li><a href="#">Mon Profile</a></li>
-                            <li><a href="#">Editer Profile</a></li>
-                            <li><a href="#">Paramètres</a></li>
+                            <li><a routerLink="/profile">Mon Profile</a></li>
+                            <li><a routerLink="/editprofile">Editer Profile</a></li>
+                            <li><a routerLink="/configuration">Paramètres</a></li>
                             <li class="divider"></li>
-                            <li><a href="#">Déconnexion</a></li>
+                            <li><a routerLink="/">Déconnexion</a></li>
                         </ul>
                     </li>
                 </ul>
@@ -70,6 +70,9 @@
 
                 </div>
                 <!--/.content-->
+
+
+
             </div>
             <!--/.span9-->
         </div>
@@ -86,6 +89,16 @@
     </div>
 </div>
 <!-- Right Panel -->
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -144,16 +157,3 @@
 
 
 
-<script type="text/javascript" src="../assets/scripts/jquery-1.9.1.min.js"></script>
-<script type="text/javascript" src="../assets/scripts/jquery-ui-1.10.1.custom.min.js"></script>
-<script type="text/javascript" src="../assets/bootstrap/js/bootstrap.min.js"></script>
-<script type="text/javascript" src="../assets/scripts/datatables/jquery.dataTables.js"></script>
-<script>
-    $(document).ready(function() {
-        $('.datatable-1').dataTable();
-        $('.dataTables_paginate').addClass("btn-group datatable-pagination");
-        $('.dataTables_paginate > a').wrapInner('<span />');
-        $('.dataTables_paginate > a:first-child').append('<i class="icon-chevron-left shaded"></i>');
-        $('.dataTables_paginate > a:last-child').append('<i class="icon-chevron-right shaded"></i>');
-    } );
-</script>
