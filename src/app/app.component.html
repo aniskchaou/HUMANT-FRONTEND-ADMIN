@@ -6,10 +6,11 @@
             </a>
 
             <a class="brand">
-                <img src="assets/images/logo.png" height="80" width="120">
+                <img src="assets/images/logo.png" height="89" width="120">
             </a>
 
             <div class="nav-collapse collapse navbar-inverse-collapse">
+                <!--
                 <ul class="nav nav-icons">
                     <li class="active"><a href="#">
                             <i class="icon-envelope"></i>
@@ -28,7 +29,7 @@
                         <i class="icon-search"></i>
                     </button>
                 </form>
-
+                 -->
                 <ul class="nav pull-right">
                  
                     <li class="nav-user dropdown">
@@ -49,6 +50,7 @@
         </div>
     </div><!-- /navbar-inner -->
 </div><!-- /navbar -->
+
 
 
 
@@ -103,17 +105,17 @@
 
 
 
-<div  *ngIf="hasRoute('login')">
-    <div class="module module-login span4 offset4">
+<div  *ngIf="hasRoute('login')" style="width:50%;margin:auto;">
+    <div class="module module-login span5" >
       
             <div class="module-head">
                 <img src="assets/images/logo.png" align="middle">
             </div>
             <div class="module-body">
-                <small>login : admin / mp : admin</small>
+               
                 <div class="control-group">
                     <div class="controls row-fluid">
-                        <input class="span12" type="text" id="inputEmail"  value="admin" placeholder="Username">
+                        <input class="span12" type="text" id="inputEmail"  value="admin@admin.com" placeholder="Username">
                     </div>
                 </div>
                 <div class="control-group">
