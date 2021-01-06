@@ -1,8 +1,8 @@
-# MyAppAngular
+# Humant
 
 Humant is a web application for managing the human resources (HR) of a company.
 
-## Information
+## Informations
 - Created: November 2020
 - Status: under development
 - Latest version : 1.0
