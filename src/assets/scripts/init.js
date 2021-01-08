@@ -5,8 +5,9 @@ $(function() {
         dom: 'Bfrtip',
         paging: true,
         autoFill: true,
+        pageLength: 10,
         buttons: [
-            'pdf','csvHtml5','copy'
+            'pdf','csvHtml5','excel','print'
         ],
         initComplete: function () {
             this.api().columns([0,4,5]).every( function () {
@@ -32,7 +33,7 @@ $(function() {
         
        
     });
-   
+    //$.fn.DataTable.ext.pager.numbers_length = 2;
     $('a.toggle-vis').on( 'click', function (e) {
         e.preventDefault();
  
@@ -48,4 +49,14 @@ $(function() {
     $('.dataTables_paginate > a').wrapInner('<span />');
     $('.dataTables_paginate > a:first-child').append('<i class="icon-chevron-left shaded"></i>');
     $('.dataTables_paginate > a:last-child').append('<i class="icon-chevron-right shaded"></i>');
+
+    
+    $('.tooltips').append("<span></span>");
+    $('.tooltips:not([tooltip-position])').attr('tooltip-position','bottom');
+    
+    
+    $(".tooltips").mouseenter(function(){
+     $(this).find('span').empty().append($(this).attr('tooltip'));
+    });
+
 });

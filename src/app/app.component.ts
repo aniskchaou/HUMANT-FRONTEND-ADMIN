@@ -1,23 +1,27 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import '@fortawesome/fontawesome-free/js/all.js';
+import { URLLoader } from './configs/URLLoader';
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css']
 })
-export class AppComponent {
+export class AppComponent extends URLLoader {
 
 
   title = 'my-app-angular';
 
   public router: string;
-
+ 
+  
   constructor(private _router: Router){
 
-         
+     super()    
         
     }
+
+
   /*
     loadScripts() {
       const dynamicScripts = [
@@ -35,11 +39,11 @@ export class AppComponent {
         node.charset = 'utf-8';
         document.getElementsByTagName('app-root')[0].appendChild(node);
       }
-    }  
+    }  */
   ngOnInit() {
    this.loadScripts();
   }
-  */
+
 
   
   hasRoute(route: string) {
