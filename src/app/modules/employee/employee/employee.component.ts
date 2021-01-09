@@ -8,6 +8,9 @@ import { URLLoader } from 'src/app/configs/URLLoader';
 })
 export class EmployeeComponent  extends URLLoader implements OnInit {
 
+  showsummary:boolean=false
+  showgraphic:boolean=false
+  
   constructor() {
     super()
    }

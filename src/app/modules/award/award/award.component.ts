@@ -10,6 +10,14 @@ import { URLLoader } from './../../../configs/URLLoader';
 export class AwardComponent extends URLLoader implements OnInit {
 
   
+  showsummary:boolean=false
+  showgraphic:boolean=false
+  
+  constructor() {
+    super()
+   }
+  
+
 ngOnInit() {
  super.loadScripts();
 }

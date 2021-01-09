@@ -3,26 +3,169 @@
         <h3>Contrôles</h3>
     </div>
     <div class="module-body">
-        <button style="margin: 3px;" type="button" href="#add-employee" role="button"  data-toggle="modal" class="btn btn-success btn-sm"><i class="fas fa-plus"></i>  Ajouter un employé</button>
-       
-        <button  style="margin: 3px;" type="button" href="#add-employee" role="button"  data-toggle="modal" class="btn btn-primary btn-sm"><i class="fas fa-file-import"></i>  Import</button>
+        <button style="margin: 3px;" type="button" href="#add-employee" role="button" data-toggle="modal"
+            class="btn btn-success btn-sm"><i class="fas fa-plus"></i> Ajouter</button>
 
-        <button  style="margin: 3px;" type="button" href="#add-employee" role="button"  data-toggle="modal" class="btn btn-danger btn-sm"><i class="fas fa-crosshairs"></i>  Sommaire</button>
+        <button style="margin: 3px;" type="button" href="#import-csv" role="button" data-toggle="modal"
+            class="btn btn-primary btn-sm"><i class="fas fa-file-import"></i> Import</button>
+
+        <button style="margin: 3px;" type="button" role="button" class="btn btn-danger btn-sm"
+            (click)="showsummary = !showsummary"><i class="fas fa-crosshairs"></i> Sommaire</button>
+
         <span style="margin: 3px;" class="dropdown">
-       
-            <button class="btn btn-warning dropdown-toggle btn-sm" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+
+            <button class="btn btn-warning dropdown-toggle btn-sm" type="button" id="dropdownMenuButton"
+                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                 <i class="fas fa-columns"></i> Monter/Cacher
             </button>
             <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
                 <a class="dropdown-item toggle-vis" href="" data-column="0">Nom</a> <br>
-                 <a class="dropdown-item toggle-vis" href="" data-column="1">Email</a> 
-              
+                <a class="dropdown-item toggle-vis" href="" data-column="1">Email</a> <br>
+                <a class="dropdown-item toggle-vis" href="" data-column="2">Télephone</a> <br>
+                <a class="dropdown-item toggle-vis" href="" data-column="3">Date de naissance</a> <br>
+                <a class="dropdown-item toggle-vis" href="" data-column="4">Désignation</a> <br>
+                <a class="dropdown-item toggle-vis" href="" data-column="5">Département</a> <br>
+                <a class="dropdown-item toggle-vis" href="" data-column="6">Salaire</a> <br>
+
             </div>
         </span>
 
-        <button  style="margin: 3px;" type="button" href="#add-employee" role="button"  data-toggle="modal" class="btn btn-info btn-sm"><i class="fas fa-chart-line"></i>  Analyse</button>
-        <br>
-        
+        <button style="margin: 3px;" type="button" role="button" (click)="showgraphic = !showgraphic"
+            class="btn btn-info btn-sm"><i class="fas fa-chart-line"></i> Analyse</button>
+        <br><br>
+
+
+        <div *ngIf="showsummary">
+
+
+            <div class="module">
+                <div class="module-head">
+                    <h3>
+                        Sommaire </h3>
+                </div>
+                <div class="module-body">
+                    <div class="row-fluid">
+                        <div class="span12">
+                            <a href="/departement" class="btn-box small span4"><i
+                                    class="icon-envelope"></i><b>Testeur</b>
+                                <div>7</div>
+                            </a><a routerLink="/employee" class="btn-box small span4"><i
+                                    class="icon-group"></i><b>Développment <div>3</div></b>
+                            </a><a href="/designation" class="btn-box small span4"><i
+                                    class="icon-exchange"></i><b>Design <div>0</div></b>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+        </div>
+
+
+        <div *ngIf="showgraphic">
+            <div class="module">
+                <div class="module-head">
+                    <h3>
+                        Graphique</h3>
+                </div>
+                <div class="module-body">
+                    <div class="chart">
+                        <div id="placeholder" class="graph" style="padding: 0px; position: relative;"><canvas
+                                class="base" width="838" height="300"></canvas><canvas class="overlay" width="838"
+                                height="300" style="position: absolute; left: 0px; top: 0px;"></canvas>
+                            <div class="tickLabels" style="font-size:smaller">
+                                <div class="xAxis x1Axis" style="color:#545454">
+                                    <div class="tickLabel"
+                                        style="position:absolute;text-align:center;left:-20px;top:280px;width:93px">0.0
+                                    </div>
+                                    <div class="tickLabel"
+                                        style="position:absolute;text-align:center;left:78px;top:280px;width:93px">1.0
+                                    </div>
+                                    <div class="tickLabel"
+                                        style="position:absolute;text-align:center;left:176px;top:280px;width:93px">2.0
+                                    </div>
+                                    <div class="tickLabel"
+                                        style="position:absolute;text-align:center;left:275px;top:280px;width:93px">3.0
+                                    </div>
+                                    <div class="tickLabel"
+                                        style="position:absolute;text-align:center;left:373px;top:280px;width:93px">4.0
+                                    </div>
+                                    <div class="tickLabel"
+                                        style="position:absolute;text-align:center;left:471px;top:280px;width:93px">5.0
+                                    </div>
+                                    <div class="tickLabel"
+                                        style="position:absolute;text-align:center;left:570px;top:280px;width:93px">6.0
+                                    </div>
+                                    <div class="tickLabel"
+                                        style="position:absolute;text-align:center;left:668px;top:280px;width:93px">7.0
+                                    </div>
+                                    <div class="tickLabel"
+                                        style="position:absolute;text-align:center;left:767px;top:280px;width:93px">8.0
+                                    </div>
+                                </div>
+                                <div class="yAxis y1Axis" style="color:#545454">
+                                    <div class="tickLabel"
+                                        style="position:absolute;text-align:right;top:265px;right:817px;width:21px">0.0
+                                    </div>
+                                    <div class="tickLabel"
+                                        style="position:absolute;text-align:right;top:223px;right:817px;width:21px">2.5
+                                    </div>
+                                    <div class="tickLabel"
+                                        style="position:absolute;text-align:right;top:182px;right:817px;width:21px">5.0
+                                    </div>
+                                    <div class="tickLabel"
+                                        style="position:absolute;text-align:right;top:140px;right:817px;width:21px">7.5
+                                    </div>
+                                    <div class="tickLabel"
+                                        style="position:absolute;text-align:right;top:98px;right:817px;width:21px">10.0
+                                    </div>
+                                    <div class="tickLabel"
+                                        style="position:absolute;text-align:right;top:57px;right:817px;width:21px">12.5
+                                    </div>
+                                    <div class="tickLabel"
+                                        style="position:absolute;text-align:right;top:15px;right:817px;width:21px">15.0
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="legend">
+                                <div
+                                    style="position: absolute; width: 54px; height: 52px; top: 30px; right: 30px; background-color: rgb(250, 250, 250); opacity: 0.85;">
+                                </div>
+                                <table style="position:absolute;top:30px;right:30px;;font-size:smaller;color:#545454">
+                                    <tbody>
+                                        <tr>
+                                            <td class="legendColorBox">
+                                                <div style="border:1px solid #ccc;padding:1px">
+                                                    <div
+                                                        style="width:4px;height:0;border:5px solid rgb(0,153,0);overflow:hidden">
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td class="legendLabel">Data A</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="legendColorBox">
+                                                <div style="border:1px solid #ccc;padding:1px">
+                                                    <div
+                                                        style="width:4px;height:0;border:5px solid rgb(0,153,153);overflow:hidden">
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td class="legendLabel">Data B</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+
+
     </div>
 </div>
 
@@ -31,10 +174,10 @@
     <div class="module-head">
         <h3>Employés</h3>
     </div>
-    
+
 
     <div class="module-body">
-        
+
         <table id="table" cellpadding="0" cellspacing="0" border="0"
             class="datatable-1 table table-bordered table-striped	 display" width="100%">
             <thead>
@@ -43,7 +186,7 @@
                     <th>Email</th>
                     <th>Télephone</th>
                     <th>Date de naissance</th>
-                    <th>Sexe</th>
+    
                     <th>Désignation</th>
                     <th>Département</th>
                     <th>Salaire</th>
@@ -56,14 +199,18 @@
                     <td>kchaouanis26@gmail.com</td>
                     <td>06 88 22 44 22</td>
                     <td class="center">01/05/1990</td>
-                    <td class="center"> Homme</td>
+                 
                     <td class="center">Développeur Web</td>
                     <td class="center">Développment</td>
                     <td class="center">1.500</td>
-                    
-                    <td><button  type="button"  href="#view-employee" role="button"  data-toggle="modal" class="btn btn-primary btn-sm"><i class="fas fa-address-book"></i></button>
-                        <button  type="button" class="btn btn-warning btn-sm"><i class="fas fa-edit"></i></button>
-                        <button  type="button" class="btn btn-danger btn-sm" onclick="return confirm('Êtes-vous sûr de vouloir supprimer cet employé ?');"><i class="fas fa-trash-alt"></i></button></td>
+
+                    <td><button type="button" href="#view-employee" role="button" data-toggle="modal"
+                            class="btn btn-primary btn-sm"><i class="fas fa-address-book"></i></button>
+                        <button type="button" class="btn btn-warning btn-sm"><i class="fas fa-edit"></i></button>
+                        <button type="button" class="btn btn-danger btn-sm"
+                            onclick="return confirm('Êtes-vous sûr de vouloir supprimer cet employé ?');"><i
+                                class="fas fa-trash-alt"></i></button>
+                    </td>
                 </tr>
 
                 <tr class="odd gradeX">
@@ -71,14 +218,18 @@
                     <td>jasck@gmail.com</td>
                     <td>06 99 66 44 66</td>
                     <td class="center">01/05/1999</td>
-                    <td class="center"> Homme</td>
+                   
                     <td class="center">Développeur Mobile</td>
                     <td class="center">Développment</td>
                     <td class="center">2.500</td>
-                    
-                    <td><button  type="button"  href="#view-employee" role="button"  data-toggle="modal" class="btn btn-primary btn-sm"><i class="fas fa-address-book"></i></button>
-                        <button  type="button" class="btn btn-warning btn-sm"><i class="fas fa-edit"></i></button>
-                        <button  type="button" class="btn btn-danger btn-sm" onclick="return confirm('Êtes-vous sûr de vouloir supprimer cet employé ?');"><i class="fas fa-trash-alt"></i></button></td>
+
+                    <td><button type="button" href="#view-employee" role="button" data-toggle="modal"
+                            class="btn btn-primary btn-sm"><i class="fas fa-address-book"></i></button>
+                        <button type="button" class="btn btn-warning btn-sm"><i class="fas fa-edit"></i></button>
+                        <button type="button" class="btn btn-danger btn-sm"
+                            onclick="return confirm('Êtes-vous sûr de vouloir supprimer cet employé ?');"><i
+                                class="fas fa-trash-alt"></i></button>
+                    </td>
                 </tr>
 
                 <tr class="odd gradeX">
@@ -86,16 +237,20 @@
                     <td>jasck@gmail.com</td>
                     <td>06 99 66 44 66</td>
                     <td class="center">01/05/1999</td>
-                    <td class="center"> Homme</td>
+                   
                     <td class="center">Développeur Mobile</td>
                     <td class="center">Développment</td>
                     <td class="center">2.500</td>
-                    
-                    <td><button  type="button"  href="#view-employee" role="button"  data-toggle="modal" class="btn btn-primary btn-sm"><i class="fas fa-address-book"></i></button>
-                        <button  type="button" class="btn btn-warning btn-sm"><i class="fas fa-edit"></i></button>
-                        <button  type="button" class="btn btn-danger btn-sm" onclick="return confirm('Êtes-vous sûr de vouloir supprimer cet employé ?');"><i class="fas fa-trash-alt"></i></button></td>
+
+                    <td><button type="button" href="#view-employee" role="button" data-toggle="modal"
+                            class="btn btn-primary btn-sm"><i class="fas fa-address-book"></i></button>
+                        <button type="button" class="btn btn-warning btn-sm"><i class="fas fa-edit"></i></button>
+                        <button type="button" class="btn btn-danger btn-sm"
+                            onclick="return confirm('Êtes-vous sûr de vouloir supprimer cet employé ?');"><i
+                                class="fas fa-trash-alt"></i></button>
+                    </td>
                 </tr>
-            
+
             </tbody>
             <tfoot>
                 <tr>
@@ -103,7 +258,7 @@
                     <th>Email</th>
                     <th>Télephone</th>
                     <th>Date de naissance</th>
-                    <th>Sexe</th>
+                 
                     <th>Désignation</th>
                     <th>Département</th>
                     <th>Salaire</th>
@@ -111,8 +266,8 @@
                 </tr>
             </tfoot>
         </table>
-      
-       
+
+
     </div>
 </div>
 
@@ -121,37 +276,55 @@
 
 
 <div id="view-employee" class="modal hide fade">
-    
+
     <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
         <h3>Détails</h3>
     </div>
-    
-    <div class="modal-body"> 
-      <app-view-employee></app-view-employee>
+
+    <div class="modal-body">
+        <app-view-employee></app-view-employee>
     </div>
-    
+
     <div class="modal-footer">
         <a href="#" class="btn" data-dismiss="modal">Fermer</a>
-       
+
     </div>
 </div>
 
 
 <div id="add-employee" class="modal hide fade">
-    
+
     <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
         <h3>Détails</h3>
     </div>
-    
-    <div class="modal-body"> 
-      <app-add-employee></app-add-employee>
+
+    <div class="modal-body">
+        <app-add-employee></app-add-employee>
     </div>
-    
+
     <div class="modal-footer">
         <a href="#" class="btn" data-dismiss="modal">Fermer</a>
-       
+
     </div>
 </div>
 
+
+<div id="import-csv" class="modal hide fade">
+
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h3>Import</h3>
+    </div>
+
+    <div class="modal-body">
+        <input type="file"> <button type="button" role="button" class="btn btn-primary btn-sm"><i
+                class="fas fa-file-import"></i> Import</button>
+    </div>
+
+    <div class="modal-footer">
+        <a href="#" class="btn" data-dismiss="modal">Fermer</a>
+
+    </div>
+</div>

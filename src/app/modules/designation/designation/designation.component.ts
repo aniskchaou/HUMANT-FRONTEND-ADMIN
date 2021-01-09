@@ -1,15 +1,23 @@
 import { Component, OnInit } from '@angular/core';
+import { URLLoader } from 'src/app/configs/URLLoader';
 
 @Component({
   selector: 'app-designation',
   templateUrl: './designation.component.html',
   styleUrls: ['./designation.component.css']
 })
-export class DesignationComponent implements OnInit {
+export class DesignationComponent extends URLLoader implements OnInit {
 
-  constructor() { }
+  showsummary:boolean=false
+  showgraphic:boolean=false
+  
+  constructor() {
+    super()
+   }
+  
 
-  ngOnInit(): void {
-  }
+ngOnInit() {
+ super.loadScripts();
+}
 
 }
