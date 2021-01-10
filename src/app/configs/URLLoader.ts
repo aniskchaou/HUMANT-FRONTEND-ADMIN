@@ -6,8 +6,8 @@ export class URLLoader {
 
     loadScripts() {
         const dynamicScripts = [
-         '../assets/scripts/jquery-1.9.1.min.js',
-         '../assets/scripts/jquery-ui-1.10.1.custom.min.js',
+         'https://code.jquery.com/jquery-2.2.4.min.js',
+        // '../assets/scripts/jquery-ui-1.10.1.custom.min.js',
          '../assets/bootstrap/js/bootstrap.min.js',
          //'../assets/scripts/datatables/jquery.dataTables.js',
          'https://cdn.datatables.net/1.10.22/js/jquery.dataTables.min.js',

@@ -24,7 +24,7 @@ export class AppComponent extends URLLoader {
 
 
   ngOnInit() {
-   this.loadScripts();
+   //this.loadScripts();
   }
 
 
