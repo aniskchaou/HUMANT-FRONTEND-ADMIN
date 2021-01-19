@@ -30,8 +30,7 @@
             </div>
         </span>
 
-        <button style="margin: 3px;" type="button" role="button" (click)="showgraphic = !showgraphic"
-            class="btn btn-info btn-sm"><i class="fas fa-chart-line"></i> Analyse</button>
+        
         <br><br>
 
 
@@ -63,106 +62,7 @@
         </div>
 
 
-        <div *ngIf="showgraphic">
-            <div class="module">
-                <div class="module-head">
-                    <h3>
-                        Graphique</h3>
-                </div>
-                <div class="module-body">
-                    <div class="chart">
-                        <div id="placeholder" class="graph" style="padding: 0px; position: relative;"><canvas
-                                class="base" width="838" height="300"></canvas><canvas class="overlay" width="838"
-                                height="300" style="position: absolute; left: 0px; top: 0px;"></canvas>
-                            <div class="tickLabels" style="font-size:smaller">
-                                <div class="xAxis x1Axis" style="color:#545454">
-                                    <div class="tickLabel"
-                                        style="position:absolute;text-align:center;left:-20px;top:280px;width:93px">0.0
-                                    </div>
-                                    <div class="tickLabel"
-                                        style="position:absolute;text-align:center;left:78px;top:280px;width:93px">1.0
-                                    </div>
-                                    <div class="tickLabel"
-                                        style="position:absolute;text-align:center;left:176px;top:280px;width:93px">2.0
-                                    </div>
-                                    <div class="tickLabel"
-                                        style="position:absolute;text-align:center;left:275px;top:280px;width:93px">3.0
-                                    </div>
-                                    <div class="tickLabel"
-                                        style="position:absolute;text-align:center;left:373px;top:280px;width:93px">4.0
-                                    </div>
-                                    <div class="tickLabel"
-                                        style="position:absolute;text-align:center;left:471px;top:280px;width:93px">5.0
-                                    </div>
-                                    <div class="tickLabel"
-                                        style="position:absolute;text-align:center;left:570px;top:280px;width:93px">6.0
-                                    </div>
-                                    <div class="tickLabel"
-                                        style="position:absolute;text-align:center;left:668px;top:280px;width:93px">7.0
-                                    </div>
-                                    <div class="tickLabel"
-                                        style="position:absolute;text-align:center;left:767px;top:280px;width:93px">8.0
-                                    </div>
-                                </div>
-                                <div class="yAxis y1Axis" style="color:#545454">
-                                    <div class="tickLabel"
-                                        style="position:absolute;text-align:right;top:265px;right:817px;width:21px">0.0
-                                    </div>
-                                    <div class="tickLabel"
-                                        style="position:absolute;text-align:right;top:223px;right:817px;width:21px">2.5
-                                    </div>
-                                    <div class="tickLabel"
-                                        style="position:absolute;text-align:right;top:182px;right:817px;width:21px">5.0
-                                    </div>
-                                    <div class="tickLabel"
-                                        style="position:absolute;text-align:right;top:140px;right:817px;width:21px">7.5
-                                    </div>
-                                    <div class="tickLabel"
-                                        style="position:absolute;text-align:right;top:98px;right:817px;width:21px">10.0
-                                    </div>
-                                    <div class="tickLabel"
-                                        style="position:absolute;text-align:right;top:57px;right:817px;width:21px">12.5
-                                    </div>
-                                    <div class="tickLabel"
-                                        style="position:absolute;text-align:right;top:15px;right:817px;width:21px">15.0
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="legend">
-                                <div
-                                    style="position: absolute; width: 54px; height: 52px; top: 30px; right: 30px; background-color: rgb(250, 250, 250); opacity: 0.85;">
-                                </div>
-                                <table style="position:absolute;top:30px;right:30px;;font-size:smaller;color:#545454">
-                                    <tbody>
-                                        <tr>
-                                            <td class="legendColorBox">
-                                                <div style="border:1px solid #ccc;padding:1px">
-                                                    <div
-                                                        style="width:4px;height:0;border:5px solid rgb(0,153,0);overflow:hidden">
-                                                    </div>
-                                                </div>
-                                            </td>
-                                            <td class="legendLabel">Data A</td>
-                                        </tr>
-                                        <tr>
-                                            <td class="legendColorBox">
-                                                <div style="border:1px solid #ccc;padding:1px">
-                                                    <div
-                                                        style="width:4px;height:0;border:5px solid rgb(0,153,153);overflow:hidden">
-                                                    </div>
-                                                </div>
-                                            </td>
-                                            <td class="legendLabel">Data B</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
 
-        </div>
 
 
 
@@ -279,7 +179,7 @@
 
     <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-        <h3>Détails</h3>
+        <h3>Nouveau</h3>
     </div>
 
     <div class="modal-body">
@@ -297,7 +197,7 @@
 
     <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-        <h3>Détails</h3>
+        <h3>Nouveau</h3>
     </div>
 
     <div class="modal-body">

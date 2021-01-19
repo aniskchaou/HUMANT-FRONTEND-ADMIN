@@ -31,12 +31,12 @@ import { ViewEmployeeComponent } from './modules/employee/view-employee/view-emp
 import { EditHolidayComponent } from './modules/holiday/edit-holiday/edit-holiday.component';
 import { HolidayComponent } from './modules/holiday/holiday/holiday.component';
 import { ViewHolidayComponent } from './modules/holiday/view-holiday/view-holiday.component';
-import { AddHolidayComponent } from './modules/leave/add-holiday/add-holiday.component';
+import { AddHolidayComponent } from './modules/holiday/add-holiday/add-holiday.component';
 import { AddLeaveComponent } from './modules/leave/add-leave/add-leave.component';
 import { LeaveComponent } from './modules/leave/leave/leave.component';
 import { ViewLeaveComponent } from './modules/leave/view-leave/view-leave.component';
 import { EditLeaveComponent } from './modules/notice/edit-leave/edit-leave.component';
-import { NoticeComponent } from './modules/notice/notice/notice.component';
+
 import { PresenceComponent } from './modules/presence/presence/presence.component';
 import { AddResignationComponent } from './modules/resign/add-resignation/add-resignation.component';
 import { EditResignationComponent } from './modules/resign/edit-resignation/edit-resignation.component';
@@ -68,6 +68,10 @@ import { EditprofileComponent } from './modules/shared/editprofile/editprofile.c
 import { LoginComponent } from './modules/shared/login/login.component';
 import { ProfileComponent } from './modules/shared/profile/profile.component';
 
+import { AddNoteComponent } from './add-note/add-note.component';
+import { AddAwardComponent } from './add-award/add-award.component';
+import { AddNoticeComponent } from './notice/add-notice/add-notice.component';
+
 
 
 const routes:Routes=[
@@ -82,7 +86,7 @@ const routes:Routes=[
   {path:'employee',component:EmployeeComponent,pathMatch:'full'},
   {path:'holiday',component:HolidayComponent,pathMatch:'full'},
   {path:'leave',component:LeaveComponent,pathMatch:'full'},
-  {path:'notice',component:NoticeComponent,pathMatch:'full'},
+  //{path:'notice',component:NoticeComponent,pathMatch:'full'},
   {path:'presence',component:PresenceComponent,pathMatch:'full'},
   {path:'resign',component:ResignComponent,pathMatch:'full'},
   {path:'salary',component:SalaryComponent,pathMatch:'full'},
@@ -112,7 +116,7 @@ const routes:Routes=[
     ResignComponent,
     HolidayComponent,
     TerminationComponent,
-    NoticeComponent,
+    //NoticeComponent,
     LeaveComponent,
     TrainingComponent,
     AdvanceComponent,
@@ -127,7 +131,7 @@ const routes:Routes=[
     ViewEmployeeComponent,
     EditEmployeeComponent,
     AddEmployeeComponent,
-  
+    AdvanceComponent,
     AddTransfertComponent,
     AddComplaintComponent,
     AddWarningComponent,
@@ -163,6 +167,9 @@ const routes:Routes=[
     ViewTrainingComponent,
     ViewTransertComponent,
     ViewWarningComponent,
+    AddAwardComponent,
+    AddNoteComponent,
+    AddNoticeComponent
     
     
   ],
