@@ -6,18 +6,22 @@ import { URLLoader } from 'src/app/configs/URLLoader';
   templateUrl: './employee.component.html',
   styleUrls: ['./employee.component.css']
 })
-export class EmployeeComponent  extends URLLoader implements OnInit {
+export class EmployeeComponent extends URLLoader implements OnInit {
 
-  showsummary:boolean=false
-  showgraphic:boolean=false
-  
+  showsummary: boolean = false
+  showgraphic: boolean = false
+
   constructor() {
     super()
-   }
-  
+  }
 
-ngOnInit() {
- super.loadScripts();
-}
+
+  ngOnInit() {
+    super.loadScripts();
+  }
+
+  reInitComponent() {
+    super.loadScripts();
+  }
 
 }

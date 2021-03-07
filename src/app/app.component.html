@@ -1,52 +1,186 @@
 <div class="navbar navbar-fixed-top" *ngIf="!hasRoute('login')">
     <div class="navbar-inner">
         <div class="container">
-            <a class="btn btn-navbar" data-toggle="collapse" data-target=".navbar-inverse-collapse">
-                <i class="icon-reorder shaded"></i>
-            </a>
+            <span class="pull-left">
+                <a routerLink="/dashboard">
+                    <img src="assets/images/logo.png" height="80" width="140">
+                </a>
+            </span>
 
-            <a class="brand">
-                <img src="assets/images/logo.png" height="89" width="120">
-            </a>
 
-            <div class="nav-collapse collapse navbar-inverse-collapse">
-                <!--
-                <ul class="nav nav-icons">
-                    <li class="active"><a href="#">
-                            <i class="icon-envelope"></i>
-                        </a></li>
-                    <li><a href="#">
-                            <i class="icon-eye-open"></i>
-                        </a></li>
-                    <li><a href="#">
-                            <i class="icon-bar-chart"></i>
-                        </a></li>
-                </ul>
 
-                <form class="navbar-search pull-left input-append" action="#">
-                    <input type="text" class="span3">
-                    <button class="btn" type="button">
-                        <i class="icon-search"></i>
-                    </button>
-                </form>
-                 -->
-                <ul class="nav pull-right">
-                 
-                    <li class="nav-user dropdown">
-                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">
-                            <img src="../assets/images/user.png" class="nav-avatar" />
-                            <b class="caret"></b>
-                        </a>
-                        <ul class="dropdown-menu">
-                            <li><a routerLink="/profile">Mon Profile</a></li>
-                            <li><a routerLink="/editprofile">Editer Profile</a></li>
-                            <li><a routerLink="/configuration">Paramètres</a></li>
-                            <li class="divider"></li>
-                            <li><a routerLink="/">Déconnexion</a></li>
-                        </ul>
-                    </li>
-                </ul>
-            </div><!-- /.nav-collapse -->
+
+
+
+            <ul class="nav navbar-nav">
+
+
+                <li class="dropdown">
+                    <a routerLink="/employee" class="dropdown-toggle" data-toggle="dropdown">Employés
+                        <span class="caret"></span></a>
+                    <ul class="dropdown-menu">
+                        <li>
+                            <a routerLinkActive="active" routerLink="/employee">
+                                <i class="fas fa-users"></i>
+                                Employé
+                            </a>
+                        </li>
+                        <li>
+
+                            <a routerLinkActive="active" routerLink="/presence">
+                                <i class="fas fa-check-square"></i>
+                                Présences des employés
+
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+
+
+                <li class="dropdown">
+                    <a routerLink="/salary" class="dropdown-toggle" data-toggle="dropdown">Salaires
+                        <span class="caret"></span></a>
+                    <ul class="dropdown-menu">
+                        <li>
+                            <a routerLinkActive="active" routerLink="/salary">
+                                <i class="fas fa-dollar-sign"></i>
+                                Salaires
+
+                            </a>
+                        </li>
+                        <li>
+                            <a routerLinkActive="active" routerLink="/award">
+                                <i class="fas fa-money-check-alt"></i>
+                                Récompenses
+                            </a>
+                        </li>
+                        <li>
+                            <a routerLinkActive="active" routerLink="/advance">
+                                <i class="fas fa-coins"></i>
+                                Avance sur salaire
+                            </a>
+                        </li>
+
+                    </ul>
+                </li>
+
+
+
+
+
+                <li class="dropdown">
+                    <a routerLink="/holiday" class="dropdown-toggle" data-toggle="dropdown">Vacances
+                        <span class="caret"></span></a>
+                    <ul class="dropdown-menu">
+                        <li>
+                            <a routerLinkActive="active" routerLink="/holiday">
+                                <i class="fas fa-bed"></i>
+                                Vacances
+                            </a>
+                        </li>
+                        <li>
+                            <a routerLinkActive="active" routerLink="/leave">
+                                <i class="fas fa-umbrella-beach"></i>
+                                Congés
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+
+
+
+                <li class="dropdown">
+                    <a routerLink="/departement" class="dropdown-toggle" data-toggle="dropdown">Départements
+                        <span class="caret"></span></a>
+                    <ul class="dropdown-menu">
+                        <li>
+                            <a routerLinkActive="active" routerLink="/departement">
+                                <i class="fas fa-puzzle-piece"></i>
+                                Départements
+                            </a>
+                        </li>
+                        <li>
+                            <a routerLinkActive="active" routerLink="/designation">
+                                <i class="fas fa-user-md"></i>
+                                Désignations
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+
+
+
+                <li class="dropdown">
+                    <a routerLink="/resign" class="dropdown-toggle" data-toggle="dropdown">Contrats
+                        <span class="caret"></span></a>
+                    <ul class="dropdown-menu">
+                        <li>
+                            <a routerLinkActive="active" routerLink="/resign">
+                                <i class="fas fa-sign-out-alt"></i>
+                                Démissions
+                            </a>
+                        </li>
+
+                        <li>
+                            <a routerLinkActive="active" routerLink="/termination">
+                                <i class="fas fa-times-circle"></i>
+                                Résilliation
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+
+
+                <li class="dropdown">
+                    <a routerLink="/complain" class="dropdown-toggle" data-toggle="dropdown">Notifications
+                        <span class="caret"></span></a>
+                    <ul class="dropdown-menu">
+                        <li>
+                            <a routerLinkActive="active" routerLink="/complain">
+                                <i class="fas fa-building"></i>
+                                Se plaindre
+                            </a>
+                        </li>
+
+                        <li>
+                            <a routerLinkActive="active" routerLink="/warning">
+                                <i class="fas fa-exclamation"></i>
+                                Avertissement
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+
+                <li>
+                    <a routerLinkActive="active" routerLink="/transfert">
+
+                        Transfert
+                    </a>
+                </li>
+
+
+
+
+            </ul>
+
+
+            <ul class="nav pull-right">
+
+                <li class="dropdown">
+                    <a class="dropdown-toggle" data-toggle="dropdown"><img src="../assets/images/user.png"
+                            class="nav-avatar" />
+                        <span class="caret"></span></a>
+
+                    <ul class="dropdown-menu">
+                        <li><a routerLink="/profile"><i class="fas fa-user"></i> Mon Profile</a></li>
+                        <li><a routerLink="/editprofile"><i class="fas fa-user-edit"></i> Editer Profile</a></li>
+                        <li><a routerLink="/configuration"><i class="fas fa-tools"></i> Paramètres</a></li>
+                        <li class="divider"></li>
+                        <li><a routerLink="/"><i class="fas fa-power-off"></i> Déconnexion</a></li>
+                    </ul>
+                </li>
+            </ul>
+
         </div>
     </div><!-- /navbar-inner -->
 </div><!-- /navbar -->
@@ -60,12 +194,12 @@
             <app-navigation></app-navigation>
 
 
-            <div class="span9">
+            <div class="span12">
                 <div class="content">
 
 
 
-                     
+
                     <router-outlet></router-outlet>>
 
                     <br />
@@ -87,7 +221,7 @@
     <div class="container">
 
 
-        <b class="copyright">Developed by <a href="https://github.com/aniskchaou" >Anis KCHAOU</a></b>
+        <b class="copyright">Developed by <a href="https://github.com/aniskchaou">Anis KCHAOU</a></b>
     </div>
 </div>
 <!-- Right Panel -->
@@ -105,57 +239,33 @@
 
 
 
-<div  *ngIf="hasRoute('login')" style="width:50%;margin:auto;">
-    <div class="module module-login span5" >
-      
-            <div class="module-head">
-                <img src="assets/images/logo.png" align="middle">
-            </div>
-            <div class="module-body">
-               
-                <div class="control-group">
-                    <div class="controls row-fluid">
-                        <input class="span12" type="text" id="inputEmail"  value="admin@admin.com" placeholder="Username">
-                    </div>
-                </div>
-                <div class="control-group">
-                    <div class="controls row-fluid">
-                        <input class="span12" type="password" id="inputPassword" value="admin"  placeholder="Password">
-                    </div>
+<div *ngIf="hasRoute('login')" style="width:50%;margin:auto;">
+    <div class="module module-login span6">
+
+        <div class="module-head">
+            <img class="logo-img" src="assets/images/logo.png" align="middle">
+        </div>
+        <div class="module-body">
+
+            <div class="control-group">
+                <div class="controls row-fluid">
+                    <input class="span12" type="text" id="inputEmail" value="admin@admin.com" placeholder="Username">
                 </div>
             </div>
-            <div class="module-foot">
-                <div class="control-group">
-                    <div class="controls clearfix">
-                        <button routerLink="/dashboard" type="submit" class="btn btn-primary pull-right">Connexion</button>
-                      
-                    </div>
+            <div class="control-group">
+                <div class="controls row-fluid">
+                    <input class="span12" type="password" id="inputPassword" value="admin" placeholder="Password">
                 </div>
             </div>
-        
+        </div>
+        <div class="module-foot">
+            <div class="control-group">
+                <div class="controls clearfix">
+                    <button routerLink="/dashboard" type="submit" class="btn btn-primary pull-right">Connexion</button>
+
+                </div>
+            </div>
+        </div>
+
     </div>
 </div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

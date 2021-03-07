@@ -1,17 +1,16 @@
-<form class="form-horizontal" action="#" enctype="multipart/form-data"  style="width: 50%;
-margin: 0 auto;" >
+<form class="form-horizontal" action="#" enctype="multipart/form-data" style="width: 90%; margin: 0 auto;">
     <input type="hidden" name="company_id" id="company_id" value="4">
     <div class="form-group row">
         <div class="col-md-2 ambitious-model-from-tc-pt">raison <b class="ambitious-crimson">*</b></div>
         <div class="col-md-10">
-            <input class="form-control" name="reason" id="reason" type="text"
+            <input class="input-block-level" name="reason" id="reason" type="text"
                 placeholder="veuillez saisir la raison du salaire anticipé" required="">
         </div>
     </div>
     <div class="form-group row">
         <div class="col-md-2 ambitious-model-from-tc-pt">Nom de la filiale <b class="ambitious-crimson">*</b></div>
         <div class="col-md-4">
-            <select class="form-control" id="branch_id" name="branch_id" required="">
+            <select class=" input-block-level" id="branch_id" name="branch_id" required="">
                 <option value="">sélectionner une branche</option>
                 <option value="17">fatima</option>
                 <option value="4">Store</option>
@@ -20,7 +19,7 @@ margin: 0 auto;" >
         </div>
         <div class="col-md-2 ambitious-model-from-tc-pt">Nom de l'employé <b class="ambitious-crimson">*</b></div>
         <div class="col-md-4">
-            <select class="form-control" id="employee_id" name="employee_id" required="">
+            <select class=" input-block-level" id="employee_id" name="employee_id" required="">
                 <option value="">sélectionnez d'abord la branche</option>
             </select>
         </div>
@@ -28,19 +27,19 @@ margin: 0 auto;" >
     <div class="form-group row">
         <div class="col-md-2 ambitious-model-from-tc-pt">montant <b class="ambitious-crimson">*</b></div>
         <div class="col-md-4">
-            <input class="form-control" name="amount" id="amount" type="number" min="1" required="">
+            <input class=" input-block-level" name="amount" id="amount" type="number" min="1" required="">
         </div>
         <div class="col-md-2 ambitious-model-from-tc-pt">Date<b class="ambitious-crimson">*</b>
         </div>
         <div class="col-md-4">
-            <input autocomplete="off" id="date" name="date" type="text" class="form-control datepicker flatpickr-input"
-                required="" readonly="readonly">
+            <input autocomplete="off" id="date" name="date" type="text"
+                class=" input-block-level datepicker flatpickr-input" required="" readonly="readonly">
         </div>
     </div>
     <div class="form-group row">
         <div class="col-md-2 ambitious-model-from-tc-pt">remarques</div>
-        
-            <textarea></textarea>
-        </div>
-    
+
+        <textarea></textarea>
+    </div>
+
 </form>

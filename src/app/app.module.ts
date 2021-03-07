@@ -69,37 +69,37 @@ import { LoginComponent } from './modules/shared/login/login.component';
 import { ProfileComponent } from './modules/shared/profile/profile.component';
 
 import { AddNoteComponent } from './add-note/add-note.component';
-import { AddAwardComponent } from './add-award/add-award.component';
+import { AddAwardComponent } from './modules/award/add-award/add-award.component';
 import { AddNoticeComponent } from './notice/add-notice/add-notice.component';
 
 
 
-const routes:Routes=[
+const routes: Routes = [
 
-  {path:'advance',component:AdvanceComponent,pathMatch:'full'},
-  {path:'award',component:AwardComponent,pathMatch:'full'},
-  {path:'complain',component:ComplainComponent,pathMatch:'full'},
-  {path:'configuration',component:ConfigurationComponent,pathMatch:'full'},
-  {path:'credit',component:CreditComponent,pathMatch:'full'},
-  {path:'departement',component:DepartementComponent,pathMatch:'full'},
-  {path:'designation',component:DesignationComponent,pathMatch:'full'},
-  {path:'employee',component:EmployeeComponent,pathMatch:'full'},
-  {path:'holiday',component:HolidayComponent,pathMatch:'full'},
-  {path:'leave',component:LeaveComponent,pathMatch:'full'},
+  { path: 'advance', component: AdvanceComponent, pathMatch: 'full' },
+  { path: 'award', component: AwardComponent, pathMatch: 'full' },
+  { path: 'complain', component: ComplainComponent, pathMatch: 'full' },
+  { path: 'configuration', component: ConfigurationComponent, pathMatch: 'full' },
+  { path: 'credit', component: CreditComponent, pathMatch: 'full' },
+  { path: 'departement', component: DepartementComponent, pathMatch: 'full' },
+  { path: 'designation', component: DesignationComponent, pathMatch: 'full' },
+  { path: 'employee', component: EmployeeComponent, pathMatch: 'full' },
+  { path: 'holiday', component: HolidayComponent, pathMatch: 'full' },
+  { path: 'leave', component: LeaveComponent, pathMatch: 'full' },
   //{path:'notice',component:NoticeComponent,pathMatch:'full'},
-  {path:'presence',component:PresenceComponent,pathMatch:'full'},
-  {path:'resign',component:ResignComponent,pathMatch:'full'},
-  {path:'salary',component:SalaryComponent,pathMatch:'full'},
-  {path:'termination',component:TerminationComponent,pathMatch:'full'},
-  {path:'training',component:TrainingComponent,pathMatch:'full'},
-  {path:'transfert',component:TransfertComponent,pathMatch:'full'},
-  {path:'warning',component:WarningComponent,pathMatch:'full'},
-  {path:'dashboard',component:DashboardComponent,pathMatch:'full'},
-  {path:'login',component:LoginComponent,pathMatch:'full'},
-  {path:'profile',component:ProfileComponent,pathMatch:'full'},
-  {path:'editprofile',component:EditprofileComponent,pathMatch:'full'},
-  {path:'',redirectTo:'login',pathMatch:'full'},
-  {path:'**',redirectTo:'login',pathMatch:'full'}]
+  { path: 'presence', component: PresenceComponent, pathMatch: 'full' },
+  { path: 'resign', component: ResignComponent, pathMatch: 'full' },
+  { path: 'salary', component: SalaryComponent, pathMatch: 'full' },
+  { path: 'termination', component: TerminationComponent, pathMatch: 'full' },
+  { path: 'training', component: TrainingComponent, pathMatch: 'full' },
+  { path: 'transfert', component: TransfertComponent, pathMatch: 'full' },
+  { path: 'warning', component: WarningComponent, pathMatch: 'full' },
+  { path: 'dashboard', component: DashboardComponent, pathMatch: 'full' },
+  { path: 'login', component: LoginComponent, pathMatch: 'full' },
+  { path: 'profile', component: ProfileComponent, pathMatch: 'full' },
+  { path: 'editprofile', component: EditprofileComponent, pathMatch: 'full' },
+  { path: '', redirectTo: 'login', pathMatch: 'full' },
+  { path: '**', redirectTo: 'login', pathMatch: 'full' }]
 
 
 @NgModule({
@@ -170,15 +170,15 @@ const routes:Routes=[
     AddAwardComponent,
     AddNoteComponent,
     AddNoticeComponent
-    
-    
+
+
   ],
   imports: [
     DataTablesModule,
     BrowserModule,
     RouterModule.forRoot(routes)
   ],
-  providers: [{provide: APP_BASE_HREF, useValue: ''}],
+  providers: [{ provide: APP_BASE_HREF, useValue: '' }],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

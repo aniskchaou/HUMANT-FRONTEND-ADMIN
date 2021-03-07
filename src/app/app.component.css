@@ -5,3 +5,8 @@
     width: 50%;
   }
 
+.logo-img {
+  margin-left: auto;
+  margin-right: auto;
+  display: block;
+}
