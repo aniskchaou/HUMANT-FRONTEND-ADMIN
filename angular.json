@@ -25,11 +25,9 @@
             ],
             "styles": [
               "src/styles.css"
-             
             ],
-            "scripts": [
-            
-            ]},
+            "scripts": []
+          },
           "configurations": {
             "production": {
               "fileReplacements": [
@@ -122,5 +120,8 @@
       }
     }
   },
-  "defaultProject": "my-app-angular"
+  "defaultProject": "my-app-angular",
+  "cli": {
+    "analytics": false
+  }
 }

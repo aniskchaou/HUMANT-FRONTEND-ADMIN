@@ -1,3 +1,5 @@
+<!--
+
 <div class="navbar navbar-fixed-top" *ngIf="!hasRoute('login')">
     <div class="navbar-inner">
         <div class="container">
@@ -182,12 +184,14 @@
             </ul>
 
         </div>
-    </div><!-- /navbar-inner -->
-</div><!-- /navbar -->
+    </div>
+</div>
+
+-->
 
 
 
-
+<!--
 <div class="wrapper" *ngIf="!hasRoute('login')">
     <div class="container">
         <div class="row">
@@ -205,18 +209,18 @@
                     <br />
 
                 </div>
-                <!--/.content-->
+                
 
 
 
             </div>
-            <!--/.span9-->
+            
         </div>
     </div>
-    <!--/.container-->
+   
 </div>
-<!--/.wrapper-->
-
+-->
+<!--
 <div class="footer" *ngIf="!hasRoute('login')">
     <div class="container">
 
@@ -224,7 +228,7 @@
         <b class="copyright">Developed by <a href="https://github.com/aniskchaou">Anis KCHAOU</a></b>
     </div>
 </div>
-<!-- Right Panel -->
+ Right Panel -->
 
 
 
@@ -238,7 +242,7 @@
 
 
 
-
+<!--
 <div *ngIf="hasRoute('login')" style="width:50%;margin:auto;">
     <div class="module module-login span6">
 
@@ -267,5 +271,53 @@
             </div>
         </div>
 
+    </div>
+</div>
+-->
+
+
+<div id="app">
+    <div id="sidebar" class="active">
+
+
+        <app-navigation></app-navigation>
+
+    </div>
+    <div id="main" class='layout-navbar'>
+        <header class='mb-3'>
+            <nav class="navbar navbar-expand navbar-light ">
+                <div class="container-fluid">
+                    <a href="#" class="burger-btn d-block">
+                        <i class="bi bi-justify fs-3"></i>
+                    </a>
+
+                    <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                        data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
+                        aria-expanded="false" aria-label="Toggle navigation">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
+                    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                        <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+                            <li class="nav-item dropdown me-1">
+                                <app-messages></app-messages>
+                            </li>
+                            <li class="nav-item dropdown me-3">
+                                <app-shortcut-menu></app-shortcut-menu>
+                            </li>
+                        </ul>
+                        <div class="dropdown">
+
+                            <app-user-menu></app-user-menu>
+                        </div>
+                    </div>
+                </div>
+            </nav>
+        </header>
+        <div id="main-content">
+
+
+            <router-outlet></router-outlet>
+            <app-footer></app-footer>
+        </div>
     </div>
 </div>

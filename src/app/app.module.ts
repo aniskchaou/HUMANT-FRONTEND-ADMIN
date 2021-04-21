@@ -68,10 +68,16 @@ import { EditprofileComponent } from './modules/shared/editprofile/editprofile.c
 import { LoginComponent } from './modules/shared/login/login.component';
 import { ProfileComponent } from './modules/shared/profile/profile.component';
 
-import { AddNoteComponent } from './add-note/add-note.component';
+
 import { AddAwardComponent } from './modules/award/add-award/add-award.component';
 import { AddNoticeComponent } from './notice/add-notice/add-notice.component';
-
+import { UserMenuComponent } from './template/user-menu/user-menu.component';
+import { ShortcutMenuComponent } from './template/shortcut-menu/shortcut-menu.component';
+import { MessagesComponent } from './template/messages/messages.component';
+import { FooterComponent } from './template/footer/footer.component';
+import { PathComponent } from './template/path/path.component';
+import { ModalAwardComponent } from './modules/award/modal-award/modal-award.component';
+import { ModalEmployeeComponent } from './modules/employee/modal-employee/modal-employee.component';
 
 
 const routes: Routes = [
@@ -168,8 +174,14 @@ const routes: Routes = [
     ViewTransertComponent,
     ViewWarningComponent,
     AddAwardComponent,
-    AddNoteComponent,
-    AddNoticeComponent
+    AddNoticeComponent,
+    UserMenuComponent,
+    ShortcutMenuComponent,
+    MessagesComponent,
+    FooterComponent,
+    PathComponent,
+    ModalAwardComponent,
+    ModalEmployeeComponent
 
 
   ],
