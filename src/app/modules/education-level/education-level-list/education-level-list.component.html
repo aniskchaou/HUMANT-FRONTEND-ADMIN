@@ -1,0 +1,37 @@
+<table class="table table-bordered" id="table" width="100%" cellspacing="0">
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tfoot>
+    <tr>
+      <th>Name</th>
+      <th></th>
+    </tr>
+  </tfoot>
+  <tbody *ngIf="educationLevel.length > 0">
+    <tr *ngFor="let c of educationLevel">
+      <td>{{ c.name }}</td>
+      <td>
+        <button
+          type="button"
+          data-toggle="modal"
+          (click)="edit(c.id)"
+          data-target="#edit"
+          class="btn btn-warning btn-sm"
+        >
+          <i class="fas fa-edit"></i>
+        </button>
+        <button
+          type="button"
+          class="btn btn-danger btn-sm"
+          (click)="delete(c.id)"
+        >
+          <i class="fas fa-trash-alt"></i>
+        </button>
+      </td>
+    </tr>
+  </tbody>
+</table>

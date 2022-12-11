@@ -1,19 +1,19 @@
 import { Component, OnInit } from '@angular/core';
-import { URLLoader } from './../../../configs/URLLoader';
+import { URLLoader } from 'src/app/main/configs/URLLoader';
 
 @Component({
   selector: 'app-login',
   templateUrl: './login.component.html',
-  styleUrls: ['./login.component.css']
+  styleUrls: ['./login.component.css'],
 })
 export class LoginComponent extends URLLoader implements OnInit {
-
-  constructor() { 
-    super()
+  constructor() {
+    super();
   }
 
   ngOnInit(): void {
-    super.loadScripts()
+    super.loadScripts();
+    sessionStorage.setItem('username', 'admin');
+    sessionStorage.setItem('password', 'admin');
   }
-
 }

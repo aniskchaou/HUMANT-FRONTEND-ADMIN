@@ -1,47 +1,23 @@
 <div class="page-heading">
-
-    <section class="section">
-        <div class="card">
-            <div class="card-header">
-                <h2>Avance sur salaire</h2>
-            </div>
-            <div class="card-body">
-                <div class="dataTable-container">
-                    <table id="table" cellpadding="0" cellspacing="0" border="0"
-                        class="datatable-1 table table-bordered table-striped	 display" width="100%">
-                        <thead>
-                            <tr>
-                                <th>Nom</th>
-                                <th>Raison</th>
-                                <th>Montant</th>
-                                <th>Date</th>
-                                <th>Statut</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr class="odd gradeX">
-
-                                <td>Anis</td>
-                                <th>maladie</th>
-                                <td>232</td>
-                                <td>21/10/2020</td>
-                                <td>active</td>
-                            </tr>
-
-                        </tbody>
-                        <tfoot>
-                            <tr>
-                                <th>Nom</th>
-                                <th>Raison</th>
-                                <th>Montant</th>
-                                <th>Date</th>
-                                <th>Statut</th>
-
-                            </tr>
-                        </tfoot>
-                    </table>
-                </div>
-            </div>
+  <section class="section">
+    <div class="card">
+      <div class="card-header">
+        <h2>Avance sur salaire</h2>
+      </div>
+      <div class="card-body">
+        <div class="dataTable-container">
+          <button
+            type="button"
+            class="btn btn-success btn-sm"
+            data-bs-toggle="modal"
+            data-bs-target="#add"
+          >
+            <i class="fas fa-plus-square"></i>
+          </button>
+          <app-advance-salary-list [salary]="salary$"></app-advance-salary-list>
+          <app-advance-salary-modal></app-advance-salary-modal>
         </div>
-    </section>
+      </div>
+    </div>
+  </section>
 </div>

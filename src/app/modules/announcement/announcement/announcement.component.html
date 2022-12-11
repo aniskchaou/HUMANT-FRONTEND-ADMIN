@@ -1,0 +1,25 @@
+<div class="page-heading">
+  <section class="section">
+    <div class="card">
+      <div class="card-header">
+        <h2>Announcements</h2>
+      </div>
+      <div class="card-body">
+        <div class="dataTable-container">
+          <app-announcement-modal></app-announcement-modal>
+          <button
+            type="button"
+            class="btn btn-success btn-sm"
+            data-bs-toggle="modal"
+            data-bs-target="#add"
+          >
+            <i class="fas fa-plus-square"></i>
+          </button>
+          <app-announcement-list
+            [announcement]="announcement$"
+          ></app-announcement-list>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>

@@ -1,0 +1,32 @@
+<form [formGroup]="awardTypeForm">
+  <div class="form-group row">
+    <label for="text" class="col-4 col-form-label">Award Type</label>
+    <div class="col-8">
+      <input
+        formControlName="name"
+        id="text"
+        name="name"
+        type="text"
+        class="form-control"
+        [ngClass]="{ 'is-invalid': submitted && f.name.errors }"
+      />
+    </div>
+    <div *ngIf="submitted && f.name.errors" class="alert alert-danger">
+      <div *ngIf="submitted && f.name.errors.required">
+        {{ "msg.validationMessage.category_name" }}
+      </div>
+    </div>
+  </div>
+  <div class="form-group row">
+    <div class="offset-4 col-8">
+      <button
+        type="button"
+        name="submit"
+        (click)="add()"
+        class="btn btn-primary"
+      >
+        Save
+      </button>
+    </div>
+  </div>
+</form>

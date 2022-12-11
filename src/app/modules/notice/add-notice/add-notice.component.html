@@ -1,0 +1,65 @@
+<form [formGroup]="noticeForm">
+  <div class="form-group row">
+    <label for="title" class="col-4 col-form-label">Title</label>
+    <div class="col-8">
+      <input
+        formControlName="NoticeTitle"
+        id="title"
+        name="title"
+        placeholder="title"
+        type="text"
+        class="form-control"
+      />
+    </div>
+  </div>
+  <div class="form-group row">
+    <label for="text" class="col-4 col-form-label">Start Date</label>
+    <div class="col-8">
+      <input
+        id="text"
+        name="text"
+        type="text"
+        class="form-control"
+        formControlName="StartDate"
+      />
+    </div>
+  </div>
+  <div class="form-group row">
+    <label for="text1" class="col-4 col-form-label">End Date</label>
+    <div class="col-8">
+      <input
+        id="text1"
+        name="text1"
+        type="text"
+        class="form-control"
+        formControlName="EndDate"
+      />
+    </div>
+  </div>
+  <div class="form-group row">
+    <label for="note" class="col-4 col-form-label">Note</label>
+    <div class="col-8">
+      <textarea
+        formControlName="NoticeNote"
+        id="note"
+        name="note"
+        cols="40"
+        rows="5"
+        class="form-control"
+      ></textarea>
+    </div>
+  </div>
+  <div class="form-group row">
+    <div class="offset-4 col-8">
+      <button
+        (click)="add()"
+        name="submit"
+        type="submit"
+        class="btn btn-primary"
+      >
+        Submit
+      </button>
+    </div>
+  </div>
+</form>
+oo

@@ -1,137 +1,74 @@
-<form style="width: 90%; margin: 0 auto;" class="form-horizontal" action="#" enctype="multipart/form-data"
-    id="auto_salary_form">
-    <input type="hidden" id="user_id" name="user_id" value="1">
-    <input type="hidden" id="company" name="company" value="4">
-
-    <div class="form-group row">
-        <div class="col-md-3 ambitious-model-from-tc-pt">nom du salaire <b class="ambitious-crimson">*</b></div>
-        <div class="col-md-9">
-            <input id="salary_name" name="salary_name" type="text" class="input-block-level"
-                placeholder="tapez votre nom de salaire" required="">
-        </div>
+<form [formGroup]="salaryForm">
+  <div class="form-group row">
+    <label for="name" class="col-4 col-form-label">Name</label>
+    <div class="col-8">
+      <input
+        id="name"
+        name="name"
+        type="text"
+        class="form-control"
+        formControlName="SalaryName"
+      />
     </div>
-
-    <div class="form-group row">
-        <div class="col-md-3 ambitious-model-from-tc-pt">salaire de base <b class="ambitious-crimson">*</b></div>
-        <div class="col-md-4">
-            <input id="basic_salary" name="basic_salary" type="number" class="input-block-level"
-                placeholder="tapez votre salaire de base" required="">
-        </div>
-
-        <div class="col-md-2 ambitious-model-from-tc-pt">salaire total</div>
-        <div class="col-md-3">
-            <input id="total_salary" name="total_salary" type="text" class="input-block-level" value="0.00" disabled="">
-        </div>
+  </div>
+  <div class="form-group row">
+    <label for="text" class="col-4 col-form-label">Basic Salary</label>
+    <div class="col-8">
+      <input
+        id="text"
+        name="text"
+        type="text"
+        class="form-control"
+        formControlName="BasicSalary"
+      />
     </div>
-
-    <div class="form-group row">
-        <div class="col-md-3 ambitious-model-from-tc-pt">location de maison</div>
-        <div class="col-md-4">
-            <div class="input-group">
-                <input type="text" class="input-block-level" id="house_rent" name="house_rent"
-                    placeholder="tapez votre maison à louer" required="">
-                <div class="input-group-append">
-                    <span class="input-group-text">%</span>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-2 ambitious-model-from-tc-pt">montant</div>
-        <div class="col-md-3">
-            <input id="house_rent_amount" name="house_rent_amount" type="text" class="input-block-level" value="0.00"
-                disabled="">
-        </div>
+  </div>
+  <div class="form-group row">
+    <label for="text1" class="col-4 col-form-label">Total Salary</label>
+    <div class="col-8">
+      <input
+        id="text1"
+        name="text1"
+        type="text"
+        class="form-control"
+        formControlName="TotalSalary"
+      />
     </div>
-
-    <div class="form-group row">
-        <div class="col-md-3 ambitious-model-from-tc-pt">allocation médicale</div>
-        <div class="col-md-4">
-            <div class="input-group">
-                <input type="text" class="input-block-level" id="medical_allowance" name="medical_allowance"
-                    placeholder="tapez votre allocation médicale" required="">
-                <div class="input-group-append">
-                    <span class="input-group-text">%</span>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-2 ambitious-model-from-tc-pt">montant</div>
-        <div class="col-md-3">
-            <input id="medical_allowance_amount" name="medical_allowance_amount" type="text" class="input-block-level"
-                value="0.00" disabled="">
-        </div>
+  </div>
+  <div class="form-group row">
+    <label for="text2" class="col-4 col-form-label">Medical Allowance</label>
+    <div class="col-8">
+      <input
+        id="text2"
+        name="text2"
+        type="text"
+        class="form-control"
+        formControlName="MedicalAllowance"
+      />
     </div>
-
-    <div class="form-group row">
-        <div class="col-md-3 ambitious-model-from-tc-pt">allocation de transport</div>
-        <div class="col-md-4">
-            <div class="input-group">
-                <input type="text" class="input-block-level" id="conveyance_allowance" name="conveyance_allowance"
-                    placeholder="tapez votre allocation de transport" required="">
-                <div class="input-group-append">
-                    <span class="input-group-text">%</span>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-2 ambitious-model-from-tc-pt">montant</div>
-        <div class="col-md-3">
-            <input id="conveyance_allowance_amount" name="conveyance_allowance_amount" type="text"
-                class="input-block-level" value="0.00" disabled="">
-        </div>
+  </div>
+  <div class="form-group row">
+    <label for="text" class="col-4 col-form-label">Conveyance Allowance</label>
+    <div class="col-8">
+      <input
+        id="text"
+        name="text"
+        type="text"
+        class="form-control"
+        formControlName="ConveyanceAllowance"
+      />
     </div>
-
-    <div class="form-group row">
-        <div class="col-md-3 ambitious-model-from-tc-pt">allocation alimentaire</div>
-        <div class="col-md-4">
-            <div class="input-group">
-                <input type="text" class="input-block-level" id="food_allowance" name="food_allowance"
-                    placeholder="tapez votre allocation alimentaire" required="">
-                <div class="input-group-append">
-                    <span class="input-group-text">%</span>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-2 ambitious-model-from-tc-pt">montant</div>
-        <div class="col-md-3">
-            <input id="food_allowance_amount" name="food_allowance_amount" type="text" class="input-block-level"
-                value="0.00" disabled="">
-        </div>
+  </div>
+  <div class="form-group row">
+    <div class="offset-4 col-8">
+      <button
+        name="submit"
+        type="button"
+        (click)="add()"
+        class="btn btn-primary"
+      >
+        Create
+      </button>
     </div>
-
-    <div class="form-group row">
-        <div class="col-md-3 ambitious-model-from-tc-pt">allocation de communication</div>
-        <div class="col-md-4">
-            <div class="input-group">
-                <input type="text" class="input-block-level" id="communication_allowance" name="communication_allowance"
-                    placeholder="tapez votre allocation de communication" required="">
-                <div class="input-group-append">
-                    <span class="input-group-text">%</span>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-2 ambitious-model-from-tc-pt">montant</div>
-        <div class="col-md-3">
-            <input id="communication_allowance_amount" name="communication_allowance_amount" type="text"
-                class="input-block-level" value="0.00" disabled="">
-        </div>
-    </div>
-
-    <div class="form-group row">
-        <div class="col-md-3 ambitious-model-from-tc-pt">autre</div>
-        <div class="col-md-4">
-            <div class="input-group">
-                <input type="text" class="input-block-level" id="other" name="other"
-                    placeholder="tapez votre autre allocation" required="">
-                <div class="input-group-append">
-                    <span class="input-group-text">%</span>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-2 ambitious-model-from-tc-pt">montant</div>
-        <div class="col-md-3">
-            <input id="other_amount" name="other_amount" type="text" class="input-block-level" value="0.00" disabled="">
-        </div>
-    </div>
+  </div>
 </form>

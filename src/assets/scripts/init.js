@@ -1,4 +1,5 @@
 $(function () {
+
     $(".dropdown-toggle").dropdown();
     var table = $('#table').DataTable({
         orderCellsTop: true,

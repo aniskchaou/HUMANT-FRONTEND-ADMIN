@@ -1,23 +1,15 @@
 import { Component, OnInit } from '@angular/core';
-import { URLLoader } from 'src/app/configs/URLLoader';
+import { URLLoader } from 'src/app/main/configs/URLLoader';
 
 @Component({
   selector: 'app-holiday',
   templateUrl: './holiday.component.html',
-  styleUrls: ['./holiday.component.css']
+  styleUrls: ['./holiday.component.css'],
 })
 export class HolidayComponent extends URLLoader implements OnInit {
-
-  showsummary:boolean=false
-  showgraphic:boolean=false
-  
   constructor() {
-    super()
-   }
-  
+    super();
+  }
 
-ngOnInit() {
- super.loadScripts();
-}
-
+  ngOnInit(): void {}
 }

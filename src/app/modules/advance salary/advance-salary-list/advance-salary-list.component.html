@@ -1,0 +1,33 @@
+<table
+  id="table"
+  cellpadding="0"
+  cellspacing="0"
+  border="0"
+  class="datatable-1 table table-bordered table-striped display"
+  width="100%"
+>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Amount</th>
+      <th>Date</th>
+      <th>Remark</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr class="odd gradeX" *ngFor="let a of salary">
+      <td>{{ a.employeeName }}</td>
+      <th>{{ a.amount }}</th>
+      <td>{{ a.date }}</td>
+      <td>{{ a.remarks }}</td>
+    </tr>
+  </tbody>
+  <tfoot>
+    <tr>
+      <th>Name</th>
+      <th>Amount</th>
+      <th>Date</th>
+      <th>Remark</th>
+    </tr>
+  </tfoot>
+</table>

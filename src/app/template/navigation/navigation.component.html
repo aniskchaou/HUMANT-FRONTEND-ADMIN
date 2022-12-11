@@ -1,117 +1,191 @@
-<div class="sidebar-wrapper active">
+<div id="sidebar" class="active">
+  <div class="sidebar-wrapper active">
     <div class="sidebar-header">
-        <div class="d-flex justify-content-between">
-            <div>
-                <a routerLink="/dashboard">
-                    <img src="assets/images/logo.png">
-                </a>
-
-            </div>
-            <div class="toggler">
-                <a href="#" class="sidebar-hide d-xl-none d-block"><i class="bi bi-x bi-middle"></i></a>
-            </div>
+      <div class="d-flex justify-content-between">
+        <div>
+          <a routerLink="/dashboard">
+            <img src="assets/images/logo.png" />
+          </a>
         </div>
+        <div class="toggler">
+          <a href="#" class="sidebar-hide d-xl-none d-block"
+            ><i class="bi bi-x bi-middle"></i
+          ></a>
+        </div>
+      </div>
     </div>
-    <div class="sidebar-menu">
-        <ul class="menu">
-            <li class="sidebar-title">Menu</li>
+    <div class="sidebar-menu active">
+      <ul class="menu">
+        <li class="sidebar-title">Menu</li>
 
-            <li class="sidebar-item">
-                <a routerLinkActive="active" class="sidebar-link" routerLink="/employee">
-                    <i class="fas fa-users"></i>
-                    <span>Employés</span>
-                </a>
+        <li class="sidebar-item has-sub">
+          <a href="#" class="sidebar-link">
+            <i class="bi bi-stack"></i>
+            <span>Leave</span>
+          </a>
+          <ul class="submenu">
+            <li class="submenu-item">
+              <a routerLink="/termination">Termination</a>
             </li>
+            <li class="submenu-item">
+              <a routerLink="/resign">Resignation</a>
+            </li>
+          </ul>
+        </li>
 
+        <li class="sidebar-item has-sub">
+          <a href="#" class="sidebar-link">
+            <i class="bi bi-stack"></i>
+            <span>Events</span>
+          </a>
+          <ul class="submenu">
+            <li class="submenu-item">
+              <a routerLink="/announcement">Announcement</a>
+            </li>
+            <!--  <li class="submenu-item">
+              <a routerLink="/holiday">Holiday</a>
+            </li> -->
+            <li class="submenu-item">
+              <a routerLink="/notice">Notice</a>
+            </li>
+          </ul>
+        </li>
 
+        <li class="sidebar-item has-sub">
+          <a href="#" class="sidebar-link">
+            <i class="bi bi-stack"></i>
+            <span>Employees</span>
+          </a>
+          <ul class="submenu">
+            <li class="submenu-item">
+              <a routerLink="/employee">Employees</a>
+            </li>
+            <li class="submenu-item">
+              <a routerLink="/education-level">Education Level</a>
+            </li>
+            <li class="submenu-item">
+              <a routerLink="/complain">Complain</a>
+            </li>
+            <li class="submenu-item">
+              <a routerLink="/departement">Departements</a>
+            </li>
+          </ul>
+        </li>
 
-            <li class="sidebar-item">
-                <a routerLinkActive="active" class="sidebar-link" routerLink="/salary">
-                    <i class="fas fa-dollar-sign"></i>
-                    <span>Salaires</span>
-                </a>
+        <li class="sidebar-item has-sub">
+          <a href="#" class="sidebar-link">
+            <i class="bi bi-stack"></i>
+            <span>Salary</span>
+          </a>
+          <ul class="submenu">
+            <li class="submenu-item">
+              <a routerLink="/salary">Salary</a>
             </li>
-            <li class="sidebar-item">
-                <a routerLinkActive="active" class="sidebar-link" routerLink="/award">
-                    <i class="fas fa-money-check-alt"></i>
-                    <span>Récompenses</span>
-                </a>
+            <li class="submenu-item">
+              <a routerLink="/advance">Advance Salary</a>
             </li>
-            <li class="sidebar-item">
-                <a routerLinkActive="active" class="sidebar-link" routerLink="/advance">
-                    <i class="fas fa-coins"></i>
-                    <span>Avance sur salaire</span>
-                </a>
-            </li>
+            <!--   <li class="submenu-item">
+              <a routerLink="/award">Award</a>
+            </li> -->
+            <!--   <li class="submenu-item">
+              <a routerLink="/lauch-plan">launch plan </a>
+            </li> -->
+            <!--  <li class="submenu-item">
+              <a routerLink="/pay-slip">pay slip </a>
+            </li> -->
+          </ul>
+        </li>
 
-            <li class="sidebar-item">
-                <a routerLinkActive="active" class="sidebar-link" routerLink="/holiday">
-                    <i class="fas fa-bed"></i>
-                    <span>Vacances</span>
-                </a>
+        <!-- <li class="sidebar-item has-sub">
+          <a href="#" class="sidebar-link">
+            <i class="bi bi-stack"></i>
+            <span>Jobs</span>
+          </a>
+          <ul class="submenu">
+            <li class="submenu-item">
+              <a routerLink="/job">Jobs</a>
             </li>
-            <li class="sidebar-item">
-                <a routerLinkActive="active" class="sidebar-link" routerLink="/leave">
-                    <i class="fas fa-umbrella-beach"></i>
-                    <span>Congés</span>
-                </a>
+            <li class="submenu-item">
+              <a routerLink="/jobapplication">Job Applications</a>
             </li>
+          </ul>
+        </li> -->
 
-            <li class="sidebar-item">
-                <a routerLinkActive="active" class="sidebar-link" routerLink="/departement">
-                    <i class="fas fa-puzzle-piece"></i>
-                    <span>Départements</span>
-                </a>
+        <li class="sidebar-item has-sub">
+          <a href="#" class="sidebar-link">
+            <i class="bi bi-stack"></i>
+            <span>Contracts</span>
+          </a>
+          <ul class="submenu">
+            <li class="submenu-item">
+              <a routerLink="/contract">Contract</a>
             </li>
-            <li class="sidebar-item">
-                <a routerLinkActive="active" class="sidebar-link" routerLink="/designation">
-                    <i class="fas fa-user-md"></i>
-                    <span>Désignations</span>
-                </a>
+            <li class="submenu-item">
+              <a routerLink="/contract-type">Contract Type</a>
             </li>
+          </ul>
+        </li>
 
-            <li class="sidebar-item">
-                <a routerLinkActive="active" class="sidebar-link" routerLink="/resign">
-                    <i class="fas fa-sign-out-alt"></i>
-                    <span>Démissions</span>
-                </a>
+        <li class="sidebar-item has-sub">
+          <a href="#" class="sidebar-link">
+            <i class="bi bi-stack"></i>
+            <span>Training</span>
+          </a>
+          <ul class="submenu">
+            <li class="submenu-item">
+              <a routerLink="/training">Training</a>
             </li>
+            <li class="submenu-item">
+              <a routerLink="/training-type">Type Training</a>
+            </li>
+          </ul>
+        </li>
 
-            <li class="sidebar-item">
-                <a routerLinkActive="active" class="sidebar-link" routerLink="/termination">
-                    <i class="fas fa-times-circle"></i>
-                    <span>Résilliation</span>
-                </a>
+        <li class="sidebar-item has-sub">
+          <a href="#" class="sidebar-link">
+            <i class="bi bi-stack"></i>
+            <span>Award</span>
+          </a>
+          <ul class="submenu">
+            <li class="submenu-item">
+              <a routerLink="/award">Award</a>
             </li>
+            <li class="submenu-item">
+              <a routerLink="/award-type">Type Award</a>
+            </li>
+          </ul>
+        </li>
 
-            <li class="sidebar-item">
-                <a routerLinkActive="active" class="sidebar-link" routerLink="/complain">
-                    <i class="fas fa-building"></i>
-                    <span>Se plaindre </span>
-                </a>
+        <li class="sidebar-item has-sub">
+          <a href="#" class="sidebar-link">
+            <i class="bi bi-stack"></i>
+            <span>General Settings</span>
+          </a>
+          <ul class="submenu" style="display: none">
+            <li class="submenu-item">
+              <a routerLink="/city">Cities</a>
             </li>
-
-            <li class="sidebar-item">
-                <a routerLinkActive="active" class="sidebar-link" routerLink="/warning">
-                    <i class="fas fa-exclamation"></i>
-                    <span>Avertissement</span>
-                </a>
+            <li class="submenu-item">
+              <a routerLink="/country">Countries</a>
             </li>
-
-            <li class="sidebar-item">
-                <a routerLinkActive="active" class="sidebar-link" routerLink="/transfert">
-                    <i class="fas fa-exchange-alt"></i>
-                    <span>Transfert</span>
-                </a>
+            <li class="submenu-item">
+              <a routerLink="/user">Users</a>
             </li>
-
-            <li class="sidebar-item">
-                <a routerLinkActive="active" class="sidebar-link" routerLink="/presence">
-                    <i class="fas fa-check-square"></i>
-                    <span>Présences</span>
-                </a>
+            <li class="submenu-item">
+              <a routerLink="/loan">Loans</a>
             </li>
-        </ul>
+            <li class="submenu-item">
+              <a
+                routerLinkActive="active"
+                class="sidebar-link"
+                routerLink="/departement"
+                >Departements</a
+              >
+            </li>
+          </ul>
+        </li>
+      </ul>
     </div>
     <button class="sidebar-toggler btn x"><i data-feather="x"></i></button>
+  </div>
 </div>

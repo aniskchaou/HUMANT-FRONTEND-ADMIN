@@ -1,0 +1,59 @@
+<div class="page-heading">
+  <section class="section">
+    <div class="card">
+      <div class="card-header">
+        <h2>Résilliations</h2>
+      </div>
+      <div class="card-body">
+        <div class="dataTable-container">
+          <app-contract-list [contract]="contract$"></app-contract-list>
+          <button
+            type="button"
+            class="btn btn-success btn-sm"
+            data-bs-toggle="modal"
+            data-bs-target="#add"
+          >
+            <i class="fas fa-plus-square"></i>
+          </button>
+
+          <div
+            class="modal fade text-left"
+            id="add"
+            tabindex="-1"
+            aria-labelledby="myModalLabel1"
+            style="display: none"
+            aria-hidden="true"
+          >
+            <div
+              class="modal-dialog modal-dialog-scrollable modal-lg"
+              role="document"
+            >
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title" id="myModalLabel1">Basic Modal</h5>
+                  <button
+                    type="button"
+                    class="close rounded-pill"
+                    data-bs-dismiss="modal"
+                    aria-label="Close"
+                  >
+                    <i data-feather="x"></i>
+                  </button>
+                </div>
+                <div class="modal-body">
+                  <app-add-contract></app-add-contract>
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn" data-bs-dismiss="modal">
+                    <i class="bx bx-x d-block d-sm-none"></i>
+                    <span class="d-none d-sm-block">Fermer</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>

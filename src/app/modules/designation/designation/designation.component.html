@@ -1,47 +1,14 @@
 <div class="page-heading">
-
-    <section class="section">
-        <div class="card">
-            <div class="card-header">
-                <h2>Désignations</h2>
-            </div>
-            <div class="card-body">
-                <div class="dataTable-container">
-                    <table id="table" cellpadding="0" cellspacing="0" border="0"
-                        class="datatable-1 table table-bordered table-striped	 display" width="100%">
-                        <thead>
-                            <tr>
-                                <th>Designation</th>
-                                <th>Departement</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr class="odd gradeX">
-
-                                <td>consulatant</td>
-                                <td>RH</td>
-                                <td>
-                                    <button type="button" class="btn btn-warning btn-sm"><i
-                                            class="fas fa-edit"></i></button>
-                                    <button type="button" class="btn btn-danger btn-sm"
-                                        onclick="return confirm('Êtes-vous sûr de vouloir supprimer cet employé ?');"><i
-                                            class="fas fa-trash-alt"></i></button>
-                                </td>
-                            </tr>
-
-                        </tbody>
-                        <tfoot>
-                            <tr>
-                                <th>Designation</th>
-                                <th>Departement</th>
-                                <th>Actions</th>
-
-                            </tr>
-                        </tfoot>
-                    </table>
-                </div>
-            </div>
+  <section class="section">
+    <div class="card">
+      <div class="card-header">
+        <h2>Désignations</h2>
+      </div>
+      <div class="card-body">
+        <div class="dataTable-container">
+          <app-designation-list></app-designation-list>
         </div>
-    </section>
+      </div>
+    </div>
+  </section>
 </div>
