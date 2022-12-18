@@ -22,13 +22,19 @@
       <td>{{ t.terminationDate }}</td>
       <td>{{ t.typeTermination }}</td>
       <td>
-        <button type="button" class="btn btn-warning btn-sm">
+        <button
+          type="button"
+          data-bs-toggle="modal"
+          (click)="edit(t.id)"
+          data-bs-target="#edit"
+          class="btn btn-warning btn-sm"
+        >
           <i class="fas fa-edit"></i>
         </button>
         <button
           type="button"
           class="btn btn-danger btn-sm"
-          onclick="return confirm('Êtes-vous sûr de vouloir supprimer cet employé ?');"
+          (click)="delete(t.id)"
         >
           <i class="fas fa-trash-alt"></i>
         </button>

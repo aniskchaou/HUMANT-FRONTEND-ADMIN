@@ -34,17 +34,17 @@
 
 <!-- edit category modal -->
 <div
-  class="modal fade"
+  class="modal fade text-left"
   id="edit"
   tabindex="-1"
-  role="dialog"
-  aria-labelledby="exampleModalCenterTitle"
+  aria-labelledby="myModalLabel1"
+  style="display: none"
   aria-hidden="true"
 >
-  <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="exampleModalLongTitle"></h5>
+        <h5 class="modal-title" id="myModalLabel1">Edit</h5>
         <button
           type="button"
           class="close rounded-pill"
@@ -54,7 +54,9 @@
           <i data-feather="x"></i>
         </button>
       </div>
-      <div class="modal-body">sssss</div>
+      <div class="modal-body">
+        <app-edit-termination></app-edit-termination>
+      </div>
       <div class="modal-footer">
         <button type="button" class="btn" data-bs-dismiss="modal">
           <i class="bx bx-x d-block d-sm-none"></i>

@@ -38,20 +38,17 @@
                 <td>
                   <button
                     type="button"
-                    href="#view-employee"
-                    role="button"
-                    data-toggle="modal"
-                    class="btn btn-primary btn-sm"
+                    data-bs-toggle="modal"
+                    (click)="edit(item.id)"
+                    data-bs-target="#edit"
+                    class="btn btn-warning btn-sm"
                   >
-                    <i class="fas fa-address-book"></i>
-                  </button>
-                  <button type="button" class="btn btn-warning btn-sm">
                     <i class="fas fa-edit"></i>
                   </button>
                   <button
                     type="button"
                     class="btn btn-danger btn-sm"
-                    onclick="return confirm('Êtes-vous sûr de vouloir supprimer cet employé ?');"
+                    (click)="delete(item.id)"
                   >
                     <i class="fas fa-trash-alt"></i>
                   </button>
@@ -82,6 +79,42 @@
         >
           <i class="fas fa-plus"></i>
         </button>
+        <div
+          class="modal fade text-left"
+          id="edit"
+          tabindex="-1"
+          aria-labelledby="myModalLabel1"
+          style="display: none"
+          aria-hidden="true"
+        >
+          <div
+            class="modal-dialog modal-dialog-scrollable modal-lg"
+            role="document"
+          >
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="myModalLabel1">Edit</h5>
+                <button
+                  type="button"
+                  class="close rounded-pill"
+                  data-bs-dismiss="modal"
+                  aria-label="Close"
+                >
+                  <i data-feather="x"></i>
+                </button>
+              </div>
+              <div class="modal-body">
+                <app-edit-employee></app-edit-employee>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn" data-bs-dismiss="modal">
+                  <i class="bx bx-x d-block d-sm-none"></i>
+                  <span class="d-none d-sm-block">Close</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
         <app-modal-employee></app-modal-employee>
       </div>
     </div>

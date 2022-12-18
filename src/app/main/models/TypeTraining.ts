@@ -1,4 +1,4 @@
-export default class TypeMember {
+export default class TypeTraining {
   id: number;
   name: string;
 

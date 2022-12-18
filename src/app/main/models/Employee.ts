@@ -1,16 +1,10 @@
-export default class Archive {
+export default class Employee {
   id: number;
-  name: string;
-  writer: string;
-  publication: string;
-  category: string;
-  code: string;
-  ISBN: string;
-  edition: string;
-  editionYear: string;
-  quantity: string;
-  issuedQuantity: string;
-  RackNo: string;
+  /* reason: new FormControl(''),
+      employeeName: new FormControl(''),
+      amount: new FormControl(''),
+      date: new FormControl(''),
+      remarks: new FormControl(''),
 
   constructor(
     id: number,
@@ -38,5 +32,5 @@ export default class Archive {
     this.quantity = quantity;
     this.issuedQuantity = issuedQuantity;
     this.RackNo = RackNo;
-  }
+  } */
 }

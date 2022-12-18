@@ -15,7 +15,24 @@
   <tbody>
     <tr class="odd gradeX" *ngFor="let a of awardType">
       <td>{{ a.name }}</td>
-      <td></td>
+      <td>
+        <button
+          type="button"
+          data-bs-toggle="modal"
+          (click)="edit(a.id)"
+          data-bs-target="#edit"
+          class="btn btn-warning btn-sm"
+        >
+          <i class="fas fa-edit"></i>
+        </button>
+        <button
+          type="button"
+          class="btn btn-danger btn-sm"
+          (click)="delete(a.id)"
+        >
+          <i class="fas fa-trash-alt"></i>
+        </button>
+      </td>
     </tr>
   </tbody>
   <tfoot>

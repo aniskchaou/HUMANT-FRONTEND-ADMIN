@@ -1,4 +1,4 @@
-export default class Publisher {
+export default class ContractType {
   id: number;
   name: string;
 

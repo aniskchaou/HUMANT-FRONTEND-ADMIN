@@ -12,6 +12,7 @@
       <th>Amount</th>
       <th>Date</th>
       <th>Remark</th>
+      <th></th>
     </tr>
   </thead>
   <tbody>
@@ -20,6 +21,24 @@
       <th>{{ a.amount }}</th>
       <td>{{ a.date }}</td>
       <td>{{ a.remarks }}</td>
+      <td>
+        <button
+          type="button"
+          data-bs-toggle="modal"
+          (click)="edit(a.id)"
+          data-bs-target="#edit"
+          class="btn btn-warning btn-sm"
+        >
+          <i class="fas fa-edit"></i>
+        </button>
+        <button
+          type="button"
+          class="btn btn-danger btn-sm"
+          (click)="delete(a.id)"
+        >
+          <i class="fas fa-trash-alt"></i>
+        </button>
+      </td>
     </tr>
   </tbody>
   <tfoot>
@@ -28,6 +47,7 @@
       <th>Amount</th>
       <th>Date</th>
       <th>Remark</th>
+      <th></th>
     </tr>
   </tfoot>
 </table>

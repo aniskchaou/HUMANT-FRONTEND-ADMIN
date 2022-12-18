@@ -1,4 +1,4 @@
-export default class CirculationStatus {
+export default class AwardType {
   id: number;
   name: string;
 

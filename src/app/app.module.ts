@@ -152,6 +152,11 @@ import { EducationLevelListComponent } from './modules/education-level/education
 import { EventListComponent } from './modules/event/event-list/event-list.component';
 import { NoticeComponent } from './modules/notice/notice/notice.component';
 import { AddTrainingTypeComponent } from './modules/training-type/add-training-type/add-training-type.component';
+import { EditAwardTypeComponent } from './modules/award-type/edit-award-type/edit-award-type.component';
+import { EditAnnouncementComponent } from './modules/announcement/edit-announcement/edit-announcement.component';
+import { EditTrainingTypeComponent } from './modules/training-type/edit-training-type/edit-training-type.component';
+import { EditEducationLevelComponent } from './modules/education-level/edit-education-level/edit-education-level.component';
+import { EditContractTypeComponent } from './modules/contract-type/edit-contract-type/edit-contract-type.component';
 
 const routes: Routes = [
   { path: 'country', component: CountryComponent, pathMatch: 'full' },
@@ -331,16 +336,19 @@ const routes: Routes = [
     TransfertListComponent,
     TerminationListComponent,
     EmployeeListComponent,
-
+    EditAnnouncementComponent,
+    EditTrainingTypeComponent,
+    EditEducationLevelComponent,
     LoanComponent,
     UserComponent,
     ContractComponent,
     PayslipComponent,
     LaunchplanComponent,
     AwardTypeModalComponent,
-
+    EditAwardTypeComponent,
     LterminationTypeComponent,
     WarningComponent,
+    EditContractTypeComponent,
     LeaveTypeComponent,
     AddEventComponent,
     AddContractComponent,
