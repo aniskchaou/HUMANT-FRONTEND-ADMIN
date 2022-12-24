@@ -6,7 +6,54 @@
       </div>
       <div class="card-body">
         <div class="dataTable-container">
-          <app-complain-list [complain]="complain$"></app-complain-list>
+          <table
+            class="table table-bordered"
+            id="table"
+            width="100%"
+            cellspacing="0"
+          >
+            <thead>
+              <tr>
+                <th>By</th>
+                <th>Against</th>
+                <th>Title</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tfoot>
+              <tr>
+                <th>By</th>
+                <th>Against</th>
+                <th>Title</th>
+                <th></th>
+              </tr>
+            </tfoot>
+            <tbody *ngIf="complain.length > 0">
+              <tr *ngFor="let c of complain$">
+                <td>{{ c.complainBy }}</td>
+                <td>{{ c.complainAgainst }}</td>
+                <td>{{ c.complainTitle }}</td>
+                <td>
+                  <button
+                    type="button"
+                    data-bs-toggle="modal"
+                    (click)="edit(c.id)"
+                    data-bs-target="#edit"
+                    class="btn btn-warning btn-sm"
+                  >
+                    <i class="fas fa-edit"></i>
+                  </button>
+                  <button
+                    type="button"
+                    class="btn btn-danger btn-sm"
+                    (click)="delete(c.id)"
+                  >
+                    <i class="fas fa-trash-alt"></i>
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
           <button
             type="button"
             class="btn btn-success btn-sm"

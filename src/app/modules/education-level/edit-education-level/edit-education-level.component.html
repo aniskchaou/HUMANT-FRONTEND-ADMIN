@@ -1,1 +1,74 @@
-<p>edit-education-level works!</p>
+<form>
+  <div class="form-group row">
+    <label for="name" class="col-4 col-form-label">Name</label>
+    <div class="col-8">
+      <input
+        id="name"
+        name="name"
+        type="text"
+        class="form-control"
+        [(ngModel)]="model.name"
+      />
+    </div>
+  </div>
+  <div class="form-group row">
+    <label for="years" class="col-4 col-form-label">Years</label>
+    <div class="col-8">
+      <input
+        id="years"
+        name="years"
+        type="text"
+        class="form-control"
+        [(ngModel)]="model.years"
+      />
+    </div>
+  </div>
+  <div class="form-group row">
+    <label for="field" class="col-4 col-form-label">Field</label>
+    <div class="col-8">
+      <input
+        id="field"
+        name="field"
+        type="text"
+        class="form-control"
+        [(ngModel)]="model.CertificateLevel"
+      />
+    </div>
+  </div>
+  <div class="form-group row">
+    <label for="text" class="col-4 col-form-label">Certificate Level</label>
+    <div class="col-8">
+      <input
+        id="text"
+        name="text"
+        type="text"
+        class="form-control"
+        [(ngModel)]="model.FieldofStudy"
+      />
+    </div>
+  </div>
+  <div class="form-group row">
+    <label for="school" class="col-4 col-form-label">School</label>
+    <div class="col-8">
+      <input
+        id="school"
+        name="school"
+        type="text"
+        class="form-control"
+        [(ngModel)]="model.School"
+      />
+    </div>
+  </div>
+  <div class="form-group row">
+    <div class="offset-4 col-8">
+      <button
+        name="submit"
+        (click)="edit()"
+        type="submit"
+        class="btn btn-primary"
+      >
+        Submit
+      </button>
+    </div>
+  </div>
+</form>

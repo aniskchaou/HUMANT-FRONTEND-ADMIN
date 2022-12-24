@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { URLLoader } from 'src/app/main/configs/URLLoader';
 
 @Component({
@@ -7,6 +7,7 @@ import { URLLoader } from 'src/app/main/configs/URLLoader';
   styleUrls: ['./termination-modal.component.css'],
 })
 export class TerminationModalComponent extends URLLoader implements OnInit {
+  @Input() id;
   constructor() {
     super();
     this.loadScripts();

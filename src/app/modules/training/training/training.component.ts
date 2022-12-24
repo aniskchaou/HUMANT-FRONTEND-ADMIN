@@ -16,6 +16,11 @@ export class TrainingComponent extends URLLoader implements OnInit {
   loading: boolean;
   training$: any;
   typeTerminations$: any[];
+  id = 0;
+
+  edit(id) {
+    this.id = id;
+  }
 
   constructor(private httpService: HTTPService, private router: Router) {
     super();

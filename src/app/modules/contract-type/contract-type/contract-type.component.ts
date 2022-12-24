@@ -16,9 +16,13 @@ export class ContractTypeComponent extends URLLoader implements OnInit {
   showgraphic: boolean = false;
   loading: boolean;
   contractType$: any;
+  id = 0;
 
   constructor(private httpService: HTTPService, private router: Router) {
     super();
+  }
+  edit(id) {
+    this.id = id;
   }
 
   ngOnInit() {

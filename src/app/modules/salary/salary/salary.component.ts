@@ -15,6 +15,11 @@ export class SalaryComponent extends URLLoader implements OnInit {
   showgraphic: boolean = false;
   loading: boolean;
   expenses$: any;
+  id = 0;
+
+  edit(id) {
+    this.id = id;
+  }
 
   constructor(private httpService: HTTPService, private router: Router) {
     super();
@@ -28,7 +33,7 @@ export class SalaryComponent extends URLLoader implements OnInit {
   getAll() {
     this.loading = true;
     this.httpService
-      .getAll(CONFIG.URL_BASE + '/city/all')
+      .getAll(CONFIG.URL_BASE + '/salary/all')
       .pipe(finalize(() => (this.loading = false)))
       .subscribe(
         (data) => {

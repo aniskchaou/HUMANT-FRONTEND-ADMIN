@@ -6,10 +6,9 @@
     <div class="col-8">
       <select
         class="form-control"
-        [ngClass]="{ 'is-invalid': submitted && f.Name.errors }"
-        formControlName="Name"
+        formControlName="name"
         id="employee_name"
-        name="employee_name"
+        name="name"
         class="form-control"
       >
         <option *ngFor="let c of employees$" value="{{ c.id }}">
@@ -17,18 +16,12 @@
         </option>
       </select>
     </div>
-    <div *ngIf="submitted && f.Name.errors" class="alert alert-danger">
-      <div *ngIf="submitted && f.Name.errors.required">
-        {{ msg.validationMessage.Name }}
-      </div>
-    </div>
   </div>
   <div class="form-group row">
     <label for="select" class="col-4 col-form-label">Type</label>
     <div class="col-8">
       <select
         class="form-control"
-        [ngClass]="{ 'is-invalid': submitted && f.typeTermination.errors }"
         formControlName="typeTermination"
         id="select"
         name="type"
@@ -39,89 +32,54 @@
         <option value="fish">Fish</option>
       </select>
     </div>
-    <div
-      *ngIf="submitted && f.typeTermination.errors"
-      class="alert alert-danger"
-    >
-      <div *ngIf="submitted && f.typeTermination.errors.required">
-        {{ msg.validationMessage.typeTermination }}
-      </div>
-    </div>
   </div>
   <div class="form-group row">
     <label for="text" class="col-4 col-form-label">Reason</label>
     <div class="col-8">
       <input
-        [ngClass]="{ 'is-invalid': submitted && f.Reason.errors }"
-        formControlName="Reason"
+        formControlName="reason"
         id="text"
-        name="Reason"
+        name="reason"
         type="text"
         class="form-control"
       />
-    </div>
-    <div *ngIf="submitted && f.Reason.errors" class="alert alert-danger">
-      <div *ngIf="submitted && f.Reason.errors.required">
-        {{ msg.validationMessage.Reason }}
-      </div>
     </div>
   </div>
   <div class="form-group row">
     <label for="text1" class="col-4 col-form-label">Notice</label>
     <div class="col-8">
       <input
-        [ngClass]="{ 'is-invalid': submitted && f.Notice.errors }"
-        formControlName="Notice"
+        formControlName="noticeDate"
         id="text1"
-        name="Notice"
+        name="noticeDate"
         type="text"
         class="form-control"
       />
-    </div>
-    <div *ngIf="submitted && f.Notice.errors" class="alert alert-danger">
-      <div *ngIf="submitted && f.Notice.errors.required">
-        {{ msg.validationMessage.Notice }}
-      </div>
     </div>
   </div>
   <div class="form-group row">
     <label for="text2" class="col-4 col-form-label">Termination Date</label>
     <div class="col-8">
       <input
-        [ngClass]="{ 'is-invalid': submitted && f.TerminationDate.errors }"
-        formControlName="TerminationDate"
+        formControlName="terminationDate"
         id="text2"
-        name="text2"
+        name="terminationDate"
         type="text"
         class="form-control"
       />
-    </div>
-    <div
-      *ngIf="submitted && f.TerminationDate.errors"
-      class="alert alert-danger"
-    >
-      <div *ngIf="submitted && f.TerminationDate.errors.required">
-        {{ msg.validationMessage.TerminationDate }}
-      </div>
     </div>
   </div>
   <div class="form-group row">
     <label for="textarea" class="col-4 col-form-label">Description</label>
     <div class="col-8">
       <textarea
-        [ngClass]="{ 'is-invalid': submitted && f.Description.errors }"
-        formControlName="Description"
+        formControlName="description"
         id="textarea"
-        name="textarea"
+        name="description"
         cols="40"
         rows="5"
         class="form-control"
       ></textarea>
-    </div>
-    <div *ngIf="submitted && f.Description.errors" class="alert alert-danger">
-      <div *ngIf="submitted && f.Description.errors.required">
-        {{ msg.validationMessage.Description }}
-      </div>
     </div>
   </div>
   <div class="form-group row">

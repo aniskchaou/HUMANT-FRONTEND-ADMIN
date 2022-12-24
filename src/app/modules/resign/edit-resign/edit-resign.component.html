@@ -2,57 +2,66 @@
   <div class="form-group row">
     <label for="select" class="col-4 col-form-label">Employee</label>
     <div class="col-8">
-      <select id="select" name="select" class="custom-select">
-        <option value="rabbit">Rabbit</option>
-        <option value="duck">Duck</option>
-        <option value="fish">Fish</option>
+      <select
+        id="select"
+        name="select"
+        class="custom-select"
+        [(ngModel)]="model.EmployeeName"
+      >
+        <option *ngFor="let c of employees$" value="{{ c.id }}">
+          {{ c.fullName }}
+        </option>
       </select>
     </div>
   </div>
   <div class="form-group row">
     <label for="select1" class="col-4 col-form-label">Departement</label>
     <div class="col-8">
-      <select id="select1" name="select1" class="custom-select">
-        <option value="rabbit">Rabbit</option>
-        <option value="duck">Duck</option>
-        <option value="fish">Fish</option>
+      <select
+        id="select1"
+        name="select1"
+        class="custom-select"
+        [(ngModel)]="model.departement"
+      >
+        <option *ngFor="let c of departements$" value="{{ c.id }}">
+          {{ c.name }}
+        </option>
       </select>
     </div>
   </div>
   <div class="form-group row">
     <label for="text" class="col-4 col-form-label">Date</label>
     <div class="col-8">
-      <input id="text" name="text" type="text" class="form-control" />
+      <input
+        id="text"
+        name="text"
+        type="text"
+        class="form-control"
+        [(ngModel)]="model.ResignationDate"
+      />
     </div>
   </div>
   <div class="form-group row">
     <label for="text2" class="col-4 col-form-label">Reason</label>
     <div class="col-8">
-      <input id="text2" name="text2" type="text" class="form-control" />
-    </div>
-  </div>
-  <div class="form-group row">
-    <label for="text1" class="col-4 col-form-label">Notice Date</label>
-    <div class="col-8">
-      <input id="text1" name="text1" type="text" class="form-control" />
-    </div>
-  </div>
-  <div class="form-group row">
-    <label for="textarea" class="col-4 col-form-label">Description</label>
-    <div class="col-8">
-      <textarea
-        id="textarea"
-        name="textarea"
-        cols="40"
-        rows="5"
+      <input
+        id="text2"
+        name="text2"
+        type="text"
         class="form-control"
-      ></textarea>
+        [(ngModel)]="model.ResignationReason"
+      />
     </div>
   </div>
   <div class="form-group row">
     <div class="offset-4 col-8">
-      <button name="submit" type="submit" class="btn btn-primary">
-        Submit
+      <button
+        (click)="edit()"
+        name="submit"
+        type="submit"
+        class="btn btn-primary"
+      >
+        Edit
       </button>
     </div>
   </div>

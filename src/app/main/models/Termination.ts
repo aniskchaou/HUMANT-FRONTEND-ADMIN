@@ -1,10 +1,10 @@
 export default class Termination {
   id: number;
   typeTermination: string;
-  Reason: string;
-  Notice: string;
-  Description: string;
-  Name: string;
+  reason: string;
+  notice: string;
+  description: string;
+  name: string;
   TerminationDate: string;
 
   constructor(
@@ -14,14 +14,14 @@ export default class Termination {
     Notice: string,
     Description: string,
     Name: string,
-    TerminationDate: string
+    terminationDate: string
   ) {
     this.id = id;
     this.typeTermination = typeTermination;
-    this.Reason = Reason;
-    this.Notice = Notice;
-    this.Description = Description;
-    this.Name = Name;
-    this.TerminationDate = TerminationDate;
+    this.reason = Reason;
+    this.notice = Notice;
+    this.description = Description;
+    this.name = Name;
+    this.TerminationDate = terminationDate;
   }
 }

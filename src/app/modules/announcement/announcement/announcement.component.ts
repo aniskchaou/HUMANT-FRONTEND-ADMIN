@@ -16,6 +16,7 @@ export class AnnouncementComponent extends URLLoader implements OnInit {
   showgraphic: boolean = false;
   loading: boolean;
   announcement$: any;
+  id = 0;
 
   constructor(private httpService: HTTPService, private router: Router) {
     super();
@@ -24,6 +25,10 @@ export class AnnouncementComponent extends URLLoader implements OnInit {
   ngOnInit() {
     this.getAll();
     super.loadScripts();
+  }
+
+  edit(id) {
+    this.id = id;
   }
 
   getAll() {

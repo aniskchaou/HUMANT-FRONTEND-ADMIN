@@ -15,6 +15,7 @@ export class AwardComponent extends URLLoader implements OnInit {
   showgraphic: boolean = false;
   loading: boolean;
   award$;
+  id = 0;
   constructor(private httpService: HTTPService, private router: Router) {
     super();
   }
@@ -22,6 +23,10 @@ export class AwardComponent extends URLLoader implements OnInit {
   ngOnInit() {
     this.getAll();
     super.loadScripts();
+  }
+
+  edit(id) {
+    this.id = id;
   }
 
   getAll() {

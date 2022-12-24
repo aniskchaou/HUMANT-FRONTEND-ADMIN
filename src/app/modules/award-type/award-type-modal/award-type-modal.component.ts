@@ -7,6 +7,8 @@ import { Component, Input, OnInit } from '@angular/core';
 })
 export class AwardTypeModalComponent implements OnInit {
   constructor() {}
+  @Input()
+  id = 0;
 
   ngOnInit(): void {}
 }

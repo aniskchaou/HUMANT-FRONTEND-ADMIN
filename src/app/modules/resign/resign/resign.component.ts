@@ -15,6 +15,7 @@ export class ResignComponent extends URLLoader implements OnInit {
   showgraphic: boolean = false;
   loading: boolean;
   resignations$: any;
+  id = 0;
 
   constructor(private httpService: HTTPService, private router: Router) {
     super();
@@ -23,6 +24,10 @@ export class ResignComponent extends URLLoader implements OnInit {
   ngOnInit() {
     this.getAll();
     super.loadScripts();
+  }
+
+  edit(id) {
+    this.id = id;
   }
 
   getAll() {

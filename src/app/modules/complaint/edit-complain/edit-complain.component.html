@@ -2,31 +2,55 @@
   <div class="form-group row">
     <label for="employee_name" class="col-4 col-form-label">Complain by</label>
     <div class="col-8">
-      <select id="employee_name" name="employee_name" class="custom-select">
-        <option value="rabbit">John doe</option>
+      <select
+        id="employee_name"
+        name="employee_name"
+        class="custom-select"
+        [(ngModel)]="model.ComplainBy"
+      >
+        <option *ngFor="let c of employees$" value="{{ c.id }}">
+          {{ c.fullName }}
+        </option>
       </select>
     </div>
   </div>
   <div class="form-group row">
     <label for="select" class="col-4 col-form-label">Complain against</label>
     <div class="col-8">
-      <select id="select" name="select" class="custom-select">
-        <option value="rabbit">Rabbit</option>
-        <option value="duck">Duck</option>
-        <option value="fish">Fish</option>
+      <select
+        id="select"
+        name="select"
+        class="custom-select"
+        [(ngModel)]="model.ComplainAgainst"
+      >
+        <option *ngFor="let c of employees$" value="{{ c.id }}">
+          {{ c.fullName }}
+        </option>
       </select>
     </div>
   </div>
   <div class="form-group row">
     <label for="text" class="col-4 col-form-label">Title</label>
     <div class="col-8">
-      <input id="text" name="text" type="text" class="form-control" />
+      <input
+        id="text"
+        name="text"
+        type="text"
+        class="form-control"
+        [(ngModel)]="model.ComplainTitle"
+      />
     </div>
   </div>
   <div class="form-group row">
     <label for="text1" class="col-4 col-form-label">Date</label>
     <div class="col-8">
-      <input id="text1" name="text1" type="text" class="form-control" />
+      <input
+        id="text1"
+        name="text1"
+        type="text"
+        class="form-control"
+        [(ngModel)]="model.ComplainDate"
+      />
     </div>
   </div>
   <div class="form-group row">
@@ -38,12 +62,18 @@
         cols="40"
         rows="5"
         class="form-control"
+        [(ngModel)]="model.Description"
       ></textarea>
     </div>
   </div>
   <div class="form-group row">
     <div class="offset-4 col-8">
-      <button name="submit" type="submit" class="btn btn-primary">
+      <button
+        (click)="edit()"
+        name="submit"
+        type="submit"
+        class="btn btn-primary"
+      >
         Submit
       </button>
     </div>

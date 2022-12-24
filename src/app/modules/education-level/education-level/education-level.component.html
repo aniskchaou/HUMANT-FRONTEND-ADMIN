@@ -6,9 +6,49 @@
       </div>
       <div class="card-body">
         <div class="dataTable-container">
-          <app-education-level-list
-            [educationLevel]="educationLevel$"
-          ></app-education-level-list>
+          <table
+            class="table table-bordered"
+            id="table"
+            width="100%"
+            cellspacing="0"
+          >
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tfoot>
+              <tr>
+                <th>Name</th>
+                <th></th>
+              </tr>
+            </tfoot>
+            <tbody>
+              <tr *ngFor="let c of educationLevel$">
+                <td>{{ c.name }}</td>
+                <td>
+                  <button
+                    type="button"
+                    data-bs-toggle="modal"
+                    (click)="edit(c.id)"
+                    data-bs-target="#edit"
+                    class="btn btn-warning btn-sm"
+                  >
+                    <i class="fas fa-edit"></i>
+                  </button>
+                  <button
+                    type="button"
+                    class="btn btn-danger btn-sm"
+                    (click)="delete(c.id)"
+                  >
+                    <i class="fas fa-trash-alt"></i>
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+
           <button
             type="button"
             class="btn btn-success btn-sm"

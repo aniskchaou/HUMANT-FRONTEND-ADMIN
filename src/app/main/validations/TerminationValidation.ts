@@ -23,11 +23,11 @@ export default class TerminationValidation {
   createFormGroup() {
     return new FormGroup({
       typeTermination: new FormControl('', Validators.required),
-      Reason: new FormControl('', Validators.required),
-      Notice: new FormControl('', Validators.required),
-      Description: new FormControl('', Validators.required),
-      Name: new FormControl('', Validators.required),
-      TerminationDate: new FormControl('', Validators.required),
+      reason: new FormControl('', Validators.required),
+      noticeDate: new FormControl('', Validators.required),
+      description: new FormControl('', Validators.required),
+      name: new FormControl('', Validators.required),
+      terminationDate: new FormControl('', Validators.required),
     });
   }
 }

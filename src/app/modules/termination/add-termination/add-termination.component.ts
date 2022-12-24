@@ -61,7 +61,11 @@ export class AddTerminationComponent extends URLLoader implements OnInit {
   }
 
   add() {
+    this.terminationForm.value.name = this.employees$.filter(
+      (x) => x.id == parseInt(this.terminationForm.value.name)
+    )[0];
     this.submitted = true;
+    console.log(this.terminationForm.value);
     //  if (this.validation.checkValidation()) {
     this.httpService
       .create(
