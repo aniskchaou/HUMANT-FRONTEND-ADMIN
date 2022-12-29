@@ -53,4 +53,21 @@ export class DepartementComponent extends URLLoader implements OnInit {
         this.router.navigate(['/expense']);
       });
   }
+
+  delete(id) {
+    var r = confirm('Do you want to delete this recording ?');
+    if (r) {
+      console.log(CONFIG.URL_BASE + '/departement/delete/' + id);
+      this.httpService
+        .remove(CONFIG.URL_BASE + '/departement/delete/' + id)
+        .then(() => {
+          super.show(
+            'Confirmation',
+            'this.messageService.confirmationMessages.delete',
+            'success'
+          );
+          this.reloadPage();
+        });
+    }
+  }
 }

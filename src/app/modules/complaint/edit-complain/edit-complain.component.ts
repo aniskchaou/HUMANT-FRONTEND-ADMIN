@@ -43,6 +43,7 @@ export class EditComplainComponent extends URLLoader implements OnInit {
 
   ngOnInit(): void {
     this.getCategory();
+    this.getAll();
   }
 
   ngOnChanges(changes: any) {
@@ -61,15 +62,24 @@ export class EditComplainComponent extends URLLoader implements OnInit {
   }
 
   edit() {
-    this.httpService.create(CONFIG.URL_BASE + '/complain/create', this.model);
-    this.closeModal();
-    this.goBack();
-    super.show(
-      'Confirmation',
-      this.message.confirmationMessages.edit,
-      'success'
-    );
-    this.closeModal();
+    this.model.ComplainAgainst = this.employees$.filter(
+      (x) => x.id == parseInt(this.model.ComplainAgainst)
+    )[0];
+    this.model.ComplainBy = this.employees$.filter(
+      (x) => x.id == parseInt(this.model.ComplainBy)
+    )[0];
+    this.httpService
+      .create(CONFIG.URL_BASE + '/complain/create', this.model)
+      .then(() => {
+        this.closeModal();
+        this.goBack();
+        super.show(
+          'Confirmation',
+          this.message.confirmationMessages.edit,
+          'success'
+        );
+        this.closeModal();
+      });
   }
 
   getAll() {

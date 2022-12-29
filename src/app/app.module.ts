@@ -382,6 +382,7 @@ const routes: Routes = [
     ContractTypeListComponent,
     EducationLevelListComponent,
     EventListComponent,
+    AddAwardTypeComponent,
   ],
   imports: [
     HttpClientModule,

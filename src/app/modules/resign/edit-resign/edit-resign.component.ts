@@ -46,6 +46,8 @@ export class EditResignComponent extends URLLoader implements OnInit {
   ngOnInit(): void {
     this.getCategory();
     //this.getCategoryByLang(CONFIG.getInstance().getLang());
+    this.getAll();
+    this.getAllDepartements();
   }
 
   ngOnChanges(changes: any) {

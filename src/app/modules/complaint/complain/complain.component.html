@@ -28,7 +28,7 @@
                 <th></th>
               </tr>
             </tfoot>
-            <tbody *ngIf="complain.length > 0">
+            <tbody>
               <tr *ngFor="let c of complain$">
                 <td>{{ c.complainBy }}</td>
                 <td>{{ c.complainAgainst }}</td>

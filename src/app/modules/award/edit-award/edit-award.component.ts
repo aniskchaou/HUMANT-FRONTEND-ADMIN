@@ -19,6 +19,7 @@ export class EditAwardComponent extends URLLoader implements OnInit {
   @Output() closeModalEvent = new EventEmitter<string>();
   categoryI18n;
   employees$: any[];
+  awardTypes$: any[];
 
   constructor(
     //  private categoryTestService: CategoryTestService,
@@ -45,10 +46,13 @@ export class EditAwardComponent extends URLLoader implements OnInit {
   ngOnInit(): void {
     this.getCategory();
     // this.getCategoryByLang(CONFIG.getInstance().getLang());
+    this.getEmployees();
+    this.getAwardType();
   }
 
   ngOnChanges(changes: any) {
     this.getCategory();
+
     //  this.getCategoryByLang(CONFIG.getInstance().getLang());
   }
 
@@ -64,25 +68,51 @@ export class EditAwardComponent extends URLLoader implements OnInit {
   }
 
   edit() {
-    this.httpService.create(CONFIG.URL_BASE + '/award/create', this.model);
-    this.closeModal();
-    this.goBack();
-    super.show(
-      'Confirmation',
-      this.message.confirmationMessages.edit,
-      'success'
-    );
-    this.closeModal();
+    this.model.awardType = this.awardTypes$.filter(
+      (x) => x.id == this.model.awardType.id
+    )[0];
+    this.model.employeeName = this.employees$.filter(
+      (x) => x.id == this.model.employeeName.id
+    )[0];
+    this.httpService
+      .create(CONFIG.URL_BASE + '/award/create', this.model)
+      .then(() => {
+        this.closeModal();
+        this.goBack();
+        super.show(
+          'Confirmation',
+          this.message.confirmationMessages.edit,
+          'success'
+        );
+        this.closeModal();
+      });
   }
 
-  getAll() {
+  getAwardType() {
+    // this.loading = true;
+    this.httpService
+      .getAll(CONFIG.URL_BASE + '/typeaward/all')
+      //  .pipe(finalize(() => (this.loading = false)))
+      .subscribe(
+        (data: any[]) => {
+          this.awardTypes$ = data;
+          // this.loading = false;
+        },
+        (err: HttpErrorResponse) => {
+          super.show('Error', err.message, 'warning');
+        }
+      );
+  }
+
+  getEmployees() {
+    //this.loading = true;
     this.httpService
       .getAll(CONFIG.URL_BASE + '/employee/all')
-
+      //.pipe(finalize(() => (this.loading = false)))
       .subscribe(
         (data: any[]) => {
           this.employees$ = data;
-          console.log(data);
+          // this.loading = false;
         },
         (err: HttpErrorResponse) => {
           super.show('Error', err.message, 'warning');

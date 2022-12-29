@@ -45,6 +45,8 @@ export class EditTrainingComponent extends URLLoader implements OnInit {
 
   ngOnInit(): void {
     this.getCategory();
+    this.getAll();
+    this.getTypeTraining();
   }
 
   ngOnChanges(changes: any) {

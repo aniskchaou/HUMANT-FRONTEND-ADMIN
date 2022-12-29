@@ -3,8 +3,8 @@ export default class EducationLevel {
   name: string;
   years: string;
   CertificateLevel: string;
-  FieldofStudy: string;
-  School: string;
+  fieldofStudy: string;
+  school: string;
 
   constructor(
     id: number,
@@ -18,7 +18,7 @@ export default class EducationLevel {
     this.name = name;
     this.years = years;
     this.CertificateLevel = CertificateLevel;
-    this.FieldofStudy = FieldofStudy;
-    this.School = School;
+    this.fieldofStudy = FieldofStudy;
+    this.school = School;
   }
 }

@@ -43,6 +43,7 @@ export class EditTerminationComponent extends URLLoader implements OnInit {
 
   ngOnInit(): void {
     this.getCategory();
+    this.getAll();
   }
 
   ngOnChanges(changes: any) {
@@ -61,18 +62,21 @@ export class EditTerminationComponent extends URLLoader implements OnInit {
   }
 
   edit() {
-    this.httpService.create(
-      CONFIG.URL_BASE + '/termination/create',
-      this.model
-    );
-    this.closeModal();
-    this.goBack();
-    super.show(
-      'Confirmation',
-      this.message.confirmationMessages.edit,
-      'success'
-    );
-    this.closeModal();
+    this.model.name = this.employees$.filter(
+      (x) => x.id == parseInt(this.model.name)
+    )[0];
+    this.httpService
+      .create(CONFIG.URL_BASE + '/termination/create', this.model)
+      .then(() => {
+        this.closeModal();
+        this.goBack();
+        super.show(
+          'Confirmation',
+          this.message.confirmationMessages.edit,
+          'success'
+        );
+        this.closeModal();
+      });
   }
 
   getAll() {

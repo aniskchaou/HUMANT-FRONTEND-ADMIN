@@ -1,17 +1,19 @@
+import Departement from './Departement';
+
 export default class Announcement {
   id: number;
-  Title: string;
-  Department: string;
-  StartDate: string;
-  EndDate: string;
-  Attachment: string;
-  Summary: string;
-  Description: string;
+  title: string;
+  department: Departement;
+  startDate: string;
+  endDate: string;
+  attachment: string;
+  summary: string;
+  description: string;
 
   constructor(
     id: number,
     Title: string,
-    Department: string,
+    Department: Departement,
     StartDate: string,
     EndDate: string,
     Attachment: string,
@@ -19,12 +21,12 @@ export default class Announcement {
     Description: string
   ) {
     this.id = id;
-    this.Title = Title;
-    this.Department = Department;
-    this.StartDate = StartDate;
-    this.EndDate = EndDate;
-    this.Attachment = Attachment;
-    this.Summary = Summary;
-    this.Description = Description;
+    this.title = Title;
+    this.department = Department;
+    this.startDate = StartDate;
+    this.endDate = EndDate;
+    this.attachment = Attachment;
+    this.summary = Summary;
+    this.description = Description;
   }
 }

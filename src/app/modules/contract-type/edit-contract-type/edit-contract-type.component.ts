@@ -54,7 +54,7 @@ export class EditContractTypeComponent extends URLLoader implements OnInit {
   getCategory() {
     if (this.id != undefined) {
       this.httpService
-        .get(CONFIG.URL_BASE + '/category/' + this.id)
+        .get(CONFIG.URL_BASE + '/contracttype/' + this.id)
         .subscribe((data: AwardType) => {
           this.model = data;
           console.log(this.model);
@@ -63,7 +63,10 @@ export class EditContractTypeComponent extends URLLoader implements OnInit {
   }
 
   edit() {
-    this.httpService.create(CONFIG.URL_BASE + '/category/create', this.model);
+    this.httpService.create(
+      CONFIG.URL_BASE + '/contracttype/create',
+      this.model
+    );
     this.closeModal();
     this.goBack();
     super.show(

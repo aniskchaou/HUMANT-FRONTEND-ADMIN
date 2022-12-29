@@ -4,31 +4,50 @@
       >Employee Name</label
     >
     <div class="col-8">
-      <select id="employee_name" name="employee_name" class="custom-select">
-        <option value="rabbit">John doe</option>
+      <select
+        id="employee_name"
+        name="employee_name"
+        class="custom-select"
+        [(ngModel)]="model.employeeName"
+      >
+        <option *ngFor="let c of employees$" value="{{ c.id }}">
+          {{ c.fullName }}
+        </option>
       </select>
     </div>
   </div>
   <div class="form-group row">
     <label for="select" class="col-4 col-form-label">Award Type</label>
     <div class="col-8">
-      <select id="select" name="select" class="custom-select">
-        <option value="rabbit">Rabbit</option>
-        <option value="duck">Duck</option>
-        <option value="fish">Fish</option>
+      <select
+        id="select"
+        name="select"
+        class="custom-select"
+        [(ngModel)]="model.awardType"
+      >
+        <option *ngFor="let c of awardTypes$" value="{{ c.id }}">
+          {{ c.name }}
+        </option>
       </select>
     </div>
   </div>
   <div class="form-group row">
     <label for="text" class="col-4 col-form-label">Date</label>
     <div class="col-8">
-      <input id="text" name="text" type="text" class="form-control" />
+      <input
+        id="text"
+        name="text"
+        type="text"
+        class="form-control"
+        [(ngModel)]="model.awardDate"
+      />
     </div>
   </div>
   <div class="form-group row">
     <label for="textarea" class="col-4 col-form-label">Description</label>
     <div class="col-8">
       <textarea
+        [(ngModel)]="model.description"
         id="textarea"
         name="textarea"
         cols="40"
@@ -39,7 +58,12 @@
   </div>
   <div class="form-group row">
     <div class="offset-4 col-8">
-      <button name="submit" type="submit" class="btn btn-primary">
+      <button
+        (click)="edit()"
+        name="submit"
+        type="submit"
+        class="btn btn-primary"
+      >
         Submit
       </button>
     </div>

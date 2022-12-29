@@ -5,6 +5,7 @@ import { finalize } from 'rxjs/operators';
 import { URLLoader } from 'src/app/main/configs/URLLoader';
 import CategoryMessage from 'src/app/main/messages/CategoryMessage';
 import Announcement from 'src/app/main/models/Announcement';
+import Departemnt from 'src/app/main/models/Departement';
 import { HTTPService } from 'src/app/main/services/HTTPService';
 import CONFIG from 'src/app/main/urls/urls';
 
@@ -14,11 +15,11 @@ import CONFIG from 'src/app/main/urls/urls';
   styleUrls: ['./edit-announcement.component.css'],
 })
 export class EditAnnouncementComponent extends URLLoader implements OnInit {
-  model: Announcement = new Announcement(0, '', '', '', '', '', '', '');
+  model: Announcement = new Announcement(0, '', undefined, '', '', '', '', '');
   @Input() id = undefined;
   @Output() closeModalEvent = new EventEmitter<string>();
   categoryI18n;
-  departements$: Object;
+  departements$: Departemnt[];
 
   constructor(
     //private categoryTestService: CategoryTestService,
@@ -27,14 +28,14 @@ export class EditAnnouncementComponent extends URLLoader implements OnInit {
     private router: Router
   ) {
     super();
-    this.model = new Announcement(0, '', '', '', '', '', '', '');
+    this.model = new Announcement(0, '', undefined, '', '', '', '', '');
     this.getAll();
   }
 
   getAll() {
     //  this.loading = true;
     this.httpService.getAll(CONFIG.URL_BASE + '/departement/all').subscribe(
-      (data) => {
+      (data: Departemnt[]) => {
         this.departements$ = data;
       },
       (err: HttpErrorResponse) => {
@@ -66,17 +67,18 @@ export class EditAnnouncementComponent extends URLLoader implements OnInit {
   }
 
   getCategory() {
-    if (this.id != undefined) {
-      this.httpService
-        .get(CONFIG.URL_BASE + '/announcement/' + this.id)
-        .subscribe((data: Announcement) => {
-          this.model = data;
-          console.log(this.model);
-        });
-    }
+    this.httpService
+      .get(CONFIG.URL_BASE + '/announcement/' + this.id)
+      .subscribe((data: Announcement) => {
+        this.model = data;
+        console.log(this.model);
+      });
   }
 
   edit() {
+    this.model.department = this.departements$.filter(
+      (x) => x.id == this.model.department.id
+    )[0];
     this.httpService.create(
       CONFIG.URL_BASE + '/announcement/create',
       this.model

@@ -8,7 +8,7 @@
         placeholder="title"
         type="text"
         class="form-control"
-        [(ngModel)]="model.Title"
+        [(ngModel)]="model.title"
       />
     </div>
   </div>
@@ -19,7 +19,7 @@
         id="select"
         name="select"
         class="custom-select"
-        [(ngModel)]="model.Department"
+        [(ngModel)]="model.department"
       >
         <option *ngFor="let c of departements$" value="{{ c.id }}">
           {{ c.name }}
@@ -35,7 +35,7 @@
         name="text"
         type="text"
         class="form-control"
-        [(ngModel)]="model.StartDate"
+        [(ngModel)]="model.startDate"
       />
     </div>
   </div>
@@ -47,20 +47,14 @@
         name="text1"
         type="text"
         class="form-control"
-        [(ngModel)]="model.EndDate"
+        [(ngModel)]="model.endDate"
       />
     </div>
   </div>
   <div class="form-group row">
     <label for="text2" class="col-4 col-form-label">Attachement</label>
     <div class="col-8">
-      <input
-        id="text2"
-        name="text2"
-        type="text"
-        class="form-control"
-        formControlName="Attachment"
-      />
+      <input id="text2" name="text2" type="text" class="form-control" />
     </div>
   </div>
   <div class="form-group row">
@@ -71,7 +65,7 @@
         name="summary"
         type="text"
         class="form-control"
-        [(ngModel)]="model.Summary"
+        [(ngModel)]="model.summary"
       />
     </div>
   </div>
@@ -84,7 +78,7 @@
         cols="40"
         rows="5"
         class="form-control"
-        [(ngModel)]="model.Description"
+        [(ngModel)]="model.description"
       ></textarea>
     </div>
   </div>

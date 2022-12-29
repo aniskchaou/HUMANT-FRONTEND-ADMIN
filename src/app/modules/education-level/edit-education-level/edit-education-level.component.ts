@@ -53,7 +53,7 @@ export class EditEducationLevelComponent extends URLLoader implements OnInit {
   getCategory() {
     if (this.id != undefined) {
       this.httpService
-        .get(CONFIG.URL_BASE + '/category/' + this.id)
+        .get(CONFIG.URL_BASE + '/educationLevel/' + this.id)
         .subscribe((data: EducationLevel) => {
           this.model = data;
           console.log(this.model);
@@ -62,7 +62,10 @@ export class EditEducationLevelComponent extends URLLoader implements OnInit {
   }
 
   edit() {
-    this.httpService.create(CONFIG.URL_BASE + '/category/create', this.model);
+    this.httpService.create(
+      CONFIG.URL_BASE + '/educationLevel/create',
+      this.model
+    );
     this.closeModal();
     this.goBack();
     super.show(

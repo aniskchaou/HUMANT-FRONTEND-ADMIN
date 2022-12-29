@@ -1,7 +1,9 @@
+import Employee from './Employee';
+
 export default class Advance {
   id: number;
   reason: string;
-  employeeName: string;
+  employeeName: Employee;
   amount: string;
   date: string;
   remarks: string;
@@ -9,7 +11,7 @@ export default class Advance {
   constructor(
     id: number,
     reason: string,
-    employeeName: string,
+    employeeName: Employee,
     amount: string,
     date: string,
     remarks: string

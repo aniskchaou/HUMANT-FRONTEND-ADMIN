@@ -21,6 +21,22 @@ export class TerminationComponent extends URLLoader implements OnInit {
     this.id = id;
   }
 
+  delete(id) {
+    var r = confirm('Do you want to delete this recording ?');
+    if (r) {
+      this.httpService
+        .remove(CONFIG.URL_BASE + '/termination/delete/' + id)
+        .then(() => {
+          super.show(
+            'Confirmation',
+            'this.messageService.confirmationMessages.delete',
+            'success'
+          );
+          this.reloadPage();
+        });
+    }
+  }
+
   constructor(private httpService: HTTPService, private router: Router) {
     super();
   }
