@@ -52,7 +52,42 @@ export class TrainingComponent extends URLLoader implements OnInit {
     this.router
       .navigateByUrl('/dashboard', { skipLocationChange: true })
       .then(() => {
-        this.router.navigate(['/expense']);
+        this.router.navigate(['/training']);
       });
+  }
+
+  closeModalAdd() {
+    let element: HTMLElement = document.getElementsByClassName(
+      'closeAdd'
+    )[0] as HTMLElement;
+    element.click();
+    this.getAll();
+  }
+
+  closeModalEdit() {
+    let element: HTMLElement = document.getElementsByClassName(
+      'closeEdit'
+    )[0] as HTMLElement;
+    element.click();
+    this.getAll();
+  }
+
+  delete(id) {
+    var r = confirm('Do you want to delete this recording ?');
+    if (r) {
+      this.httpService
+        .remove(CONFIG.URL_BASE + '/training/delete/' + id)
+        .then(() => {
+          /*   super.show(
+            'Confirmation',
+            'this.messageService.confirmationMessages.delete',
+            'success'
+          ); */
+          // this.reloadPage();
+        })
+        .finally(() => {
+          this.getAll();
+        });
+    }
   }
 }

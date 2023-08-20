@@ -25,9 +25,9 @@ export default class TrainingValidation {
     return new FormGroup({
       name: new FormControl(''),
       years: new FormControl(''),
-      CertificateLevel: new FormControl(''),
-      FieldofStudy: new FormControl(''),
-      School: new FormControl(''),
+      certificateLevel: new FormControl(''),
+      fieldofStudy: new FormControl(''),
+      school: new FormControl(''),
       // Description: new FormControl(''),
     });
   }

@@ -2,23 +2,20 @@
   <section class="section">
     <div class="card">
       <div class="card-header">
-        <h2>Award</h2>
+        <h2>Awards</h2>
       </div>
       <div class="card-body">
         <div class="dataTable-container">
           <button
-            style="margin: 3px"
             type="button"
-            href="#add"
-            role="button"
-            data-toggle="modal"
-            class="btn btn-success btn-icon-split"
+            class="btn btn-success btn-sm"
+            data-bs-toggle="modal"
+            data-bs-target="#add"
           >
-            <span class="icon text-white-50">
-              <i class="fas fa-plus"></i>
-            </span>
-            <span class="text">zerzerze</span>
+            <i class="fas fa-plus-square"></i> Create
           </button>
+
+          <app-modal-award [id]="id"></app-modal-award>
           <table
             class="table table-bordered"
             id="table"
@@ -28,7 +25,7 @@
             <thead>
               <tr>
                 <th>Employee</th>
-                <th>Type</th>
+                <th>Type Award</th>
                 <th>Date</th>
                 <th></th>
               </tr>
@@ -43,9 +40,15 @@
             </tfoot>
             <tbody>
               <tr *ngFor="let c of award$">
-                <td>{{ c.employeeName }}</td>
-                <td>{{ c.AwardType }}</td>
-                <td>{{ c.AwardDate }}</td>
+                <td>
+                  <span class="badge-primary">{{
+                    c.employeeName.fullName
+                  }}</span>
+                </td>
+                <td>{{ c.awardType.name }}</td>
+                <td>
+                  <span class="badge-light">{{ c.awardDate }}</span>
+                </td>
                 <td>
                   <button
                     type="button"
@@ -68,54 +71,6 @@
             </tbody>
           </table>
         </div>
-        <button
-          type="button"
-          class="btn btn-success btn-sm"
-          data-bs-toggle="modal"
-          data-bs-target="#add"
-        >
-          <i class="fas fa-plus-square"></i>
-        </button>
-        <div
-          class="modal fade"
-          id="edit"
-          tabindex="-1"
-          role="dialog"
-          aria-labelledby="exampleModalCenterTitle"
-          aria-hidden="true"
-        >
-          <div
-            class="modal-dialog modal-dialog-centered modal-lg"
-            role="document"
-          >
-            <div class="modal-content">
-              <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLongTitle"></h5>
-                <button
-                  type="button"
-                  class="close"
-                  data-dismiss="modal"
-                  aria-label="Close"
-                >
-                  <span aria-hidden="true">&times;</span>
-                </button>
-              </div>
-              <div class="modal-body">
-                <app-edit-award [id]="id"></app-edit-award>>
-              </div>
-              <div class="modal-footer">
-                <button
-                  type="button"
-                  class="btn btn-secondary"
-                  data-dismiss="modal"
-                >
-                  ssssssss
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-        <app-modal-award></app-modal-award>
       </div>
     </div>
   </section>

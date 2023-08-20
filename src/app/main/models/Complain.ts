@@ -1,9 +1,9 @@
 export default class Complain {
   id: number;
-  ComplainBy: string;
-  ComplainAgainst: string;
-  ComplainTitle: string;
-  ComplainDate: string;
+  complainBy: string;
+  complainAgainst: string;
+  complainTitle: string;
+  complainDate: string;
   constructor(
     id: number,
     ComplainBy: string,
@@ -13,11 +13,11 @@ export default class Complain {
     Description: string
   ) {
     this.id = id;
-    this.ComplainBy = ComplainBy;
-    this.ComplainAgainst = ComplainAgainst;
-    this.ComplainTitle = ComplainTitle;
-    this.ComplainDate = ComplainDate;
-    this.Description = Description;
+    this.complainBy = ComplainBy;
+    this.complainAgainst = ComplainAgainst;
+    this.complainTitle = ComplainTitle;
+    this.complainDate = ComplainDate;
+    this.description = Description;
   }
-  Description: string;
+  description: string;
 }

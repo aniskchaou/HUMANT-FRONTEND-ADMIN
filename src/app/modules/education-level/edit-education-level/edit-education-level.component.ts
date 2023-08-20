@@ -36,7 +36,7 @@ export class EditEducationLevelComponent extends URLLoader implements OnInit {
     this.router
       .navigateByUrl('/dashboard', { skipLocationChange: true })
       .then(() => {
-        this.router.navigate(['/category']);
+        this.router.navigate(['/education-level']);
       });
   }
 
@@ -62,18 +62,18 @@ export class EditEducationLevelComponent extends URLLoader implements OnInit {
   }
 
   edit() {
-    this.httpService.create(
-      CONFIG.URL_BASE + '/educationLevel/create',
-      this.model
-    );
-    this.closeModal();
-    this.goBack();
-    super.show(
-      'Confirmation',
-      this.message.confirmationMessages.edit,
-      'success'
-    );
-    this.closeModal();
+    this.httpService
+      .create(CONFIG.URL_BASE + '/educationLevel/create', this.model)
+      .finally(() => {
+        this.closeModal();
+        this.goBack();
+        super.show(
+          'Confirmation',
+          this.message.confirmationMessages.edit,
+          'success'
+        );
+        //  this.closeModal();
+      });
   }
 
   getCategoryByLang(lang) {

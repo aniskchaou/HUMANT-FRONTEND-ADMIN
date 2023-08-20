@@ -68,12 +68,12 @@ export class AddTrainingTypeComponent extends URLLoader implements OnInit {
           console.log(this.typetrainingForm.value);
           this.typetrainingForm.reset();
           this.closeModal();
-          this.goBack();
+          /* this.goBack();
           super.show(
             'Confirmation',
             ' this.msg.addConfirmation[CONFIG.getInstance().getLang()]',
             'success'
-          );
+          ); */
         });
     }
   }

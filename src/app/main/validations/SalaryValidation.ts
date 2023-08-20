@@ -22,11 +22,11 @@ export default class SalaryValidation {
   }
   createFormGroup() {
     return new FormGroup({
-      SalaryName: new FormControl(''),
-      BasicSalary: new FormControl(''),
-      TotalSalary: new FormControl(''),
-      MedicalAllowance: new FormControl(''),
-      ConveyanceAllowance: new FormControl(''),
+      salaryName: new FormControl(''),
+      basicSalary: new FormControl(''),
+      totalSalary: new FormControl(''),
+      medicalAllowance: new FormControl(''),
+      conveyanceAllowance: new FormControl(''),
       // link: new FormControl('', Validators.required),
     });
   }

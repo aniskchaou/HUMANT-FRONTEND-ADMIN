@@ -48,9 +48,9 @@ export class DepartementComponent extends URLLoader implements OnInit {
 
   reloadPage() {
     this.router
-      .navigateByUrl('/dashboard', { skipLocationChange: true })
+      .navigateByUrl('/departement', { skipLocationChange: true })
       .then(() => {
-        this.router.navigate(['/expense']);
+        this.router.navigate(['/departement']);
       });
   }
 
@@ -61,13 +61,34 @@ export class DepartementComponent extends URLLoader implements OnInit {
       this.httpService
         .remove(CONFIG.URL_BASE + '/departement/delete/' + id)
         .then(() => {
-          super.show(
+          /*super.show(
             'Confirmation',
             'this.messageService.confirmationMessages.delete',
             'success'
-          );
-          this.reloadPage();
+          );*/
+          console.log('deleted');
+          //this.reloadPage();
+          this.getAll();
+        })
+        .finally(() => {
+          this.getAll();
         });
     }
+  }
+
+  closeModalAdd() {
+    let element: HTMLElement = document.getElementById(
+      'closeAdd'
+    ) as HTMLElement;
+    element.click();
+    this.getAll();
+  }
+
+  closeModalEdit() {
+    let element: HTMLElement = document.getElementById(
+      'closeEdit'
+    ) as HTMLElement;
+    element.click();
+    this.getAll();
   }
 }

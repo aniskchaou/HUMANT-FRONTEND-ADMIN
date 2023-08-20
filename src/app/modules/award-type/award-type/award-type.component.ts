@@ -27,8 +27,8 @@ export class AwardTypeComponent extends URLLoader implements OnInit {
   }
 
   ngOnInit() {
-    this.getAll();
     super.loadScripts();
+    this.getAll();
   }
 
   getAll() {
@@ -53,5 +53,24 @@ export class AwardTypeComponent extends URLLoader implements OnInit {
       .then(() => {
         this.router.navigate(['/expense']);
       });
+  }
+
+  delete(id) {
+    var r = confirm('Do you want to delete this recording ?');
+    if (r) {
+      console.log(CONFIG.URL_BASE + '/typeaward/delete/' + id);
+      this.httpService
+        .remove(CONFIG.URL_BASE + '/typeaward/delete/' + id)
+        .then(() => {
+          /*super.show(
+            'Confirmation',
+            'this.messageService.confirmationMessages.delete',
+            'success'
+          );*/
+          console.log('deleted');
+          //this.reloadPage();
+          this.getAll();
+        });
+    }
   }
 }

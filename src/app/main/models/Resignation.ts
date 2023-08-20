@@ -1,21 +1,21 @@
 export default class Resignation {
   id: number;
-  EmployeeName: string;
+  employeeName: string;
   departement: string;
-  ResignationDate: string;
-  ResignationReason: string;
+  resignationDate: string;
+  resignationReason: string;
 
   constructor(
     id: number,
-    EmployeeName: string,
+    employeeName: string,
     departement: string,
     ResignationDate: string,
     ResignationReason: string
   ) {
     this.id = id;
-    this.EmployeeName = EmployeeName;
+    this.employeeName = employeeName;
     this.departement = departement;
-    this.ResignationDate = ResignationDate;
-    this.ResignationReason = ResignationReason;
+    this.resignationDate = ResignationDate;
+    this.resignationReason = ResignationReason;
   }
 }

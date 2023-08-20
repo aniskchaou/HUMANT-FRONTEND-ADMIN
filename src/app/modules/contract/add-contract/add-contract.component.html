@@ -1,82 +1,179 @@
-<form>
+<form [formGroup]="contractForm">
   <div class="form-group row">
-    <label for="text" class="col-4 col-form-label">Employee</label>
+    <label for="select1" class="col-4 col-form-label">Employee</label>
     <div class="col-8">
-      <input id="text" name="text" type="text" class="form-control" />
+      <select
+        id="select1"
+        name="select1"
+        class="custom-select"
+        formControlName="employee"
+      >
+        <option *ngFor="let c of employees$" value="{{ c.id }}">
+          {{ c.fullName }}
+        </option>
+      </select>
     </div>
   </div>
+
   <div class="form-group row">
-    <label for="text1" class="col-4 col-form-label">Subject</label>
+    <label for="text1" class="col-4 col-form-label">Title</label>
     <div class="col-8">
-      <input id="text1" name="text1" type="text" class="form-control" />
+      <input
+        formControlName="subject"
+        id="text1"
+        name="text1"
+        type="text"
+        class="form-control"
+      />
     </div>
   </div>
   <div class="form-group row">
     <label for="text3" class="col-4 col-form-label">Contract Value</label>
     <div class="col-8">
-      <input id="text3" name="text3" type="text" class="form-control" />
+      <input
+        formControlName="contractValue"
+        id="text3"
+        name="text3"
+        type="text"
+        class="form-control"
+      />
     </div>
   </div>
   <div class="form-group row">
-    <label for="text2" class="col-4 col-form-label">Contract Type</label>
+    <label for="select1" class="col-4 col-form-label">Contratct Type</label>
     <div class="col-8">
-      <input id="text2" name="text2" type="text" class="form-control" />
+      <select
+        id="select1"
+        name="select1"
+        class="custom-select"
+        formControlName="contractType"
+      >
+        <option *ngFor="let c of contractTypes$" value="{{ c.id }}">
+          {{ c.name }}
+        </option>
+      </select>
     </div>
   </div>
   <div class="form-group row">
     <label for="text4" class="col-4 col-form-label">Start</label>
     <div class="col-8">
-      <input id="text4" name="text4" type="text" class="form-control" />
+      <input
+        formControlName="startDate"
+        id="text4"
+        name="text4"
+        type="date"
+        class="form-control"
+      />
     </div>
   </div>
   <div class="form-group row">
     <label for="text5" class="col-4 col-form-label">End</label>
     <div class="col-8">
-      <input id="text5" name="text5" type="text" class="form-control" />
+      <input
+        formControlName="endDate"
+        id="text5"
+        name="text5"
+        type="date"
+        class="form-control"
+      />
     </div>
   </div>
   <div class="form-group row">
-    <label for="select1" class="col-4 col-form-label">Departement</label>
+    <label for="text" class="col-4 col-form-label">Description</label>
     <div class="col-8">
-      <select id="select1" name="select1" class="custom-select">
-        <option value="rabbit">Rabbit</option>
-        <option value="duck">Duck</option>
-        <option value="fish">Fish</option>
-      </select>
-    </div>
-  </div>
-  <div class="form-group row">
-    <label for="text" class="col-4 col-form-label">Text Field</label>
-    <div class="col-8">
-      <input id="text" name="text" type="text" class="form-control" />
+      <input
+        formControlName="description"
+        id="text"
+        name="text"
+        type="text"
+        class="form-control"
+      />
     </div>
   </div>
   <div class="form-group row">
     <label for="select" class="col-4 col-form-label">Status</label>
     <div class="col-8">
-      <select id="select" name="select" class="custom-select">
-        <option value="rabbit">Rabbit</option>
-        <option value="duck">Duck</option>
-        <option value="fish">Fish</option>
+      <select
+        formControlName="status"
+        id="select"
+        name="select"
+        class="custom-select"
+      >
+        <option value="Draft">Draft</option>
+        <option value="In Review">In Review</option>
+        <option value="Not Signed">Not Signed</option>
+        <option value="Canceled">Canceled</option>
+        <option value="Signed">Signed</option>
       </select>
     </div>
   </div>
   <div class="form-group row">
-    <label for="text6" class="col-4 col-form-label">Job</label>
+    <label for="select1" class="col-4 col-form-label">Job</label>
     <div class="col-8">
-      <input id="text6" name="text6" type="text" class="form-control" />
+      <select
+        id="select1"
+        name="select1"
+        class="custom-select"
+        formControlName="job"
+      >
+        <option *ngFor="let c of jobs$" value="{{ c.id }}">
+          {{ c.name }}
+        </option>
+      </select>
     </div>
   </div>
   <div class="form-group row">
-    <label for="text7" class="col-4 col-form-label">Salary Structure</label>
+    <label for="select1" class="col-4 col-form-label">Departement</label>
     <div class="col-8">
-      <input id="text7" name="text7" type="text" class="form-control" />
+      <select
+        id="select1"
+        name="select1"
+        class="custom-select"
+        formControlName="departement"
+      >
+        <option *ngFor="let c of departements$" value="{{ c.id }}">
+          {{ c.name }}
+        </option>
+      </select>
     </div>
   </div>
+  <div class="form-group row">
+    <label for="select1" class="col-4 col-form-label">Salary structure</label>
+    <div class="col-8">
+      <select
+        id="select1"
+        name="select1"
+        class="custom-select"
+        formControlName="salaryStructureType"
+      >
+        <option *ngFor="let c of salaryTypes$" value="{{ c.id }}">
+          {{ c.salaryName }}
+        </option>
+      </select>
+    </div>
+  </div>
+  <div class="form-group row">
+    <label for="text" class="col-4 col-form-label">working Schedule</label>
+    <div class="col-8">
+      <input
+        formControlName="workingSchedule"
+        id="text"
+        name="text"
+        type="text"
+        class="form-control"
+      />
+    </div>
+  </div>
+
   <div class="form-group row">
     <div class="offset-4 col-8">
-      <button name="submit" type="submit" class="btn btn-primary">
-        Submit
+      <button
+        (click)="add()"
+        name="submit"
+        type="submit"
+        class="btn btn-primary"
+      >
+        Save
       </button>
     </div>
   </div>

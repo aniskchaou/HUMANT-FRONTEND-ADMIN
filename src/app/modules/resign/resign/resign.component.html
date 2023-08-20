@@ -6,6 +6,14 @@
       </div>
       <div class="card-body">
         <div class="dataTable-container">
+          <button
+            type="button"
+            class="btn btn-success btn-sm"
+            data-bs-toggle="modal"
+            data-bs-target="#add"
+          >
+            <i class="fas fa-plus-square"></i> Create
+          </button>
           <table
             id="table"
             cellpadding="0"
@@ -25,10 +33,10 @@
             </thead>
             <tbody>
               <tr class="odd gradeX" *ngFor="let item of resignations$">
-                <td>{{ item.EmployeeName }}</td>
-                <td>{{ item.departement }}</td>
-                <td>{{ item.ResignationDate }}</td>
-                <td>{{ item.ResignationReason }}</td>
+                <td>{{ item.employeeName.fullName }}</td>
+                <td>{{ item.departement.name }}</td>
+                <td>{{ item.resignationDate }}</td>
+                <td>{{ item.resignationReason }}</td>
                 <td>
                   <button
                     type="button"
@@ -59,17 +67,9 @@
               </tr>
             </tfoot>
           </table>
-          <button
-            type="button"
-            class="btn btn-success btn-sm"
-            data-bs-toggle="modal"
-            data-bs-target="#add"
-          >
-            <i class="fas fa-plus-square"></i>
-          </button>
         </div>
       </div>
     </div>
-    <app-resign-modal></app-resign-modal>
+    <app-resign-modal [id]="id"></app-resign-modal>
   </section>
 </div>

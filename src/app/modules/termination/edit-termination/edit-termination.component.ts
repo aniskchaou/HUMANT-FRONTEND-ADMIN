@@ -37,7 +37,7 @@ export class EditTerminationComponent extends URLLoader implements OnInit {
     this.router
       .navigateByUrl('/dashboard', { skipLocationChange: true })
       .then(() => {
-        this.router.navigate(['/category']);
+        this.router.navigate(['/termination']);
       });
   }
 
@@ -69,13 +69,16 @@ export class EditTerminationComponent extends URLLoader implements OnInit {
       .create(CONFIG.URL_BASE + '/termination/create', this.model)
       .then(() => {
         this.closeModal();
-        this.goBack();
+
         super.show(
           'Confirmation',
           this.message.confirmationMessages.edit,
           'success'
         );
         this.closeModal();
+      })
+      .finally(() => {
+        this.goBack();
       });
   }
 

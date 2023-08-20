@@ -65,9 +65,10 @@ export class AddTrainingComponent extends URLLoader implements OnInit {
     this.trainingForm.value.typetraining = this.typeTerminations$.filter(
       (x) => x.id == parseInt(this.trainingForm.value.typetraining)
     )[0];
-    this.trainingForm.value.Employee = this.employees$.filter(
-      (x) => x.id == parseInt(this.trainingForm.value.Employee)
+    this.trainingForm.value.employee = this.employees$.filter(
+      (x) => x.id == parseInt(this.trainingForm.value.employee)
     )[0];
+    console.log(this.trainingForm.value);
     this.submitted = true;
     //   if (this.validation.checkValidation()) {
     this.httpService
@@ -76,11 +77,11 @@ export class AddTrainingComponent extends URLLoader implements OnInit {
         this.trainingForm.reset();
         this.closeModal();
         this.goBack();
-        super.show(
+        /*   super.show(
           'Confirmation',
           'this.msg.addConfirmation[CONFIG.getInstance().getLang()]',
           'success'
-        );
+        ); */
       });
     // }
   }

@@ -19,7 +19,7 @@ export class EditResignComponent extends URLLoader implements OnInit {
   @Output() closeModalEvent = new EventEmitter<string>();
   categoryI18n;
   employees$: any[];
-  departements$: Object;
+  departements$: any[];
 
   constructor(
     //private categoryTestService: CategoryTestService,
@@ -58,7 +58,7 @@ export class EditResignComponent extends URLLoader implements OnInit {
   getCategory() {
     if (this.id != undefined) {
       this.httpService
-        .get(CONFIG.URL_BASE + '/category/' + this.id)
+        .get(CONFIG.URL_BASE + '/resignation/' + this.id)
         .subscribe((data: Resignation) => {
           this.model = data;
           console.log(this.model);
@@ -67,15 +67,34 @@ export class EditResignComponent extends URLLoader implements OnInit {
   }
 
   edit() {
-    this.httpService.create(CONFIG.URL_BASE + '/category/create', this.model);
-    this.closeModal();
-    this.goBack();
+    this.model.employeeName = this.employees$.filter(
+      (x) => x.id == parseInt(this.model.employeeName)
+    )[0];
+
+    this.model.departement = this.departements$.filter(
+      (x) => x.id == parseInt(this.model.departement)
+    )[0];
+    this.httpService
+      .create(CONFIG.URL_BASE + '/resignation/create', this.model)
+      .then(() => {
+        this.closeModal();
+      })
+      .finally(() => {
+        this.closeModal();
+        this.router
+          .navigateByUrl('/dashboard', { skipLocationChange: true })
+          .then(() => {
+            this.router.navigate(['/resign']);
+          });
+      });
+
+    /*  this.goBack();
     super.show(
       'Confirmation',
       this.message.confirmationMessages.edit,
       'success'
     );
-    this.closeModal();
+    this.closeModal(); */
   }
 
   getCategoryByLang(lang) {
@@ -112,7 +131,7 @@ export class EditResignComponent extends URLLoader implements OnInit {
       .getAll(CONFIG.URL_BASE + '/departement/all')
 
       .subscribe(
-        (data) => {
+        (data: any[]) => {
           this.departements$ = data;
         },
         (err: HttpErrorResponse) => {

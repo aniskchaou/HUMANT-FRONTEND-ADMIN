@@ -5,8 +5,8 @@
       <select
         id="employee_name"
         name="employee_name"
-        class="custom-select"
-        formControlName="ComplainBy"
+        class="form-control"
+        formControlName="complainBy"
       >
         <option *ngFor="let c of employees$" value="{{ c.id }}">
           {{ c.fullName }}
@@ -20,8 +20,8 @@
       <select
         id="select"
         name="select"
-        class="custom-select"
-        formControlName="ComplainAgainst"
+        class="form-control"
+        formControlName="complainAgainst"
       >
         <option *ngFor="let c of employees$" value="{{ c.id }}">
           {{ c.fullName }}
@@ -37,7 +37,7 @@
         name="text"
         type="text"
         class="form-control"
-        formControlName="ComplainTitle"
+        formControlName="complainTitle"
       />
     </div>
   </div>
@@ -47,9 +47,9 @@
       <input
         id="text1"
         name="text1"
-        type="text"
+        type="date"
         class="form-control"
-        formControlName="ComplainDate"
+        formControlName="complainDate"
       />
     </div>
   </div>
@@ -57,7 +57,7 @@
     <label for="textarea" class="col-4 col-form-label">Description</label>
     <div class="col-8">
       <textarea
-        formControlName="Description"
+        formControlName="description"
         id="textarea"
         name="textarea"
         cols="40"
@@ -74,7 +74,7 @@
         type="submit"
         class="btn btn-primary"
       >
-        Submit
+        Create
       </button>
     </div>
   </div>

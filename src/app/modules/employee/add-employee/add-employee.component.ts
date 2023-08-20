@@ -1,3 +1,4 @@
+import { HttpErrorResponse } from '@angular/common/http';
 import { Component, EventEmitter, OnInit, Output } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -20,6 +21,10 @@ export class AddEmployeeComponent extends URLLoader implements OnInit {
   selectedFile: File;
   retrievedImage: any;
   base64Data: any;
+  contractTypes$: any[];
+  salaries$: any[];
+  departements$: any[];
+  jobs$: any[];
 
   constructor(
     private validation: EmployeeValidation,
@@ -49,6 +54,10 @@ export class AddEmployeeComponent extends URLLoader implements OnInit {
 
   ngOnInit(): void {
     //this.getEmployeeByLang(CONFIG.getInstance().getLang());
+    this.getContactTypes();
+    this.getDepartements();
+    this.getJobs();
+    this.getSalaries();
   }
 
   reset() {
@@ -56,21 +65,101 @@ export class AddEmployeeComponent extends URLLoader implements OnInit {
   }
 
   add() {
+    this.employeeForm.value.departement = this.departements$.filter(
+      (x) => x.id == parseInt(this.employeeForm.value.departement)
+    )[0];
+    this.employeeForm.value.contractType = this.contractTypes$.filter(
+      (x) => x.id == parseInt(this.employeeForm.value.contractType)
+    )[0];
+    this.employeeForm.value.salary = this.salaries$.filter(
+      (x) => x.id == parseInt(this.employeeForm.value.salary)
+    )[0];
+    this.employeeForm.value.job = this.jobs$.filter(
+      (x) => x.id == parseInt(this.employeeForm.value.job)
+    )[0];
     this.submitted = true;
-    if (this.validation.checkValidation()) {
-      this.httpService.create(
-        CONFIG.URL_BASE + '/employee/create',
-        this.employeeForm.value
+    console.log(this.employeeForm.value);
+    // if (this.validation.checkValidation()) {
+    this.httpService
+      .create(CONFIG.URL_BASE + '/employee/create', this.employeeForm.value)
+      .finally(() => {
+        this.employeeForm.reset();
+        this.closeModal();
+        this.goBack();
+        super.show(
+          'Confirmation',
+          '',
+          // this.msg.addConfirmation[CONFIG.getInstance().getLang()],
+          'success'
+        );
+      });
+
+    //}
+  }
+
+  getDepartements() {
+    // this.loading = true;
+    this.httpService
+      .getAll(CONFIG.URL_BASE + '/departement/all')
+      //.pipe(finalize(() => (this.loading = false)))
+      .subscribe(
+        (data: any[]) => {
+          this.departements$ = data;
+          //this.loading = false;
+        },
+        (err: HttpErrorResponse) => {
+          super.show('Error', err.message, 'warning');
+        }
       );
-      this.employeeForm.reset();
-      this.closeModal();
-      this.goBack();
-      super.show(
-        'Confirmation',
-        '',
-        // this.msg.addConfirmation[CONFIG.getInstance().getLang()],
-        'success'
+  }
+
+  getJobs() {
+    // this.loading = true;
+    this.httpService
+      .getAll(CONFIG.URL_BASE + '/job/all')
+      //.pipe(finalize(() => (this.loading = false)))
+      .subscribe(
+        (data: any[]) => {
+          this.jobs$ = data;
+          //this.loading = false;
+        },
+        (err: HttpErrorResponse) => {
+          super.show('Error', err.message, 'warning');
+        }
       );
-    }
+  }
+
+  getSalaries() {
+    // this.loading = true;
+    this.httpService
+      .getAll(CONFIG.URL_BASE + '/salary/all')
+      //.pipe(finalize(() => (this.loading = false)))
+      .subscribe(
+        (data: any[]) => {
+          this.salaries$ = data;
+          //this.loading = false;
+          console.log(data);
+        },
+        (err: HttpErrorResponse) => {
+          super.show('Error', err.message, 'warning');
+        }
+      );
+  }
+
+  getContactTypes() {
+    // this.loading = true;
+
+    this.httpService
+      .getAll(CONFIG.URL_BASE + '/contracttype/all')
+      //.pipe(finalize(() => (this.loading = false)))
+      .subscribe(
+        (data: any[]) => {
+          this.contractTypes$ = data;
+          //this.loading = false;
+        },
+        (err: HttpErrorResponse) => {
+          super.show('Error', err.message, 'warning');
+        }
+      );
   }
 }

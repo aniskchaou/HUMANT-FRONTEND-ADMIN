@@ -5,8 +5,8 @@
       <select
         id="employee_name"
         name="employee_name"
-        class="custom-select"
-        [(ngModel)]="model.ComplainBy"
+        class="form-control"
+        [(ngModel)]="model.complainBy"
       >
         <option *ngFor="let c of employees$" value="{{ c.id }}">
           {{ c.fullName }}
@@ -20,8 +20,8 @@
       <select
         id="select"
         name="select"
-        class="custom-select"
-        [(ngModel)]="model.ComplainAgainst"
+        class="form-control"
+        [(ngModel)]="model.complainAgainst"
       >
         <option *ngFor="let c of employees$" value="{{ c.id }}">
           {{ c.fullName }}
@@ -37,7 +37,7 @@
         name="text"
         type="text"
         class="form-control"
-        [(ngModel)]="model.ComplainTitle"
+        [(ngModel)]="model.complainTitle"
       />
     </div>
   </div>
@@ -47,9 +47,9 @@
       <input
         id="text1"
         name="text1"
-        type="text"
+        type="date"
         class="form-control"
-        [(ngModel)]="model.ComplainDate"
+        [(ngModel)]="model.complainDate"
       />
     </div>
   </div>
@@ -62,7 +62,7 @@
         cols="40"
         rows="5"
         class="form-control"
-        [(ngModel)]="model.Description"
+        [(ngModel)]="model.description"
       ></textarea>
     </div>
   </div>
@@ -74,7 +74,7 @@
         type="submit"
         class="btn btn-primary"
       >
-        Submit
+        Edit
       </button>
     </div>
   </div>

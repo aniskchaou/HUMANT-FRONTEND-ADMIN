@@ -37,6 +37,7 @@ export class EducationLevelComponent extends URLLoader implements OnInit {
       .pipe(finalize(() => (this.loading = false)))
       .subscribe(
         (data) => {
+          console.log(data);
           this.educationLevel$ = data;
           this.loading = false;
         },
@@ -50,7 +51,40 @@ export class EducationLevelComponent extends URLLoader implements OnInit {
     this.router
       .navigateByUrl('/dashboard', { skipLocationChange: true })
       .then(() => {
-        this.router.navigate(['/expense']);
+        this.router.navigate(['/education-level']);
       });
+  }
+
+  closeModalEdit() {
+    let element: HTMLElement = document.getElementsByClassName(
+      'closeEdit'
+    )[0] as HTMLElement;
+    element.click();
+  }
+
+  closeModalAdd() {
+    let element: HTMLElement = document.getElementsByClassName(
+      'closeAdd'
+    )[0] as HTMLElement;
+    element.click();
+    this.getAll();
+  }
+
+  delete(id) {
+    var r = confirm('Do you want to delete this recording ?');
+    if (r) {
+      this.httpService
+        .remove(CONFIG.URL_BASE + '/educationLevel/delete/' + id)
+        .then(() => {
+          /*   super.show(
+            'Confirmation',
+            'this.messageService.confirmationMessages.delete',
+            'success'
+          ); */
+        })
+        .finally(() => {
+          this.getAll();
+        });
+    }
   }
 }

@@ -2,10 +2,18 @@
   <section class="section">
     <div class="card">
       <div class="card-header">
-        <h2>Résilliations</h2>
+        <h2>Training types</h2>
       </div>
       <div class="card-body">
         <div class="dataTable-container">
+          <button
+            type="button"
+            class="btn btn-success btn-sm"
+            data-bs-toggle="modal"
+            data-bs-target="#add"
+          >
+            <i class="fas fa-plus-square"></i> Create
+          </button>
           <table
             class="table table-bordered"
             id="table"
@@ -48,14 +56,6 @@
               </tr>
             </tbody>
           </table>
-          <button
-            type="button"
-            class="btn btn-success btn-sm"
-            data-bs-toggle="modal"
-            data-bs-target="#add"
-          >
-            <i class="fas fa-plus-square"></i>
-          </button>
 
           <div
             class="modal fade text-left"
@@ -82,10 +82,17 @@
                   </button>
                 </div>
                 <div class="modal-body">
-                  <app-edit-training-type [id]="id"></app-edit-training-type>
+                  <app-edit-training-type
+                    [id]="id"
+                    (closeModalEvent)="closeModalEdit()"
+                  ></app-edit-training-type>
                 </div>
                 <div class="modal-footer">
-                  <button type="button" class="btn" data-bs-dismiss="modal">
+                  <button
+                    type="button"
+                    class="btn closeEdit"
+                    data-bs-dismiss="modal"
+                  >
                     <i class="bx bx-x d-block d-sm-none"></i>
                     <span class="d-none d-sm-block">Close</span>
                   </button>
@@ -108,7 +115,7 @@
             >
               <div class="modal-content">
                 <div class="modal-header">
-                  <h5 class="modal-title" id="myModalLabel1">Basic Modal</h5>
+                  <h5 class="modal-title" id="myModalLabel1">Create</h5>
                   <button
                     type="button"
                     class="close rounded-pill"
@@ -119,12 +126,18 @@
                   </button>
                 </div>
                 <div class="modal-body">
-                  <add-training-type></add-training-type>
+                  <add-training-type
+                    (closeModalEvent)="closeModalAdd()"
+                  ></add-training-type>
                 </div>
                 <div class="modal-footer">
-                  <button type="button" class="btn" data-bs-dismiss="modal">
+                  <button
+                    type="button"
+                    class="btn closeAdd"
+                    data-bs-dismiss="modal"
+                  >
                     <i class="bx bx-x d-block d-sm-none"></i>
-                    <span class="d-none d-sm-block">Fermer</span>
+                    <span class="d-none d-sm-block">Close</span>
                   </button>
                 </div>
               </div>

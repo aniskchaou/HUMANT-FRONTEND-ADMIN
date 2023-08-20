@@ -27,12 +27,15 @@ export class TerminationComponent extends URLLoader implements OnInit {
       this.httpService
         .remove(CONFIG.URL_BASE + '/termination/delete/' + id)
         .then(() => {
-          super.show(
+          /*  super.show(
             'Confirmation',
             'this.messageService.confirmationMessages.delete',
             'success'
-          );
-          this.reloadPage();
+          ); */
+          //this.reloadPage();
+        })
+        .finally(() => {
+          this.getAll();
         });
     }
   }
@@ -67,7 +70,11 @@ export class TerminationComponent extends URLLoader implements OnInit {
     this.router
       .navigateByUrl('/dashboard', { skipLocationChange: true })
       .then(() => {
-        this.router.navigate(['/expense']);
+        this.router.navigate(['/termination']);
       });
+  }
+
+  refresh() {
+    this.getAll();
   }
 }

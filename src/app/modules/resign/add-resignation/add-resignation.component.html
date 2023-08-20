@@ -5,8 +5,8 @@
       <select
         id="select"
         name="select"
-        class="custom-select"
-        formControlName="EmployeeName"
+        class="form-control"
+        formControlName="employeeName"
       >
         <option *ngFor="let c of employees$" value="{{ c.id }}">
           {{ c.fullName }}
@@ -20,7 +20,7 @@
       <select
         id="select1"
         name="select1"
-        class="custom-select"
+        class="form-control"
         formControlName="departement"
       >
         <option *ngFor="let c of departements$" value="{{ c.id }}">
@@ -35,9 +35,9 @@
       <input
         id="text"
         name="text"
-        type="text"
+        type="date"
         class="form-control"
-        formControlName="ResignationDate"
+        formControlName="resignationDate"
       />
     </div>
   </div>
@@ -49,7 +49,7 @@
         name="text2"
         type="text"
         class="form-control"
-        formControlName="ResignationReason"
+        formControlName="resignationReason"
       />
     </div>
   </div>
@@ -61,7 +61,7 @@
         type="submit"
         class="btn btn-primary"
       >
-        Submit
+        Create
       </button>
     </div>
   </div>

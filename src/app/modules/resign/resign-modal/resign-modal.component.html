@@ -10,7 +10,7 @@
   <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="exampleModalLongTitle"></h5>
+        <h5 class="modal-title" id="exampleModalLongTitle">Create</h5>
         <button
           type="button"
           id="close"
@@ -21,10 +21,18 @@
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
-      <div class="modal-body"><app-add-resignation></app-add-resignation></div>
+      <div class="modal-body">
+        <app-add-resignation
+          (closeModalEvent)="closeModalAdd()"
+        ></app-add-resignation>
+      </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">
-          ssss
+        <button
+          type="button"
+          class="btn btn-secondary closeAdd"
+          data-bs-dismiss="modal"
+        >
+          Close
         </button>
       </div>
     </div>
@@ -54,10 +62,13 @@
         </button>
       </div>
       <div class="modal-body">
-        <app-edit-resign></app-edit-resign>
+        <app-edit-resign
+          [id]="id"
+          (closeModalEvent)="closeModalEdit()"
+        ></app-edit-resign>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn" data-bs-dismiss="modal">
+        <button type="button" class="btn closeEdit" data-bs-dismiss="modal">
           <i class="bx bx-x d-block d-sm-none"></i>
           <span class="d-none d-sm-block">Close</span>
         </button>

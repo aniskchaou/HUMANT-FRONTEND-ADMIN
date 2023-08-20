@@ -5,7 +5,7 @@ export default class Termination {
   notice: string;
   description: string;
   name: string;
-  TerminationDate: string;
+  terminationDate: string;
 
   constructor(
     id: number,
@@ -22,6 +22,6 @@ export default class Termination {
     this.notice = Notice;
     this.description = Description;
     this.name = Name;
-    this.TerminationDate = terminationDate;
+    this.terminationDate = terminationDate;
   }
 }

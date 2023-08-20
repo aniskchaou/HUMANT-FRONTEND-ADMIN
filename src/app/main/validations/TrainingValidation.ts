@@ -24,11 +24,11 @@ export default class TrainingValidation {
   createFormGroup() {
     return new FormGroup({
       typetraining: new FormControl(''),
-      Name: new FormControl(''),
-      Employee: new FormControl(''),
-      StartDate: new FormControl(''),
-      EndDate: new FormControl(''),
-      Description: new FormControl(''),
+      name: new FormControl(''),
+      employee: new FormControl(''),
+      startDate: new FormControl(''),
+      endDate: new FormControl(''),
+      description: new FormControl(''),
     });
   }
 }

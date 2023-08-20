@@ -58,6 +58,7 @@ export class AddEducationLevelComponent extends URLLoader implements OnInit {
   add() {
     this.submitted = true;
     // if (this.validation.checkValidation()) {
+    console.log(this.educationLevelForm.value);
     this.httpService
       .create(
         CONFIG.URL_BASE + '/educationLevel/create',
@@ -66,13 +67,13 @@ export class AddEducationLevelComponent extends URLLoader implements OnInit {
       .then(() => {
         this.educationLevelForm.reset();
         this.closeModal();
-        this.goBack();
-        super.show(
+        // this.goBack();
+        /* super.show(
           'Confirmation',
           '',
           //this.msg.addConfirmation[CONFIG.getInstance().getLang()],
           'success'
-        );
+        ); */
       });
 
     // }

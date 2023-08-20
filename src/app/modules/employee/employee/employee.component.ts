@@ -26,6 +26,25 @@ export class EmployeeComponent extends URLLoader implements OnInit {
     super.loadScripts();
   }
 
+  delete(id) {
+    var r = confirm('Do you want to delete this recording ?');
+    if (r) {
+      this.httpService
+        .remove(CONFIG.URL_BASE + '/employee/delete/' + id)
+        .then(() => {
+          /*  super.show(
+            'Confirmation',
+            'this.messageService.confirmationMessages.delete',
+            'success'
+          ); */
+          //this.reloadPage();
+        })
+        .finally(() => {
+          this.getAll();
+        });
+    }
+  }
+
   getAll() {
     this.loading = true;
     this.httpService

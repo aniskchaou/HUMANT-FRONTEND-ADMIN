@@ -36,6 +36,7 @@ export class AwardComponent extends URLLoader implements OnInit {
       .pipe(finalize(() => (this.loading = false)))
       .subscribe(
         (data) => {
+          console.log(data);
           this.award$ = data;
           this.loading = false;
         },

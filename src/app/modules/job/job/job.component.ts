@@ -15,7 +15,7 @@ export class JobComponent extends URLLoader implements OnInit {
   showsummary: boolean = false;
   showgraphic: boolean = false;
   loading: boolean;
-  expenses$: any;
+  jobs$: any;
 
   constructor(private httpService: HTTPService, private router: Router) {
     super();
@@ -29,11 +29,11 @@ export class JobComponent extends URLLoader implements OnInit {
   getAll() {
     this.loading = true;
     this.httpService
-      .getAll(CONFIG.URL_BASE + '/city/all')
+      .getAll(CONFIG.URL_BASE + '/job/all')
       .pipe(finalize(() => (this.loading = false)))
       .subscribe(
         (data) => {
-          this.expenses$ = data;
+          this.jobs$ = data;
           this.loading = false;
         },
         (err: HttpErrorResponse) => {
@@ -46,7 +46,26 @@ export class JobComponent extends URLLoader implements OnInit {
     this.router
       .navigateByUrl('/dashboard', { skipLocationChange: true })
       .then(() => {
-        this.router.navigate(['/expense']);
+        this.router.navigate(['/job']);
       });
+  }
+
+  delete(id) {
+    var r = confirm('Do you want to delete this recording ?');
+    if (r) {
+      this.httpService
+        .remove(CONFIG.URL_BASE + '/job/delete/' + id)
+        .then(() => {
+          /*  super.show(
+            'Confirmation',
+            'this.messageService.confirmationMessages.delete',
+            'success'
+          ); */
+          //this.reloadPage();
+        })
+        .finally(() => {
+          this.getAll();
+        });
+    }
   }
 }

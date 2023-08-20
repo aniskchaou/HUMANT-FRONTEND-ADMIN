@@ -2,10 +2,18 @@
   <section class="section">
     <div class="card">
       <div class="card-header">
-        <h2>Départements</h2>
+        <h2>Departements</h2>
       </div>
       <div class="card-body">
         <div class="dataTable-container">
+          <button
+            type="button"
+            class="btn btn-success btn-sm"
+            data-bs-toggle="modal"
+            data-bs-target="#add"
+          >
+            <i class="fas fa-plus-square"></i> Create
+          </button>
           <table
             id="table"
             cellpadding="0"
@@ -53,14 +61,7 @@
               </tr>
             </tfoot>
           </table>
-          <button
-            type="button"
-            class="btn btn-success btn-sm"
-            data-bs-toggle="modal"
-            data-bs-target="#add"
-          >
-            <i class="fas fa-plus-square"></i>
-          </button>
+
           <div
             class="modal fade text-left"
             id="edit"
@@ -75,7 +76,7 @@
             >
               <div class="modal-content">
                 <div class="modal-header">
-                  <h5 class="modal-title" id="myModalLabel1">Basic Modal</h5>
+                  <h5 class="modal-title" id="myModalLabel1">Edit</h5>
                   <button
                     type="button"
                     class="close rounded-pill"
@@ -86,12 +87,20 @@
                   </button>
                 </div>
                 <div class="modal-body">
-                  <app-edit-departement [id]="id"></app-edit-departement>
+                  <app-edit-departement
+                    [id]="id"
+                    (closeModalEventEdit)="closeModalEdit()"
+                  ></app-edit-departement>
                 </div>
                 <div class="modal-footer">
-                  <button type="button" class="btn" data-bs-dismiss="modal">
+                  <button
+                    id="closeEdit"
+                    type="button"
+                    class="btn"
+                    data-bs-dismiss="modal"
+                  >
                     <i class="bx bx-x d-block d-sm-none"></i>
-                    <span class="d-none d-sm-block">Fermer</span>
+                    <span class="d-none d-sm-block">Close</span>
                   </button>
                 </div>
               </div>
@@ -112,7 +121,7 @@
             >
               <div class="modal-content">
                 <div class="modal-header">
-                  <h5 class="modal-title" id="myModalLabel1">Basic Modal</h5>
+                  <h5 class="modal-title" id="myModalLabel1">Create</h5>
                   <button
                     type="button"
                     class="close rounded-pill"
@@ -123,12 +132,19 @@
                   </button>
                 </div>
                 <div class="modal-body">
-                  <app-add-departement></app-add-departement>
+                  <app-add-departement
+                    (closeModalEvent)="closeModalAdd()"
+                  ></app-add-departement>
                 </div>
                 <div class="modal-footer">
-                  <button type="button" class="btn" data-bs-dismiss="modal">
+                  <button
+                    type="button"
+                    id="closeAdd"
+                    class="btn"
+                    data-bs-dismiss="modal"
+                  >
                     <i class="bx bx-x d-block d-sm-none"></i>
-                    <span class="d-none d-sm-block">Fermer</span>
+                    <span class="d-none d-sm-block">Close</span>
                   </button>
                 </div>
               </div>

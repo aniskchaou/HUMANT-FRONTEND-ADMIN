@@ -68,7 +68,7 @@ export class AddDepartementComponent extends URLLoader implements OnInit {
       .then(() => {
         this.departementForm.reset();
         this.closeModal();
-        this.goBack();
+        //this.goBack();
         super.show(
           'Confirmation',
           '',

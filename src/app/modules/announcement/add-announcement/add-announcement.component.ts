@@ -43,7 +43,7 @@ export class AddAnnouncementComponent extends URLLoader implements OnInit {
     this.router
       .navigateByUrl('/dashboard', { skipLocationChange: true })
       .then(() => {
-        this.router.navigate(['/award']);
+        this.router.navigate(['/announcement']);
       });
   }
   get f() {
@@ -61,8 +61,8 @@ export class AddAnnouncementComponent extends URLLoader implements OnInit {
   }
 
   add() {
-    this.announcementForm.value.Department = this.departements$.filter(
-      (x) => x.id == parseInt(this.announcementForm.value.Department)
+    this.announcementForm.value.department = this.departements$.filter(
+      (x) => x.id == parseInt(this.announcementForm.value.department)
     )[0];
 
     console.log(this.announcementForm.value);
@@ -76,13 +76,13 @@ export class AddAnnouncementComponent extends URLLoader implements OnInit {
       .then(() => {
         this.announcementForm.reset();
         this.closeModal();
-        this.goBack();
-        super.show(
+        //this.goBack();
+        /*  super.show(
           'Confirmation',
           '',
           // this.msg.addConfirmation[CONFIG.getInstance().getLang()],
           'success'
-        );
+        ); */
       });
 
     // }

@@ -2,7 +2,7 @@ export default class EducationLevel {
   id: number;
   name: string;
   years: string;
-  CertificateLevel: string;
+  certificateLevel: string;
   fieldofStudy: string;
   school: string;
 
@@ -17,7 +17,7 @@ export default class EducationLevel {
     this.id = id;
     this.name = name;
     this.years = years;
-    this.CertificateLevel = CertificateLevel;
+    this.certificateLevel = CertificateLevel;
     this.fieldofStudy = FieldofStudy;
     this.school = School;
   }

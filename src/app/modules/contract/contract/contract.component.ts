@@ -37,6 +37,7 @@ export class ContractComponent extends URLLoader implements OnInit {
       .pipe(finalize(() => (this.loading = false)))
       .subscribe(
         (data) => {
+          console.log(data);
           this.contract$ = data;
           this.loading = false;
         },
@@ -44,6 +45,35 @@ export class ContractComponent extends URLLoader implements OnInit {
           super.show('Error', err.message, 'warning');
         }
       );
+  }
+
+  delete(id) {
+    var r = confirm('Do you want to delete this recording ?');
+    if (r) {
+      console.log(CONFIG.URL_BASE + '/contract/delete/' + id);
+      this.httpService
+        .remove(CONFIG.URL_BASE + '/contract/delete/' + id)
+        .then(() => {
+          /*super.show(
+            'Confirmation',
+            'this.messageService.confirmationMessages.delete',
+            'success'
+          );*/
+          console.log('deleted');
+          //this.reloadPage();
+          this.getAll();
+        })
+        .finally(() => {
+          this.getAll();
+        });
+    }
+  }
+
+  closeModalAdd() {
+    let element: HTMLElement = document.getElementsByClassName(
+      'closeAdd'
+    )[0] as HTMLElement;
+    element.click();
   }
 
   reloadPage() {

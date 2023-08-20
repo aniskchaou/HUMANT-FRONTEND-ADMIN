@@ -63,8 +63,8 @@ export class AddResignationComponent extends URLLoader implements OnInit {
   }
 
   add() {
-    this.resignationForm.value.EmployeeName = this.employees$.filter(
-      (x) => x.id == parseInt(this.resignationForm.value.EmployeeName)
+    this.resignationForm.value.employeeName = this.employees$.filter(
+      (x) => x.id == parseInt(this.resignationForm.value.employeeName)
     )[0];
 
     this.resignationForm.value.departement = this.departements$.filter(
@@ -81,12 +81,12 @@ export class AddResignationComponent extends URLLoader implements OnInit {
         this.resignationForm.reset();
         this.closeModal();
         this.goBack();
-        super.show(
+        /* super.show(
           'Confirmation',
           '',
           // this.msg.addConfirmation[CONFIG.getInstance().getLang()],
           'success'
-        );
+        ); */
       });
 
     //}

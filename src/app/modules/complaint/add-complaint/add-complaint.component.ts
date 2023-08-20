@@ -61,12 +61,13 @@ export class AddComplaintComponent extends URLLoader implements OnInit {
 
   add() {
     this.loading = true;
-    this.complainForm.value.ComplainBy = this.employees$.filter(
-      (x) => x.id == parseInt(this.complainForm.value.ComplainBy)
+    this.complainForm.value.complainBy = this.employees$.filter(
+      (x) => x.id == parseInt(this.complainForm.value.complainBy)
     )[0];
-    this.complainForm.value.ComplainAgainst = this.employees$.filter(
-      (x) => x.id == parseInt(this.complainForm.value.ComplainAgainst)
+    this.complainForm.value.complainAgainst = this.employees$.filter(
+      (x) => x.id == parseInt(this.complainForm.value.complainAgainst)
     )[0];
+    console.log(this.complainForm.value);
     this.submitted = true;
     // if (this.validation.checkValidation()) {
     this.httpService
@@ -74,13 +75,13 @@ export class AddComplaintComponent extends URLLoader implements OnInit {
       .then(() => {
         this.complainForm.reset();
         this.closeModal();
-        this.goBack();
+        /* this.goBack();
         super.show(
           'Confirmation',
           '',
           //this.msg.addConfirmation[CONFIG.getInstance().getLang()],
           'success'
-        );
+        ); */
       });
 
     //}

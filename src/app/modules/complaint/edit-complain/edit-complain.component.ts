@@ -37,12 +37,13 @@ export class EditComplainComponent extends URLLoader implements OnInit {
     this.router
       .navigateByUrl('/dashboard', { skipLocationChange: true })
       .then(() => {
-        this.router.navigate(['/category']);
+        this.router.navigate(['/complain']);
       });
   }
 
   ngOnInit(): void {
     this.getCategory();
+    console.log(this.id);
     this.getAll();
   }
 
@@ -62,16 +63,17 @@ export class EditComplainComponent extends URLLoader implements OnInit {
   }
 
   edit() {
-    this.model.ComplainAgainst = this.employees$.filter(
-      (x) => x.id == parseInt(this.model.ComplainAgainst)
+    this.model.complainAgainst = this.employees$.filter(
+      (x) => x.id == parseInt(this.model.complainAgainst)
     )[0];
-    this.model.ComplainBy = this.employees$.filter(
-      (x) => x.id == parseInt(this.model.ComplainBy)
+    this.model.complainBy = this.employees$.filter(
+      (x) => x.id == parseInt(this.model.complainBy)
     )[0];
     this.httpService
       .create(CONFIG.URL_BASE + '/complain/create', this.model)
-      .then(() => {
-        this.closeModal();
+      .then(() => {})
+      .finally(() => {
+        // this.closeModal();
         this.goBack();
         super.show(
           'Confirmation',

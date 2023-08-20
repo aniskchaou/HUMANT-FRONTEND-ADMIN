@@ -65,15 +65,19 @@ export class EditTrainingComponent extends URLLoader implements OnInit {
   }
 
   edit() {
-    this.httpService.create(CONFIG.URL_BASE + '/training/create', this.model);
-    this.closeModal();
-    this.goBack();
+    this.httpService
+      .create(CONFIG.URL_BASE + '/training/create', this.model)
+      .then(() => {
+        this.closeModal();
+      });
+
+    /*  this.goBack();
     super.show(
       'Confirmation',
       this.message.confirmationMessages.edit,
       'success'
     );
-    this.closeModal();
+    this.closeModal(); */
   }
 
   getTypeTraining() {

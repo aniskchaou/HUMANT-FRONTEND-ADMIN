@@ -36,7 +36,7 @@ export class EditAwardTypeComponent extends URLLoader implements OnInit {
     this.router
       .navigateByUrl('/dashboard', { skipLocationChange: true })
       .then(() => {
-        this.router.navigate(['/category']);
+        this.router.navigate(['/award-type']);
       });
   }
 
@@ -62,15 +62,18 @@ export class EditAwardTypeComponent extends URLLoader implements OnInit {
   }
 
   edit() {
-    this.httpService.create(CONFIG.URL_BASE + '/typeaward/create', this.model);
-    this.closeModal();
-    this.goBack();
+    this.httpService
+      .create(CONFIG.URL_BASE + '/typeaward/create', this.model)
+      .then(() => {
+        this.closeModal();
+        this.goBack();
+      });
+    /*   
     super.show(
       'Confirmation',
       this.message.confirmationMessages.edit,
       'success'
-    );
-    this.closeModal();
+    ); */
   }
 
   getCategoryByLang(lang) {

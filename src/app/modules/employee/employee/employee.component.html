@@ -2,10 +2,19 @@
   <section class="section">
     <div class="card">
       <div class="card-header">
-        <h2>Employés</h2>
+        <h2>Employees</h2>
       </div>
       <div class="card-body">
         <div class="dataTable-container">
+          <button
+            type="button"
+            data-bs-target="#add"
+            role="button"
+            data-bs-toggle="modal"
+            class="btn btn-success btn-sm"
+          >
+            <i class="fas fa-plus"></i> Create
+          </button>
           <table
             id="table"
             cellpadding="0"
@@ -16,14 +25,14 @@
           >
             <thead>
               <tr>
-                <th>Nom</th>
-                <th>Télephone</th>
-                <th>Date de naissance</th>
+                <th>Name</th>
+                <th>Telephone</th>
+                <th>BirthDate</th>
 
-                <th>Désignation</th>
-                <th>Département</th>
+                <th>Gender</th>
+                <th>Address</th>
 
-                <th>Actions</th>
+                <th></th>
               </tr>
             </thead>
             <tbody>
@@ -36,7 +45,7 @@
                 <td class="center">{{ item.presentAddress }}</td>
 
                 <td>
-                  <button
+                  <!--  <button
                     type="button"
                     data-bs-toggle="modal"
                     (click)="edit(item.id)"
@@ -44,7 +53,7 @@
                     class="btn btn-warning btn-sm"
                   >
                     <i class="fas fa-edit"></i>
-                  </button>
+                  </button> -->
                   <button
                     type="button"
                     class="btn btn-danger btn-sm"
@@ -57,28 +66,19 @@
             </tbody>
             <tfoot>
               <tr>
-                <th>Nom</th>
-                <th>Télephone</th>
-                <th>Date de naissance</th>
+                <th>Name</th>
+                <th>Telephone</th>
+                <th>BirthDate</th>
 
-                <th>Désignation</th>
-                <th>Département</th>
+                <th>Gender</th>
+                <th>Address</th>
 
-                <th>Actions</th>
+                <th></th>
               </tr>
             </tfoot>
           </table>
         </div>
-
-        <button
-          type="button"
-          data-bs-target="#add"
-          role="button"
-          data-bs-toggle="modal"
-          class="btn btn-success btn-sm"
-        >
-          <i class="fas fa-plus"></i>
-        </button>
+        <!-- 
         <div
           class="modal fade text-left"
           id="edit"
@@ -114,7 +114,7 @@
               </div>
             </div>
           </div>
-        </div>
+        </div> -->
         <app-modal-employee></app-modal-employee>
       </div>
     </div>

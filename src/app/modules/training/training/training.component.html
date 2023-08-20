@@ -2,10 +2,18 @@
   <section class="section">
     <div class="card">
       <div class="card-header">
-        <h2>Entrainements</h2>
+        <h2>Trainings</h2>
       </div>
       <div class="card-body">
         <div class="dataTable-container">
+          <button
+            type="button"
+            class="btn btn-success btn-sm"
+            data-bs-toggle="modal"
+            data-bs-target="#add"
+          >
+            <i class="fas fa-plus-square"></i> Create
+          </button>
           <table
             id="table"
             cellpadding="0"
@@ -16,17 +24,19 @@
           >
             <thead>
               <tr>
-                <th>start</th>
-                <th>end Date</th>
-                <th>Actions</th>
+                <th>Employee</th>
+                <th>Start</th>
+                <th>End</th>
+                <th></th>
               </tr>
             </thead>
             <tbody>
               <tr class="odd gradeX" *ngFor="let t of training$">
-                <td>{{ t.StartDate }}</td>
-                <td>{{ t.EndDate }}</td>
+                <td>{{ t.employee?.fullName }}</td>
+                <td>{{ t.startDate }}</td>
+                <td>{{ t.endDate }}</td>
                 <td>
-                  <button
+                  <!--  <button
                     type="button"
                     data-bs-toggle="modal"
                     (click)="edit(t.id)"
@@ -34,7 +44,7 @@
                     class="btn btn-warning btn-sm"
                   >
                     <i class="fas fa-edit"></i>
-                  </button>
+                  </button> -->
                   <button
                     type="button"
                     class="btn btn-danger btn-sm"
@@ -46,15 +56,6 @@
               </tr>
             </tbody>
           </table>
-
-          <button
-            type="button"
-            class="btn btn-success btn-sm"
-            data-bs-toggle="modal"
-            data-bs-target="#add"
-          >
-            <i class="fas fa-plus-square"></i>
-          </button>
 
           <div
             class="modal fade text-left"
@@ -81,10 +82,17 @@
                   </button>
                 </div>
                 <div class="modal-body">
-                  <app-edit-training [id]="id"></app-edit-training>
+                  <app-edit-training
+                    (closeModalEvent)="closeModalEdit()"
+                    [id]="id"
+                  ></app-edit-training>
                 </div>
                 <div class="modal-footer">
-                  <button type="button" class="btn" data-bs-dismiss="modal">
+                  <button
+                    type="button"
+                    class="btn closeEdit"
+                    data-bs-dismiss="modal"
+                  >
                     <i class="bx bx-x d-block d-sm-none"></i>
                     <span class="d-none d-sm-block">Close</span>
                   </button>
@@ -107,7 +115,7 @@
             >
               <div class="modal-content">
                 <div class="modal-header">
-                  <h5 class="modal-title" id="myModalLabel1">Basic Modal</h5>
+                  <h5 class="modal-title" id="myModalLabel1">Create</h5>
                   <button
                     type="button"
                     class="close rounded-pill"
@@ -118,12 +126,18 @@
                   </button>
                 </div>
                 <div class="modal-body">
-                  <app-add-training></app-add-training>
+                  <app-add-training
+                    (closeModalEvent)="closeModalAdd()"
+                  ></app-add-training>
                 </div>
                 <div class="modal-footer">
-                  <button type="button" class="btn" data-bs-dismiss="modal">
+                  <button
+                    type="button"
+                    class="btn closeAdd"
+                    data-bs-dismiss="modal"
+                  >
                     <i class="bx bx-x d-block d-sm-none"></i>
-                    <span class="d-none d-sm-block">Fermer</span>
+                    <span class="d-none d-sm-block">Close</span>
                   </button>
                 </div>
               </div>

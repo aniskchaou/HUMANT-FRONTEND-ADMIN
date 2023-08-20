@@ -2,10 +2,18 @@
   <section class="section">
     <div class="card">
       <div class="card-header">
-        <h2>Education Level</h2>
+        <h2>Educations Levels</h2>
       </div>
       <div class="card-body">
         <div class="dataTable-container">
+          <button
+            type="button"
+            class="btn btn-success btn-sm"
+            data-bs-toggle="modal"
+            data-bs-target="#add"
+          >
+            <i class="fas fa-plus-square"></i> Create
+          </button>
           <table
             class="table table-bordered"
             id="table"
@@ -15,18 +23,30 @@
             <thead>
               <tr>
                 <th>Name</th>
+                <th>Years</th>
+                <th>Speciality</th>
+                <th>Level</th>
+                <th>School</th>
                 <th></th>
               </tr>
             </thead>
             <tfoot>
               <tr>
                 <th>Name</th>
+                <th>Years</th>
+                <th>Speciality</th>
+                <th>Level</th>
+                <th>School</th>
                 <th></th>
               </tr>
             </tfoot>
             <tbody>
               <tr *ngFor="let c of educationLevel$">
                 <td>{{ c.name }}</td>
+                <td>{{ c.years }}</td>
+                <td>{{ c.fieldofStudy }}</td>
+                <td>{{ c.certificateLevel }}</td>
+                <td>{{ c.school }}</td>
                 <td>
                   <button
                     type="button"
@@ -49,14 +69,6 @@
             </tbody>
           </table>
 
-          <button
-            type="button"
-            class="btn btn-success btn-sm"
-            data-bs-toggle="modal"
-            data-bs-target="#add"
-          >
-            <i class="fas fa-plus-square"></i>
-          </button>
           <div
             class="modal fade text-left"
             id="edit"
@@ -84,10 +96,15 @@
                 <div class="modal-body">
                   <app-edit-education-level
                     [id]="id"
+                    (closeModalEvent)="closeModalEdit()"
                   ></app-edit-education-level>
                 </div>
                 <div class="modal-footer">
-                  <button type="button" class="btn" data-bs-dismiss="modal">
+                  <button
+                    type="button"
+                    class="btn closeEdit"
+                    data-bs-dismiss="modal"
+                  >
                     <i class="bx bx-x d-block d-sm-none"></i>
                     <span class="d-none d-sm-block">Close</span>
                   </button>
@@ -109,7 +126,7 @@
             >
               <div class="modal-content">
                 <div class="modal-header">
-                  <h5 class="modal-title" id="myModalLabel1">Basic Modal</h5>
+                  <h5 class="modal-title" id="myModalLabel1">Create</h5>
                   <button
                     type="button"
                     class="close rounded-pill"
@@ -120,12 +137,18 @@
                   </button>
                 </div>
                 <div class="modal-body">
-                  <app-add-education-level></app-add-education-level>
+                  <app-add-education-level
+                    (closeModalEvent)="closeModalAdd()"
+                  ></app-add-education-level>
                 </div>
                 <div class="modal-footer">
-                  <button type="button" class="btn" data-bs-dismiss="modal">
+                  <button
+                    type="button"
+                    class="btn closeAdd"
+                    data-bs-dismiss="modal"
+                  >
                     <i class="bx bx-x d-block d-sm-none"></i>
-                    <span class="d-none d-sm-block">Fermer</span>
+                    <span class="d-none d-sm-block">Close</span>
                   </button>
                 </div>
               </div>

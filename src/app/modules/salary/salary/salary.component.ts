@@ -14,7 +14,7 @@ export class SalaryComponent extends URLLoader implements OnInit {
   showsummary: boolean = false;
   showgraphic: boolean = false;
   loading: boolean;
-  expenses$: any;
+  salaries$: any;
   id = 0;
 
   edit(id) {
@@ -37,7 +37,8 @@ export class SalaryComponent extends URLLoader implements OnInit {
       .pipe(finalize(() => (this.loading = false)))
       .subscribe(
         (data) => {
-          this.expenses$ = data;
+          console.log(data);
+          this.salaries$ = data;
           this.loading = false;
         },
         (err: HttpErrorResponse) => {
@@ -52,5 +53,32 @@ export class SalaryComponent extends URLLoader implements OnInit {
       .then(() => {
         this.router.navigate(['/expense']);
       });
+  }
+
+  closeModalAdd() {
+    let element: HTMLElement = document.getElementsByClassName(
+      'closeAdd'
+    )[0] as HTMLElement;
+    element.click();
+    // this.getAll();
+  }
+
+  delete(id) {
+    var r = confirm('Do you want to delete this recording ?');
+    if (r) {
+      this.httpService
+        .remove(CONFIG.URL_BASE + '/salary/delete/' + id)
+        .then(() => {
+          /*   super.show(
+            'Confirmation',
+            'this.messageService.confirmationMessages.delete',
+            'success'
+          ); */
+          // this.reloadPage();
+        })
+        .finally(() => {
+          this.getAll();
+        });
+    }
   }
 }

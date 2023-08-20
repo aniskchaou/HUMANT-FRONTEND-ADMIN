@@ -37,7 +37,7 @@ export class EditContractTypeComponent extends URLLoader implements OnInit {
     this.router
       .navigateByUrl('/dashboard', { skipLocationChange: true })
       .then(() => {
-        this.router.navigate(['/category']);
+        this.router.navigate(['/contract-type']);
       });
   }
 
@@ -69,11 +69,11 @@ export class EditContractTypeComponent extends URLLoader implements OnInit {
     );
     this.closeModal();
     this.goBack();
-    super.show(
+    /*  super.show(
       'Confirmation',
       this.message.confirmationMessages.edit,
       'success'
-    );
+    ); */
     this.closeModal();
   }
 

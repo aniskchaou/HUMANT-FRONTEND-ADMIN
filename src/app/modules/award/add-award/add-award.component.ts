@@ -76,12 +76,12 @@ export class AddAwardComponent extends URLLoader implements OnInit {
         this.awardForm.reset();
         this.closeModal();
         this.goBack();
-        super.show(
+        /*   super.show(
           'Confirmation',
           '',
           // this.msg.addConfirmation[CONFIG.getInstance().getLang()],
           'success'
-        );
+        ); */
       });
 
     // }

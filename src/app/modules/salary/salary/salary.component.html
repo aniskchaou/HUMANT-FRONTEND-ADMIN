@@ -1,11 +1,19 @@
-<!-- <div class="page-heading">
+<div class="page-heading">
   <section class="section">
     <div class="card">
       <div class="card-header">
-        <h2>Salaires</h2>
+        <h2>Salaries</h2>
       </div>
       <div class="card-body">
         <div class="dataTable-container">
+          <button
+            type="button"
+            class="btn btn-success btn-sm"
+            data-bs-toggle="modal"
+            data-bs-target="#add"
+          >
+            <i class="fas fa-plus-square"></i> Create
+          </button>
           <table
             class="table table-bordered"
             id="table"
@@ -14,21 +22,33 @@
           >
             <thead>
               <tr>
-                <th>{{ "categoryI18n?.category_nameI18n" }}</th>
+                <th>Salary Name</th>
+                <th>Conveyance Allowance</th>
+                <th>Medical Allowance</th>
+                <th>Basic Salary</th>
+                <th>Total Salary</th>
                 <th></th>
               </tr>
             </thead>
             <tfoot>
               <tr>
-                <th>{{ "categoryI18n?.category_name" }}</th>
+                <th>Salary Name</th>
+                <th>Conveyance Allowance</th>
+                <th>Medical Allowance</th>
+                <th>Basic Salary</th>
+                <th>Total Salary</th>
                 <th></th>
               </tr>
             </tfoot>
             <tbody>
-              <tr *ngFor="let c of categories">
-                <td>{{ c.category_name | titlecapital }}</td>
+              <tr *ngFor="let c of salaries$">
+                <td>{{ c.salaryName }}</td>
+                <td>{{ c.conveyanceAllowance }}</td>
+                <td>{{ c.medicalAllowance }}</td>
+                <td>{{ c.basicSalary }}</td>
+                <td>{{ c.totalSalary }}</td>
                 <td>
-                  <button
+                  <!-- <button
                     type="button"
                     data-toggle="modal"
                     (click)="edit(c.id)"
@@ -36,7 +56,7 @@
                     class="btn btn-warning btn-sm"
                   >
                     <i class="fas fa-edit"></i>
-                  </button>
+                  </button> -->
                   <button
                     type="button"
                     class="btn btn-danger btn-sm"
@@ -50,14 +70,6 @@
           </table>
         </div>
       </div>
-      <button
-        type="button"
-        class="btn btn-success btn-sm"
-        data-bs-toggle="modal"
-        data-bs-target="#add"
-      >
-        <i class="fas fa-plus-square"></i>
-      </button>
     </div>
     <div
       class="modal fade text-left"
@@ -73,7 +85,7 @@
       >
         <div class="modal-content">
           <div class="modal-header">
-            <h5 class="modal-title" id="myModalLabel1">Basic Modal</h5>
+            <h5 class="modal-title" id="myModalLabel1">Create</h5>
             <button
               type="button"
               class="close rounded-pill"
@@ -84,12 +96,14 @@
             </button>
           </div>
           <div class="modal-body">
-            <app-add-salary></app-add-salary>
+            <app-add-salary
+              (closeModalEvent)="closeModalAdd()"
+            ></app-add-salary>
           </div>
           <div class="modal-footer">
-            <button type="button" class="btn" data-bs-dismiss="modal">
+            <button type="button" class="btn closeAdd" data-bs-dismiss="modal">
               <i class="bx bx-x d-block d-sm-none"></i>
-              <span class="d-none d-sm-block">Fermer</span>
+              <span class="d-none d-sm-block">Close</span>
             </button>
           </div>
         </div>
@@ -97,4 +111,3 @@
     </div>
   </section>
 </div>
- -->

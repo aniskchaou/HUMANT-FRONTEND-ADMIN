@@ -23,10 +23,10 @@ export default class ResignationValidation {
 
   createFormGroup() {
     return new FormGroup({
-      EmployeeName: new FormControl(''),
+      employeeName: new FormControl(''),
       departement: new FormControl(''),
-      ResignationDate: new FormControl(''),
-      ResignationReason: new FormControl(''),
+      resignationDate: new FormControl(''),
+      resignationReason: new FormControl(''),
       //pdf: new FormControl('', Validators.required),
       // link: new FormControl('', Validators.required),
     });

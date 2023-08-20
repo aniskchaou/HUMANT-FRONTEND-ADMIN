@@ -14,7 +14,7 @@ import CONFIG from 'src/app/main/urls/urls';
 export class EditDepartementComponent extends URLLoader implements OnInit {
   model: Departemnt = new Departemnt(0, '', '');
   @Input() id = undefined;
-  @Output() closeModalEvent = new EventEmitter<string>();
+  @Output() closeModalEventEdit = new EventEmitter<string>();
   categoryI18n;
 
   constructor(
@@ -28,7 +28,7 @@ export class EditDepartementComponent extends URLLoader implements OnInit {
   }
 
   closeModal() {
-    this.closeModalEvent.emit();
+    this.closeModalEventEdit.emit();
   }
 
   goBack() {
@@ -66,12 +66,12 @@ export class EditDepartementComponent extends URLLoader implements OnInit {
       this.model
     );
     this.closeModal();
-    this.goBack();
+    //this.goBack();
     super.show(
       'Confirmation',
       this.message.confirmationMessages.edit,
       'success'
     );
-    this.closeModal();
+    //this.closeModal();
   }
 }

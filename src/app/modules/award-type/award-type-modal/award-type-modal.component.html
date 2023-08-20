@@ -9,7 +9,7 @@
   <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="myModalLabel1">Basic Modal</h5>
+        <h5 class="modal-title" id="myModalLabel1">Create</h5>
         <button
           type="button"
           class="close rounded-pill"
@@ -20,12 +20,14 @@
         </button>
       </div>
       <div class="modal-body">
-        <app-add-award-type></app-add-award-type>
+        <app-add-award-type
+          (closeModalEvent)="closeModalAdd()"
+        ></app-add-award-type>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn" data-bs-dismiss="modal">
           <i class="bx bx-x d-block d-sm-none"></i>
-          <span class="d-none d-sm-block">Fermer</span>
+          <span class="d-none d-sm-block">Close</span>
         </button>
       </div>
     </div>
@@ -43,7 +45,7 @@
   <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="myModalLabel1">Basic Modal</h5>
+        <h5 class="modal-title" id="myModalLabel1">Edit</h5>
         <button
           type="button"
           class="close rounded-pill"
@@ -54,12 +56,20 @@
         </button>
       </div>
       <div class="modal-body">
-        <app-edit-award-type [id]="id"></app-edit-award-type>
+        <app-edit-award-type
+          (closeModalEvent)="closeModalEdit()"
+          [id]="id"
+        ></app-edit-award-type>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn" data-bs-dismiss="modal">
+        <button
+          id="closeEdit"
+          type="button"
+          class="btn"
+          data-bs-dismiss="modal"
+        >
           <i class="bx bx-x d-block d-sm-none"></i>
-          <span class="d-none d-sm-block">Fermer</span>
+          <span class="d-none d-sm-block">Close</span>
         </button>
       </div>
     </div>

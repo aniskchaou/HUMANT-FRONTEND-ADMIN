@@ -1,4 +1,4 @@
-<div id="app">
+<div id="app" *ngIf="!hasRoute('login')">
   <app-navigation></app-navigation>
   <div id="main" class="layout-navbar">
     <header class="mb-3">
@@ -40,6 +40,10 @@
       <app-footer></app-footer>
     </div>
   </div>
+</div>
+
+<div *ngIf="hasRoute('login')">
+  <app-login></app-login>
 </div>
 
 <script src="/assets/vendors/perfect-scrollbar/perfect-scrollbar.min.js"></script>

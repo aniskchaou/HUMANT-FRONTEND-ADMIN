@@ -55,4 +55,7 @@ export class AnnouncementComponent extends URLLoader implements OnInit {
         this.router.navigate(['/expense']);
       });
   }
+  refresh() {
+    this.getAll();
+  }
 }

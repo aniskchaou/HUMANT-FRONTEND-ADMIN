@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import Service from '../interfaces/Service';
 import CONFIG from '../urls/urls';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Observable } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
@@ -57,18 +57,23 @@ export class HTTPService implements Service {
   async remove(url) {
     const headers = new HttpHeaders({
       'content-type': 'application/json',
-      Authorization:
-        'Basic ' +
-        btoa(
-          sessionStorage.getItem('username') +
-            ':' +
-            sessionStorage.getItem('password')
-        ),
+      Authorization: 'Basic ' + btoa('admin' + ':' + 'admin'),
+      responseType: 'text',
     });
     await this.http
       .delete(url, {
         headers: headers,
       })
       .toPromise();
+  }
+
+  private title: BehaviorSubject<string> = new BehaviorSubject<string>(null);
+
+  setTitle(value: string) {
+    this.title.next(value);
+  }
+
+  getTitle(): Observable<string> {
+    return this.title.asObservable();
   }
 }

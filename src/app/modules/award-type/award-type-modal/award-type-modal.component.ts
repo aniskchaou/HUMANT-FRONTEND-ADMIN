@@ -11,4 +11,19 @@ export class AwardTypeModalComponent implements OnInit {
   id = 0;
 
   ngOnInit(): void {}
+
+  closeModalAdd() {
+    let element: HTMLElement = document.getElementsByClassName(
+      'close'
+    )[0] as HTMLElement;
+    element.click();
+  }
+
+  closeModalEdit() {
+    let element: HTMLElement = document.getElementById(
+      'closeEdit'
+    ) as HTMLElement;
+    console.log(element);
+    element.click();
+  }
 }

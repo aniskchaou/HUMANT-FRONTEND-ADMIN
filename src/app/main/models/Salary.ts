@@ -1,10 +1,10 @@
 export default class Salary {
   id: number;
-  SalaryName: string;
-  BasicSalary: string;
-  TotalSalary: string;
-  MedicalAllowance: string;
-  ConveyanceAllowance: string;
+  salaryName: string;
+  basicSalary: string;
+  totalSalary: string;
+  medicalAllowance: string;
+  conveyanceAllowance: string;
   constructor(
     id: number,
     SalaryName: string,
@@ -14,10 +14,10 @@ export default class Salary {
     ConveyanceAllowance: string
   ) {
     this.id = id;
-    this.SalaryName = SalaryName;
-    this.BasicSalary = BasicSalary;
-    this.TotalSalary = TotalSalary;
-    this.MedicalAllowance = MedicalAllowance;
-    this.ConveyanceAllowance = ConveyanceAllowance;
+    this.salaryName = SalaryName;
+    this.basicSalary = BasicSalary;
+    this.totalSalary = TotalSalary;
+    this.medicalAllowance = MedicalAllowance;
+    this.conveyanceAllowance = ConveyanceAllowance;
   }
 }

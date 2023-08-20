@@ -5,10 +5,9 @@
       <input
         id="title"
         name="title"
-        placeholder="title"
         type="text"
         class="form-control"
-        formControlName="Title"
+        formControlName="title"
       />
     </div>
   </div>
@@ -18,8 +17,8 @@
       <select
         id="select"
         name="select"
-        class="custom-select"
-        formControlName="Department"
+        class="form-control"
+        formControlName="department"
       >
         <option *ngFor="let c of departements$" value="{{ c.id }}">
           {{ c.name }}
@@ -33,9 +32,9 @@
       <input
         id="text"
         name="text"
-        type="text"
+        type="date"
         class="form-control"
-        formControlName="StartDate"
+        formControlName="startDate"
       />
     </div>
   </div>
@@ -45,13 +44,13 @@
       <input
         id="text1"
         name="text1"
-        type="text"
+        type="date"
         class="form-control"
-        formControlName="EndDate"
+        formControlName="endDate"
       />
     </div>
   </div>
-  <div class="form-group row">
+  <!--  <div class="form-group row">
     <label for="text2" class="col-4 col-form-label">Attachement</label>
     <div class="col-8">
       <input
@@ -59,10 +58,10 @@
         name="text2"
         type="text"
         class="form-control"
-        formControlName="Attachment"
+        formControlName="attachment"
       />
     </div>
-  </div>
+  </div> -->
   <div class="form-group row">
     <label for="summary" class="col-4 col-form-label">Summary</label>
     <div class="col-8">
@@ -71,7 +70,7 @@
         name="summary"
         type="text"
         class="form-control"
-        formControlName="Summary"
+        formControlName="summary"
       />
     </div>
   </div>
@@ -79,7 +78,7 @@
     <label for="description" class="col-4 col-form-label">Description</label>
     <div class="col-8">
       <textarea
-        formControlName="Description"
+        formControlName="description"
         id="description"
         name="description"
         cols="40"
@@ -96,7 +95,7 @@
         class="btn btn-primary"
         (click)="add()"
       >
-        Submit
+        Create
       </button>
     </div>
   </div>

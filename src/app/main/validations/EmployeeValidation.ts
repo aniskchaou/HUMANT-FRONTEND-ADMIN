@@ -21,46 +21,33 @@ export default class EmployeeValidation {
     return true;
   }
 
-  /*String FullName;
-	String Phone;
-	String BirthDay;
-	String Gender;
-	String PresentAddress;
-	String PermanentAddress;
-	String Photo;
-	String Note;
-	@ManyToOne
-	@JoinColumn(name="departement_id")
-	Departement departement;
-	@ManyToOne
-	@JoinColumn(name="job_id")
-	Job job;
-	String JoiningDate;
-	@ManyToOne
-	@JoinColumn(name="salary_id")
-	Salary salary;
-	String EmergencyContactName;
-	String ContactNumber;
-	String EmergencyContactNumber;
-	String ContactNote;
-	String Resume;
-	String OfferLetter;
-	String JoiningLetter;
-	String ContractAgreement;
-	String IdentityProof;
-	@ManyToOne
-	@JoinColumn(name="contract_type_id")
-	ContractType contractType;
-	String maritalStatus;
-	String numberOfChildren;
-	String coach;
-	String manager;*/
   createFormGroup() {
     return new FormGroup({
-      edition_year: new FormControl(''),
-      publishing_year: new FormControl(''),
-      publishing_place: new FormControl(''),
-      number_of_pages: new FormControl(''),
+      fullName: new FormControl(''),
+      phone: new FormControl(''),
+      birthday: new FormControl(''),
+      gender: new FormControl(''),
+      presentAddress: new FormControl(''),
+      permanentAddress: new FormControl(''),
+      photo: new FormControl(''),
+      note: new FormControl(''),
+      departement: new FormControl(''),
+      job: new FormControl(''),
+      joiningDate: new FormControl(''),
+      salary: new FormControl(''),
+      emergencyContactNumber: new FormControl(''),
+      contactNumber: new FormControl(''),
+      contactNote: new FormControl(''),
+      resume: new FormControl(''),
+      offerLetter: new FormControl(''),
+      contractAgreement: new FormControl(''),
+      identityProof: new FormControl(''),
+      contractType: new FormControl(''),
+      joiningLetter: new FormControl(''),
+      coach: new FormControl(''),
+      numberOfChildren: new FormControl(''),
+      manager: new FormControl(''),
+      maritalStatus: new FormControl(''),
       //pdf: new FormControl('', Validators.required),
       // link: new FormControl('', Validators.required),
     });

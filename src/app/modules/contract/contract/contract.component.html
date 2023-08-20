@@ -2,19 +2,69 @@
   <section class="section">
     <div class="card">
       <div class="card-header">
-        <h2>Résilliations</h2>
+        <h2>Contracts</h2>
       </div>
       <div class="card-body">
         <div class="dataTable-container">
-          <app-contract-list [contract]="contract$"></app-contract-list>
           <button
             type="button"
             class="btn btn-success btn-sm"
             data-bs-toggle="modal"
             data-bs-target="#add"
           >
-            <i class="fas fa-plus-square"></i>
+            <i class="fas fa-plus-square"></i> Create
           </button>
+          <table
+            class="table table-bordered"
+            id="table"
+            width="100%"
+            cellspacing="0"
+          >
+            <thead>
+              <tr>
+                <th>Employee</th>
+                <th>Start Date</th>
+                <th>End Date</th>
+                <th>Status</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tfoot>
+              <tr>
+                <th>Employee</th>
+                <th>Start Date</th>
+                <th>End Date</th>
+                <th>Status</th>
+                <th></th>
+              </tr>
+            </tfoot>
+            <tbody>
+              <tr *ngFor="let c of contract$">
+                <td>{{ c.employee?.fullName }}</td>
+                <td>{{ c.startDate }}</td>
+                <td>{{ c.endDate }}</td>
+                <td>{{ c.status }}</td>
+                <td>
+                  <button
+                    type="button"
+                    data-toggle="modal"
+                    (click)="edit(c.id)"
+                    data-target="#edit"
+                    class="btn btn-warning btn-sm"
+                  >
+                    <i class="fas fa-edit"></i>
+                  </button>
+                  <button
+                    type="button"
+                    class="btn btn-danger btn-sm"
+                    (click)="delete(c.id)"
+                  >
+                    <i class="fas fa-trash-alt"></i>
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
 
           <div
             class="modal fade text-left"
@@ -30,7 +80,7 @@
             >
               <div class="modal-content">
                 <div class="modal-header">
-                  <h5 class="modal-title" id="myModalLabel1">Basic Modal</h5>
+                  <h5 class="modal-title" id="myModalLabel1">Create</h5>
                   <button
                     type="button"
                     class="close rounded-pill"
@@ -41,12 +91,18 @@
                   </button>
                 </div>
                 <div class="modal-body">
-                  <app-add-contract></app-add-contract>
+                  <app-add-contract
+                    (closeModalEvent)="closeModalAdd()"
+                  ></app-add-contract>
                 </div>
                 <div class="modal-footer">
-                  <button type="button" class="btn" data-bs-dismiss="modal">
+                  <button
+                    type="button"
+                    class="btn closeAdd"
+                    data-bs-dismiss="modal"
+                  >
                     <i class="bx bx-x d-block d-sm-none"></i>
-                    <span class="d-none d-sm-block">Fermer</span>
+                    <span class="d-none d-sm-block">Close</span>
                   </button>
                 </div>
               </div>

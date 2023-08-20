@@ -74,14 +74,14 @@ export class AddTerminationComponent extends URLLoader implements OnInit {
       )
       .then(() => {
         this.terminationForm.reset();
-        //this.closeModal();
+        this.closeModal();
         //this.goBack();
-        super.show(
+        /*  super.show(
           'Confirmation',
           '',
           // this.msg.addConfirmation[CONFIG.getInstance().getLang()],
           'success'
-        );
+        ); */
       });
     //  }
   }

@@ -36,11 +36,11 @@ export class ResignComponent extends URLLoader implements OnInit {
       this.httpService
         .remove(CONFIG.URL_BASE + '/resignation/delete/' + id)
         .then(() => {
-          super.show(
+          /*   super.show(
             'Confirmation',
             'this.messageService.confirmationMessages.delete',
             'success'
-          );
+          ); */
           this.reloadPage();
         });
     }

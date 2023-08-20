@@ -23,11 +23,11 @@ export default class ComplainValidation {
 
   createFormGroup() {
     return new FormGroup({
-      ComplainBy: new FormControl(''),
-      ComplainAgainst: new FormControl(''),
-      ComplainTitle: new FormControl(''),
-      ComplainDate: new FormControl(''),
-      Description: new FormControl(''),
+      complainBy: new FormControl(''),
+      complainAgainst: new FormControl(''),
+      complainTitle: new FormControl(''),
+      complainDate: new FormControl(''),
+      description: new FormControl(''),
       // link: new FormControl('', Validators.required),
     });
   }

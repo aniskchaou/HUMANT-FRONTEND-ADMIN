@@ -6,6 +6,7 @@ import { HTTPService } from 'src/app/main/services/HTTPService';
 import CONFIG from 'src/app/main/urls/urls';
 import AwardTypeValidation from 'src/app/main/validations/AwardTypeValidation';
 import { AwardTypeComponent } from '../award-type/award-type.component';
+import { HttpErrorResponse } from '@angular/common/http';
 
 @Component({
   selector: 'app-add-award-type',
@@ -67,7 +68,9 @@ export class AddAwardTypeComponent extends URLLoader implements OnInit {
       .then(() => {
         console.log(this.awardTypeForm.value);
         this.awardTypeForm.reset();
+
         this.closeModal();
+        this.goBack();
       });
 
     //this.goBack();

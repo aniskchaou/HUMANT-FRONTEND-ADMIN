@@ -20,10 +20,14 @@
           <i data-feather="x"></i>
         </button>
       </div>
-      <div class="modal-body"><app-add-termination></app-add-termination></div>
+      <div class="modal-body">
+        <app-add-termination
+          (closeModalEvent)="closeModalAdd()"
+        ></app-add-termination>
+      </div>
 
       <div class="modal-footer">
-        <button type="button" class="btn" data-bs-dismiss="modal">
+        <button type="button" class="btn closeAdd" data-bs-dismiss="modal">
           <i class="bx bx-x d-block d-sm-none"></i>
           <span class="d-none d-sm-block">Close</span>
         </button>
@@ -55,10 +59,13 @@
         </button>
       </div>
       <div class="modal-body">
-        <app-edit-termination [id]="id"></app-edit-termination>
+        <app-edit-termination
+          [id]="id"
+          (closeModalEvent)="closeModalEdit()"
+        ></app-edit-termination>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn" data-bs-dismiss="modal">
+        <button type="button" class="btn closeEdit" data-bs-dismiss="modal">
           <i class="bx bx-x d-block d-sm-none"></i>
           <span class="d-none d-sm-block">Close</span>
         </button>

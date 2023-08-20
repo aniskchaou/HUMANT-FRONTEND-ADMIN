@@ -5,14 +5,12 @@
       <select
         id="select"
         name="select"
-        class="custom-select"
+        class="form-control"
         formControlName="typetraining"
       >
         <option *ngFor="let c of typeTerminations$" value="{{ c.id }}">
           {{ c.name }}
         </option>
-        <option value="duck">Duck</option>
-        <option value="fish">Fish</option>
       </select>
     </div>
   </div>
@@ -24,7 +22,7 @@
         name="text"
         type="text"
         class="form-control"
-        formControlName="Name"
+        formControlName="name"
       />
     </div>
   </div>
@@ -34,8 +32,8 @@
       <select
         id="select1"
         name="select1"
-        class="custom-select"
-        formControlName="Employee"
+        class="form-control"
+        formControlName="employee"
       >
         <option *ngFor="let c of employees$" value="{{ c.id }}">
           {{ c.fullName }}
@@ -49,9 +47,9 @@
       <input
         id="text1"
         name="text1"
-        type="text"
+        type="date"
         class="form-control"
-        formControlName="StartDate"
+        formControlName="startDate"
       />
     </div>
   </div>
@@ -61,9 +59,9 @@
       <input
         id="text2"
         name="text2"
-        type="text"
+        type="date"
         class="form-control"
-        formControlName="EndDate"
+        formControlName="endDate"
       />
     </div>
   </div>
@@ -71,7 +69,7 @@
     <label for="textarea" class="col-4 col-form-label">Description</label>
     <div class="col-8">
       <textarea
-        formControlName="Description"
+        formControlName="description"
         id="textarea"
         name="textarea"
         cols="40"
@@ -88,7 +86,7 @@
         type="submit"
         class="btn btn-primary"
       >
-        Submit
+        Create
       </button>
     </div>
   </div>

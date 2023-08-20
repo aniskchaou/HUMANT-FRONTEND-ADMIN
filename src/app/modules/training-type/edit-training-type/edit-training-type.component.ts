@@ -64,12 +64,12 @@ export class EditTrainingTypeComponent extends URLLoader implements OnInit {
       this.model
     );
     this.closeModal();
-    this.goBack();
+    /*  this.goBack();
     super.show(
       'Confirmation',
       this.message.confirmationMessages.edit,
       'success'
     );
-    this.closeModal();
+    this.closeModal(); */
   }
 }

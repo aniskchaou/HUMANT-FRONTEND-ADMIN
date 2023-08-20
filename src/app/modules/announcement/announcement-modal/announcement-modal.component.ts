@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 
 @Component({
   selector: 'app-announcement-modal',
@@ -8,7 +8,23 @@ import { Component, Input, OnInit } from '@angular/core';
 export class AnnouncementModalComponent implements OnInit {
   @Input()
   id;
+  @Output() refresh = new EventEmitter<string>();
   constructor() {}
 
   ngOnInit(): void {}
+
+  closeModalEdit() {
+    let element: HTMLElement = document.getElementsByClassName(
+      'closeEdit'
+    )[0] as HTMLElement;
+    element.click();
+  }
+
+  closeModalAdd() {
+    let element: HTMLElement = document.getElementsByClassName(
+      'closeAdd'
+    )[0] as HTMLElement;
+    element.click();
+    this.refresh.emit();
+  }
 }

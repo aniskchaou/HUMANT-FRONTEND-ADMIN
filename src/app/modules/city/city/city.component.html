@@ -2,20 +2,149 @@
   <section class="section">
     <div class="card">
       <div class="card-header">
-        <h2>Résilliations</h2>
+        <h2>Cities</h2>
       </div>
       <div class="card-body">
+        <button
+          type="button"
+          class="btn btn-success btn-sm"
+          data-bs-toggle="modal"
+          data-bs-target="#add"
+        >
+          <i class="fas fa-plus-square"></i> Create
+        </button>
         <div class="dataTable-container">
-          <app-termination-list></app-termination-list>
-          <button
-            type="button"
-            class="btn btn-success btn-sm"
-            data-bs-toggle="modal"
-            data-bs-target="#add"
+          <table
+            class="table table-bordered"
+            id="table"
+            width="100%"
+            cellspacing="0"
           >
-            <i class="fas fa-plus-square"></i>
-          </button>
-          <app-add-city></app-add-city>
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tfoot>
+              <tr>
+                <th>Name</th>
+                <th></th>
+              </tr>
+            </tfoot>
+            <tbody>
+              <tr *ngFor="let c of citys$">
+                <td>{{ c.name }}</td>
+                <td>
+                  <button
+                    type="button"
+                    data-bs-toggle="modal"
+                    data-bs-target="#edit"
+                    (click)="edit(c.id)"
+                    class="btn btn-warning btn-sm"
+                  >
+                    <i class="fas fa-edit"></i>
+                  </button>
+                  <button
+                    type="button"
+                    class="btn btn-danger btn-sm"
+                    (click)="delete(c.id)"
+                  >
+                    <i class="fas fa-trash-alt"></i>
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div
+            class="modal fade text-left"
+            id="add"
+            tabindex="-1"
+            aria-labelledby="myModalLabel1"
+            style="display: none"
+            aria-hidden="true"
+          >
+            <div
+              class="modal-dialog modal-dialog-scrollable modal-lg"
+              role="document"
+            >
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title" id="myModalLabel1">Create</h5>
+                  <button
+                    type="button"
+                    class="close rounded-pill"
+                    data-bs-dismiss="modal"
+                    aria-label="Close"
+                  >
+                    <i data-feather="x"></i>
+                  </button>
+                </div>
+                <div class="modal-body">
+                  <app-add-city
+                    (closeModalEvent)="closeModalAdd()"
+                  ></app-add-city>
+                </div>
+                <div class="modal-footer">
+                  <button
+                    type="button"
+                    class="btn closeAdd"
+                    id="closeAdd"
+                    data-bs-dismiss="modal"
+                  >
+                    <i class="bx bx-x d-block d-sm-none"></i>
+                    <span class="d-none d-sm-block">Close</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div
+            class="modal fade text-left"
+            id="edit"
+            tabindex="-1"
+            aria-labelledby="myModalLabel1"
+            style="display: none"
+            aria-hidden="true"
+          >
+            <div
+              class="modal-dialog modal-dialog-scrollable modal-lg"
+              role="document"
+            >
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title" id="myModalLabel1">Edit</h5>
+                  <button
+                    type="button"
+                    class="close rounded-pill"
+                    data-bs-dismiss="modal"
+                    aria-label="Close"
+                  >
+                    <i data-feather="x"></i>
+                  </button>
+                </div>
+                <div class="modal-body">
+                  <app-edit-city
+                    (closeModalEventEdit)="closeModalEdit()"
+                    [id]="id"
+                  ></app-edit-city>
+                </div>
+                <div class="modal-footer">
+                  <button
+                    id="closeEdit"
+                    type="button"
+                    class="btn"
+                    data-bs-dismiss="modal"
+                  >
+                    <i class="bx bx-x d-block d-sm-none"></i>
+                    <span class="d-none d-sm-block">Close</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>

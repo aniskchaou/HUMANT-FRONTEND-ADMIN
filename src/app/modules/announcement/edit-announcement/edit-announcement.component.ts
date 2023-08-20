@@ -79,17 +79,17 @@ export class EditAnnouncementComponent extends URLLoader implements OnInit {
     this.model.department = this.departements$.filter(
       (x) => x.id == this.model.department.id
     )[0];
-    this.httpService.create(
-      CONFIG.URL_BASE + '/announcement/create',
-      this.model
-    );
-    this.closeModal();
-    this.goBack();
-    super.show(
-      'Confirmation',
-      this.message.confirmationMessages.edit,
-      'success'
-    );
-    this.closeModal();
+    this.httpService
+      .create(CONFIG.URL_BASE + '/announcement/create', this.model)
+      .finally(() => {
+        this.closeModal();
+        this.goBack();
+        super.show(
+          'Confirmation',
+          this.message.confirmationMessages.edit,
+          'success'
+        );
+        this.closeModal();
+      });
   }
 }

@@ -42,7 +42,7 @@ export class AddSalaryComponent extends URLLoader implements OnInit {
     this.router
       .navigateByUrl('/dashboard', { skipLocationChange: true })
       .then(() => {
-        this.router.navigate(['/category']);
+        this.router.navigate(['/salary']);
       });
   }
   get f() {
@@ -59,14 +59,16 @@ export class AddSalaryComponent extends URLLoader implements OnInit {
     this.httpService
       .create(CONFIG.URL_BASE + '/salary/create', this.salaryForm.value)
       .then(() => {
-        this.salaryForm.reset();
-        this.closeModal();
-        this.goBack();
         super.show(
           'Confirmation',
           this.msg.addConfirmation[CONFIG.getInstance().getLang()],
           'success'
         );
+      })
+      .finally(() => {
+        this.salaryForm.reset();
+        this.closeModal();
+        this.goBack();
       });
     //  }
   }

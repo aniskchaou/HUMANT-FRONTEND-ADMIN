@@ -23,13 +23,13 @@ export default class AnnouncementValidation {
 
   createFormGroup() {
     return new FormGroup({
-      Title: new FormControl(''),
-      Department: new FormControl(''),
-      StartDate: new FormControl(''),
-      EndDate: new FormControl(''),
-      Attachment: new FormControl(''),
-      Summary: new FormControl(''),
-      Description: new FormControl(''),
+      title: new FormControl(''),
+      department: new FormControl(''),
+      startDate: new FormControl(''),
+      endDate: new FormControl(''),
+      attachment: new FormControl(''),
+      summary: new FormControl(''),
+      description: new FormControl(''),
     });
   }
 }

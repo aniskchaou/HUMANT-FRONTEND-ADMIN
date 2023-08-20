@@ -2,9 +2,19 @@
   <section class="section">
     <div class="card">
       <div class="card-header">
-        <h2>Award Types</h2>
+        <h2>Awards Types</h2>
       </div>
       <div class="card-body">
+        <button
+          type="button"
+          class="btn btn-success btn-sm"
+          data-bs-toggle="modal"
+          data-bs-target="#add"
+        >
+          <i class="fas fa-plus-square"></i>
+          Create
+        </button>
+        <app-award-type-modal [id]="id"></app-award-type-modal>
         <div class="dataTable-container">
           <table
             id="table"
@@ -50,15 +60,6 @@
               </tr>
             </tfoot>
           </table>
-          <button
-            type="button"
-            class="btn btn-success btn-sm"
-            data-bs-toggle="modal"
-            data-bs-target="#add"
-          >
-            <i class="fas fa-plus-square"></i>
-          </button>
-          <app-award-type-modal [id]="id"></app-award-type-modal>
         </div>
       </div>
     </div>

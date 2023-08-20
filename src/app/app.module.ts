@@ -157,6 +157,10 @@ import { EditAnnouncementComponent } from './modules/announcement/edit-announcem
 import { EditTrainingTypeComponent } from './modules/training-type/edit-training-type/edit-training-type.component';
 import { EditEducationLevelComponent } from './modules/education-level/edit-education-level/edit-education-level.component';
 import { EditContractTypeComponent } from './modules/contract-type/edit-contract-type/edit-contract-type.component';
+import { CountryModalComponent } from './modules/country/country-modal/country-modal.component';
+import { CityModalComponent } from './modules/city/city-modal/city-modal.component';
+import { EditCityComponent } from './modules/city/edit-city/edit-city.component';
+import { NgxChartsModule } from '@swimlane/ngx-charts';
 
 const routes: Routes = [
   { path: 'country', component: CountryComponent, pathMatch: 'full' },
@@ -383,6 +387,9 @@ const routes: Routes = [
     EducationLevelListComponent,
     EventListComponent,
     AddAwardTypeComponent,
+    CountryModalComponent,
+    CityModalComponent,
+    EditCityComponent,
   ],
   imports: [
     HttpClientModule,
@@ -390,6 +397,7 @@ const routes: Routes = [
     BrowserModule,
     FormsModule,
     ReactiveFormsModule,
+    NgxChartsModule,
     BrowserModule,
     RouterModule.forRoot(routes),
   ],

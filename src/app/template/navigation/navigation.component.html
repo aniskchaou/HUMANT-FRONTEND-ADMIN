@@ -16,44 +16,49 @@
     </div>
     <div class="sidebar-menu active">
       <ul class="menu">
-        <li class="sidebar-title">Menu</li>
+        <li class="sidebar-item">
+          <a routerLink="/dashboard" class="sidebar-link">
+            <i class="bi bi-grid-fill"></i>
+            <span>Dashboard</span>
+          </a>
+        </li>
 
         <li class="sidebar-item has-sub">
           <a href="#" class="sidebar-link">
-            <i class="bi bi-stack"></i>
+            <i class="bi bi-egg-fill"></i>
             <span>Leave</span>
           </a>
           <ul class="submenu">
             <li class="submenu-item">
-              <a routerLink="/termination">Termination</a>
+              <a routerLink="/termination">Terminations</a>
             </li>
             <li class="submenu-item">
-              <a routerLink="/resign">Resignation</a>
+              <a routerLink="/resign">Resignations</a>
             </li>
           </ul>
         </li>
 
         <li class="sidebar-item has-sub">
           <a href="#" class="sidebar-link">
-            <i class="bi bi-stack"></i>
+            <i class="bi bi-map-fill"></i>
             <span>Events</span>
           </a>
           <ul class="submenu">
             <li class="submenu-item">
-              <a routerLink="/announcement">Announcement</a>
+              <a routerLink="/announcement">Announcements</a>
             </li>
-            <!--  <li class="submenu-item">
+            <!--   <li class="submenu-item">
               <a routerLink="/holiday">Holiday</a>
-            </li> -->
+            </li>
             <li class="submenu-item">
               <a routerLink="/notice">Notice</a>
-            </li>
+            </li> -->
           </ul>
         </li>
 
         <li class="sidebar-item has-sub">
           <a href="#" class="sidebar-link">
-            <i class="bi bi-stack"></i>
+            <i class="bi bi-basket-fill"></i>
             <span>Employees</span>
           </a>
           <ul class="submenu">
@@ -61,119 +66,132 @@
               <a routerLink="/employee">Employees</a>
             </li>
             <li class="submenu-item">
-              <a routerLink="/education-level">Education Level</a>
+              <a routerLink="/education-level">Educations Levels</a>
             </li>
             <li class="submenu-item">
-              <a routerLink="/complain">Complain</a>
+              <a routerLink="/complain">Complains</a>
             </li>
-            <li class="submenu-item">
+            <!-- <li class="submenu-item">
               <a routerLink="/departement">Departements</a>
+            </li> -->
+          </ul>
+        </li>
+
+        <li class="sidebar-item has-sub">
+          <a href="#" class="sidebar-link">
+            <i class="bi bi-person-badge-fill"></i>
+            <span>Salary</span>
+          </a>
+          <ul class="submenu">
+            <li class="submenu-item">
+              <a routerLink="/salary">Salaries</a>
             </li>
+            <!--    <li class="submenu-item">
+              <a routerLink="/advance">Advance Salary!</a>
+            </li> -->
+            <!-- <li class="submenu-item">
+              <a routerLink="/award">Awards</a>
+            </li> -->
+            <!-- <li class="submenu-item">
+              <a routerLink="/lauch-plan">launch plan !</a>
+            </li>
+            <li class="submenu-item">
+              <a routerLink="/pay-slip">pay slip !</a>
+            </li> -->
           </ul>
         </li>
 
         <li class="sidebar-item has-sub">
           <a href="#" class="sidebar-link">
             <i class="bi bi-stack"></i>
-            <span>Salary</span>
-          </a>
-          <ul class="submenu">
-            <li class="submenu-item">
-              <a routerLink="/salary">Salary</a>
-            </li>
-            <li class="submenu-item">
-              <a routerLink="/advance">Advance Salary</a>
-            </li>
-            <!--   <li class="submenu-item">
-              <a routerLink="/award">Award</a>
-            </li> -->
-            <!--   <li class="submenu-item">
-              <a routerLink="/lauch-plan">launch plan </a>
-            </li> -->
-            <!--  <li class="submenu-item">
-              <a routerLink="/pay-slip">pay slip </a>
-            </li> -->
-          </ul>
-        </li>
-
-        <!-- <li class="sidebar-item has-sub">
-          <a href="#" class="sidebar-link">
-            <i class="bi bi-stack"></i>
-            <span>Jobs</span>
+            <span>Job</span>
           </a>
           <ul class="submenu">
             <li class="submenu-item">
               <a routerLink="/job">Jobs</a>
             </li>
-            <li class="submenu-item">
+            <!-- <li class="submenu-item">
               <a routerLink="/jobapplication">Job Applications</a>
-            </li>
+            </li> -->
           </ul>
-        </li> -->
+        </li>
 
         <li class="sidebar-item has-sub">
           <a href="#" class="sidebar-link">
-            <i class="bi bi-stack"></i>
-            <span>Contracts</span>
+            <i class="bi bi-cloud-arrow-up-fill"></i>
+            <span>Contract</span>
           </a>
           <ul class="submenu">
             <li class="submenu-item">
-              <a routerLink="/contract">Contract</a>
+              <a routerLink="/contract">Contracts</a>
             </li>
             <li class="submenu-item">
-              <a routerLink="/contract-type">Contract Type</a>
+              <a routerLink="/contract-type">Contracts Types</a>
             </li>
           </ul>
         </li>
 
         <li class="sidebar-item has-sub">
           <a href="#" class="sidebar-link">
-            <i class="bi bi-stack"></i>
+            <i class="bi bi-life-preserver"></i>
             <span>Training</span>
           </a>
           <ul class="submenu">
             <li class="submenu-item">
-              <a routerLink="/training">Training</a>
+              <a routerLink="/training">Trainings</a>
             </li>
             <li class="submenu-item">
-              <a routerLink="/training-type">Type Training</a>
+              <a routerLink="/training-type"> Trainings Types</a>
             </li>
           </ul>
         </li>
 
         <li class="sidebar-item has-sub">
           <a href="#" class="sidebar-link">
-            <i class="bi bi-stack"></i>
+            <i class="bi bi-pentagon-fill"></i>
             <span>Award</span>
           </a>
           <ul class="submenu">
             <li class="submenu-item">
-              <a routerLink="/award">Award</a>
+              <a routerLink="/award">Awards</a>
             </li>
             <li class="submenu-item">
-              <a routerLink="/award-type">Type Award</a>
+              <a routerLink="/award-type"> Awards Types</a>
             </li>
           </ul>
         </li>
 
         <li class="sidebar-item has-sub">
           <a href="#" class="sidebar-link">
-            <i class="bi bi-stack"></i>
+            <i class="bi bi-cloud-arrow-up-fill"></i>
             <span>General Settings</span>
           </a>
           <ul class="submenu" style="display: none">
             <li class="submenu-item">
               <a routerLink="/city">Cities</a>
             </li>
-            <li class="submenu-item">
+            <!--   <li class="submenu-item">
               <a routerLink="/country">Countries</a>
-            </li>
-            <li class="submenu-item">
+            </li> -->
+
+            <!-- <li class="submenu-item">
               <a routerLink="/user">Users</a>
             </li>
             <li class="submenu-item">
               <a routerLink="/loan">Loans</a>
+            </li>-->
+            <!--  <li class="submenu-item">
+              <a routerLink="/pay-slip">Work Entry !</a>
             </li>
+            <li class="submenu-item">
+              <a routerLink="/pay-slip">Meetings !</a>
+            </li>
+            <li class="submenu-item">
+              <a routerLink="/pay-slip">Work Permits !</a>
+            </li> -->
+            <!--  <li class="submenu-item">
+              <a routerLink="/pay-slip">Work Locations </a>
+            </li> -->
             <li class="submenu-item">
               <a
                 routerLinkActive="active"
