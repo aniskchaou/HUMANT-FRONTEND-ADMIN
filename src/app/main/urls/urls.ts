@@ -1,7 +1,7 @@
 import { UrlSegment } from '@angular/router';
 
 export default class CONFIG {
-  static URL_BASE = 'http://localhost:8080';
+  static URL_BASE = 'https://life-care-backend-071b95c8e87b.herokuapp.com';
   public LANG = 'EN';
 
   public static instance: CONFIG = null;
