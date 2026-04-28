@@ -1,23 +1,546 @@
-<div class="page-heading">
-  <section class="section">
-    <div class="card">
-      <div class="card-header">
-        <h2>Employés</h2>
-      </div>
-      <div class="card-body">
-        <div class="dataTable-container">
-          <app-leave-list></app-leave-list>
-          <button
-            type="button"
-            class="btn btn-success btn-sm"
-            data-bs-toggle="modal"
-            data-bs-target="#add"
-          >
-            <i class="fas fa-plus-square"></i>
+<div class="page-heading ops-page">
+  <section class="ops-shell">
+    <article class="card ops-hero">
+      <div class="ops-hero-copy">
+        <span class="ops-eyebrow">{{ isEmployeeWorkspace ? 'Leave' : 'Leave administration' }}</span>
+        <h2>{{ isEmployeeWorkspace ? 'Apply leave and keep your leave history visible in one place.' : 'Review leave requests with enough detail to plan coverage instead of guessing.' }}</h2>
+        <p>
+          {{ isEmployeeWorkspace ? 'Submit leave with the right dates, leave type, and supporting context, then return here to review your recorded requests.' : 'Manage employee leave, entitlement type, timing, and supporting context in one workspace with a persistent details panel for each selected record.' }}
+        </p>
+
+        <div class="ops-hero-actions">
+          <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#leaveCrudModal" (click)="openCreateModal()">
+            <i class="bi bi-plus-square-fill"></i>
+            {{ isEmployeeWorkspace ? 'Apply leave' : 'Create leave request' }}
           </button>
-          <app-leave-modal></app-leave-modal>
+          <button type="button" class="btn btn-light" (click)="exportLeaveReport()" [disabled]="!filteredLeaves.length">
+            <i class="bi bi-download"></i>
+            Export CSV
+          </button>
+          <button type="button" class="btn btn-light" (click)="refreshLeaves()" [disabled]="loading">
+            <i class="bi bi-arrow-repeat"></i>
+            Refresh
+          </button>
+        </div>
+
+        <div class="ops-hero-notice" *ngIf="loadError">{{ loadError }}</div>
+      </div>
+
+      <div class="ops-hero-panel">
+        <span class="ops-panel-kicker">Coverage pulse</span>
+        <h3>Current leave load and planning visibility</h3>
+
+        <div class="ops-metric-grid">
+          <div class="ops-metric-card">
+            <span>Total requests</span>
+            <strong>{{ totalLeavesCount }}</strong>
+            <p>Leave records currently tracked in the system.</p>
+          </div>
+          <div class="ops-metric-card">
+            <span>Active now</span>
+            <strong>{{ activeLeavesCount }}</strong>
+            <p>Employees currently out inside an active leave window.</p>
+          </div>
         </div>
       </div>
+    </article>
+
+    <div class="ops-stat-grid">
+      <article class="card ops-stat-card tone-primary">
+        <span>Requests</span>
+        <strong>{{ totalLeavesCount }}</strong>
+        <p>Leave records currently managed in the admin workspace.</p>
+      </article>
+      <article class="card ops-stat-card tone-secondary">
+        <span>Active</span>
+        <strong>{{ activeLeavesCount }}</strong>
+        <p>Leave windows happening right now and affecting staffing.</p>
+      </article>
+      <article class="card ops-stat-card tone-warning">
+        <span>Upcoming</span>
+        <strong>{{ upcomingLeavesCount }}</strong>
+        <p>Approved or planned leave windows that are still ahead.</p>
+      </article>
+      <article class="card ops-stat-card tone-secondary">
+        <span>Pending review</span>
+        <strong>{{ pendingLeavesCount }}</strong>
+        <p>Requests still waiting for HR or manager approval.</p>
+      </article>
+      <article class="card ops-stat-card tone-danger">
+        <span>With attachment</span>
+        <strong>{{ attachmentCoverageCount }}</strong>
+        <p>Requests that already include a linked document or proof file.</p>
+      </article>
+      <article class="card ops-stat-card tone-warning" *ngIf="canViewLeaveBalances">
+        <span>Balance alerts</span>
+        <strong>{{ leaveBalanceAlertCount }}</strong>
+        <p>Employees with two or fewer leave days remaining in a tracked balance.</p>
+      </article>
+    </div>
+
+    <article class="card ops-toolbar-card">
+      <div class="ops-toolbar">
+        <label class="ops-search-field">
+          <i class="bi bi-search"></i>
+          <input type="text" [ngModel]="searchTerm" (ngModelChange)="onSearchTermChange($event)" placeholder="Search employees, leave types, or reasons" />
+        </label>
+
+        <div class="ops-toolbar-controls">
+          <label>
+            <span>Filter</span>
+            <select [ngModel]="activeFilter" (ngModelChange)="onFilterChange($event)">
+              <option value="all">All requests</option>
+              <option value="active">Active now</option>
+              <option value="upcoming">Upcoming</option>
+              <option value="archived">Archived</option>
+              <option value="pending">Pending approval</option>
+              <option value="approved">Approved</option>
+              <option value="rejected">Rejected</option>
+              <option value="needs-attachment">Needs attachment</option>
+            </select>
+          </label>
+
+          <label>
+            <span>Sort</span>
+            <select [ngModel]="activeSort" (ngModelChange)="onSortChange($event)">
+              <option value="latest-start">Latest start</option>
+              <option value="longest">Longest duration</option>
+              <option value="employee-asc">Employee A-Z</option>
+            </select>
+          </label>
+        </div>
+      </div>
+
+      <div class="ops-toolbar-footer">
+        <span>{{ filteredResultsLabel }}</span>
+        <span>{{ featuredLeave ? featuredLeave.employeeName : 'No leave selected' }}</span>
+      </div>
+    </article>
+
+    <div class="ops-layout">
+      <div class="ops-main">
+        <div class="ops-loading-grid" *ngIf="loading; else leaveReady">
+          <div class="ops-skeleton-card" *ngFor="let item of loadingPlaceholders"></div>
+        </div>
+
+        <ng-template #leaveReady>
+          <div class="ops-grid" *ngIf="filteredLeaves.length; else leaveEmpty">
+            <article
+              class="card ops-card"
+              *ngFor="let item of filteredLeaves; trackBy: trackByLeaveId"
+              [class.is-active]="featuredLeave ? featuredLeave.id === item.id : false"
+              (click)="openDetailsModal(item)"
+              (keydown.enter)="openDetailsModal(item)"
+              (keydown.space)="$event.preventDefault(); openDetailsModal(item)"
+              tabindex="0"
+              role="button"
+              aria-label="Open leave details"
+            >
+              <div class="ops-card-head">
+                <div>
+                  <span class="ops-panel-kicker">Leave request</span>
+                  <h3>{{ item.employeeName || 'Employee pending' }}</h3>
+                </div>
+                <div class="ops-chip-row">
+                  <span class="ops-status" [ngClass]="'tone-' + item.approvalTone">{{ item.approvalStatus }}</span>
+                  <span class="ops-status" [ngClass]="'tone-' + item.qualityTone">{{ item.qualityLabel }}</span>
+                </div>
+              </div>
+
+              <p>{{ item.summary }}</p>
+
+              <div class="ops-progress-wrap">
+                <div class="ops-progress-top">
+                  <span>Request readiness</span>
+                  <strong>{{ item.qualityScore }}%</strong>
+                </div>
+                <div class="ops-progress-track">
+                  <span [style.width.%]="item.qualityScore"></span>
+                </div>
+              </div>
+
+              <div class="ops-chip-row">
+                <span class="ops-chip">{{ item.leaveTypeName || 'Type pending' }}</span>
+                <span class="ops-chip">{{ item.durationLabel }}</span>
+                <span class="ops-chip">{{ item.reviewedBy || 'Awaiting review' }}</span>
+              </div>
+
+              <div class="ops-card-view">
+                <span>Click to view details</span>
+                <i class="bi bi-arrow-up-right"></i>
+              </div>
+
+              <div class="ops-card-actions">
+                <button
+                  *ngIf="canReviewLeaves"
+                  type="button"
+                  class="btn btn-light btn-sm"
+                  (click)="approveLeave(item); $event.stopPropagation()"
+                  [disabled]="item.approvalStatus === 'Approved'"
+                >
+                  <i class="bi bi-check2-circle"></i>
+                  Approve
+                </button>
+                <button
+                  *ngIf="canReviewLeaves"
+                  type="button"
+                  class="btn btn-light btn-sm"
+                  (click)="rejectLeave(item); $event.stopPropagation()"
+                  [disabled]="item.approvalStatus === 'Rejected'"
+                >
+                  <i class="bi bi-x-circle"></i>
+                  Reject
+                </button>
+                <button type="button" class="btn btn-light btn-sm" data-bs-toggle="modal" data-bs-target="#leaveCrudModal" (click)="openEditModal(item); $event.stopPropagation()">
+                  <i class="bi bi-pencil-square"></i>
+                  Edit
+                </button>
+                <button type="button" class="btn btn-light btn-sm" (click)="deleteLeave(item); $event.stopPropagation()" [disabled]="deletingId === item.id">
+                  <i class="bi bi-trash3"></i>
+                  {{ deletingId === item.id ? 'Deleting...' : 'Delete' }}
+                </button>
+              </div>
+            </article>
+          </div>
+        </ng-template>
+
+        <ng-template #leaveEmpty>
+          <article class="card ops-empty-card">
+            <span class="ops-empty-kicker">No matching leave records</span>
+            <h3>The current search or filter does not match any leave request.</h3>
+            <p>Reset the filters or create a leave record to build out the planning view.</p>
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#leaveCrudModal" (click)="openCreateModal()">
+              <i class="bi bi-plus-square-fill"></i>
+              {{ isEmployeeWorkspace ? 'Apply leave' : 'Create leave request' }}
+            </button>
+          </article>
+        </ng-template>
+      </div>
+
+      <aside class="ops-side">
+        <article class="card ops-panel-card" *ngIf="featuredLeave; else emptyLeavePanel">
+          <div class="ops-panel-head">
+            <div>
+              <span>Selected leave</span>
+              <h3>{{ featuredLeave.employeeName }}</h3>
+            </div>
+            <span class="ops-status" [ngClass]="'tone-' + featuredLeave.approvalTone">{{ featuredLeave.approvalStatus }}</span>
+          </div>
+
+          <p>{{ featuredLeave.summary }}</p>
+
+          <div class="ops-fact-grid">
+            <div>
+              <span class="ops-detail-label">Leave type</span>
+              <strong>{{ featuredLeave.leaveTypeName || 'Pending' }}</strong>
+            </div>
+            <div>
+              <span class="ops-detail-label">Window</span>
+              <strong>{{ featuredLeave.startDateLabel }} - {{ featuredLeave.endDateLabel }}</strong>
+            </div>
+            <div>
+              <span class="ops-detail-label">Duration</span>
+              <strong>{{ featuredLeave.durationLabel }}</strong>
+            </div>
+            <div>
+              <span class="ops-detail-label">Approval</span>
+              <strong>{{ featuredLeave.approvalStatus }}</strong>
+            </div>
+            <div>
+              <span class="ops-detail-label">Status</span>
+              <strong>{{ featuredLeave.timelineLabel }}</strong>
+            </div>
+          </div>
+
+          <div class="ops-panel-note accent">
+            <span class="ops-detail-label">Support</span>
+            <p *ngIf="featuredLeave.remarks">{{ featuredLeave.remarks }}</p>
+            <p *ngIf="featuredLeave.attachment">Attachment: {{ featuredLeave.attachment }}</p>
+            <p>Reviewed by: {{ featuredLeave.reviewedBy || 'Awaiting review' }}</p>
+            <p>Reviewed at: {{ featuredLeave.reviewedAtLabel }}</p>
+          </div>
+
+          <div class="ops-card-actions" *ngIf="canReviewLeaves">
+            <button type="button" class="btn btn-light btn-sm" (click)="approveLeave(featuredLeave)" [disabled]="featuredLeave.approvalStatus === 'Approved'">
+              <i class="bi bi-check2-circle"></i>
+              Approve
+            </button>
+            <button type="button" class="btn btn-light btn-sm" (click)="rejectLeave(featuredLeave)" [disabled]="featuredLeave.approvalStatus === 'Rejected'">
+              <i class="bi bi-x-circle"></i>
+              Reject
+            </button>
+          </div>
+
+          <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#leaveCrudModal" (click)="openEditModal(featuredLeave)">
+            <i class="bi bi-pencil-square"></i>
+            {{ isEmployeeWorkspace ? 'Edit selected request' : 'Edit selected leave' }}
+          </button>
+        </article>
+
+        <article class="card ops-panel-card" *ngIf="canViewLeaveBalances">
+          <div class="ops-panel-head">
+            <div>
+              <span>Leave balances</span>
+              <h3>Monitor remaining entitlement before coverage gets tight.</h3>
+            </div>
+            <span class="ops-status tone-warning">{{ leaveBalanceAlertCount }} alerts</span>
+          </div>
+
+          <div *ngIf="leaveBalanceHighlights.length; else emptyBalancePanel">
+            <div class="ops-details-fact" *ngFor="let balance of leaveBalanceHighlights">
+              <strong>{{ balance.employeeName }}</strong>
+              <span>{{ balance.leaveTypeName }} • {{ balance.remainingDays }} days remaining</span>
+            </div>
+          </div>
+
+          <ng-template #emptyBalancePanel>
+            <p>No leave balance summaries are available yet.</p>
+          </ng-template>
+        </article>
+
+        <ng-template #emptyLeavePanel>
+          <article class="card ops-panel-card">
+            <span class="ops-empty-kicker">Leave preview</span>
+            <h3>Select a leave request to inspect it here.</h3>
+            <p>The side panel shows dates, leave type, support context, and attachment coverage for the selected request.</p>
+          </article>
+        </ng-template>
+      </aside>
     </div>
   </section>
+</div>
+
+<div class="modal fade text-left" id="leaveDetailsModal" tabindex="-1" aria-labelledby="leaveDetailsModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content ops-modal-content" *ngIf="featuredLeave">
+      <div class="ops-modal-header">
+        <div>
+          <span class="ops-eyebrow">Leave details</span>
+          <h5 class="modal-title ops-modal-title" id="leaveDetailsModalLabel">{{ featuredLeave.employeeName || 'Employee pending' }}</h5>
+          <p class="ops-modal-copy">Review the full leave request, support notes, and planning status for the selected record.</p>
+        </div>
+
+        <div class="ops-details-actions">
+          <span class="ops-status" [ngClass]="'tone-' + featuredLeave.approvalTone">{{ featuredLeave.approvalStatus }}</span>
+          <button type="button" class="ops-modal-close" data-bs-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="ops-modal-body">
+        <div class="ops-details-layout">
+          <div class="ops-details-main">
+            <section class="ops-details-section">
+              <span class="ops-panel-kicker">Request summary</span>
+              <h6>Leave context</h6>
+              <p class="ops-detail-copy">{{ featuredLeave.summary }}</p>
+            </section>
+
+            <div class="ops-details-metrics">
+              <article class="ops-details-metric">
+                <span class="ops-detail-label">Duration</span>
+                <strong>{{ featuredLeave.durationLabel }}</strong>
+              </article>
+              <article class="ops-details-metric">
+                <span class="ops-detail-label">Leave type</span>
+                <strong>{{ featuredLeave.leaveTypeName || 'Pending' }}</strong>
+              </article>
+              <article class="ops-details-metric">
+                <span class="ops-detail-label">Readiness</span>
+                <strong>{{ featuredLeave.qualityScore }}%</strong>
+              </article>
+              <article class="ops-details-metric">
+                <span class="ops-detail-label">Approval</span>
+                <strong>{{ featuredLeave.approvalStatus }}</strong>
+              </article>
+            </div>
+
+            <section class="ops-details-section">
+              <span class="ops-panel-kicker">Supporting context</span>
+              <h6>Reason and notes</h6>
+              <p class="ops-detail-copy">{{ featuredLeave.reason || 'No formal reason has been added to this leave request yet.' }}</p>
+
+              <div class="ops-panel-note accent">
+                <span class="ops-detail-label">Remarks</span>
+                <p>{{ featuredLeave.remarks || 'No remarks added yet.' }}</p>
+                <p>Attachment: {{ featuredLeave.attachment || 'Not provided' }}</p>
+              </div>
+            </section>
+          </div>
+
+          <aside class="ops-details-side">
+            <section class="ops-details-facts">
+              <span class="ops-panel-kicker">Quick facts</span>
+              <h6>Request overview</h6>
+
+              <div class="ops-details-fact">
+                <strong>Status</strong>
+                <span>{{ featuredLeave.timelineLabel }}</span>
+              </div>
+              <div class="ops-details-fact">
+                <strong>Window</strong>
+                <span>{{ featuredLeave.startDateLabel }} - {{ featuredLeave.endDateLabel }}</span>
+              </div>
+              <div class="ops-details-fact">
+                <strong>Reviewed by</strong>
+                <span>{{ featuredLeave.reviewedBy || 'Awaiting review' }}</span>
+              </div>
+              <div class="ops-details-fact">
+                <strong>Reviewed at</strong>
+                <span>{{ featuredLeave.reviewedAtLabel }}</span>
+              </div>
+              <div class="ops-details-fact">
+                <strong>Attachment</strong>
+                <span>{{ featuredLeave.hasAttachment ? 'Available' : 'Missing' }}</span>
+              </div>
+              <div class="ops-details-fact">
+                <strong>Record ID</strong>
+                <span>#{{ featuredLeave.id }}</span>
+              </div>
+            </section>
+          </aside>
+        </div>
+      </div>
+
+      <div class="ops-modal-footer">
+        <button
+          *ngIf="canReviewLeaves"
+          type="button"
+          class="btn btn-light"
+          (click)="approveLeave(featuredLeave)"
+          [disabled]="featuredLeave.approvalStatus === 'Approved'"
+        >
+          <i class="bi bi-check2-circle"></i>
+          Approve
+        </button>
+        <button
+          *ngIf="canReviewLeaves"
+          type="button"
+          class="btn btn-light"
+          (click)="rejectLeave(featuredLeave)"
+          [disabled]="featuredLeave.approvalStatus === 'Rejected'"
+        >
+          <i class="bi bi-x-circle"></i>
+          Reject
+        </button>
+        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary" data-bs-dismiss="modal" data-bs-toggle="modal" data-bs-target="#leaveCrudModal" (click)="openEditModal(featuredLeave)">
+          <i class="bi bi-pencil-square"></i>
+          {{ isEmployeeWorkspace ? 'Edit request' : 'Edit leave' }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade text-left" id="leaveCrudModal" tabindex="-1" aria-labelledby="leaveCrudModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content ops-modal-content">
+      <div class="ops-modal-header">
+        <div>
+          <span class="ops-eyebrow">Leave editor</span>
+          <h5 class="modal-title ops-modal-title" id="leaveCrudModalLabel">{{ modalTitle }}</h5>
+          <p class="ops-modal-copy">{{ modalSubtitle }}</p>
+        </div>
+        <button type="button" class="ops-modal-close" id="leaveCrudModalClose" data-bs-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+
+      <div class="ops-modal-body">
+        <form [formGroup]="leaveForm" (ngSubmit)="saveLeave()">
+          <div class="ops-form-grid">
+            <section class="ops-form-section">
+              <span class="ops-panel-kicker">Leave setup</span>
+              <h6>Core information</h6>
+
+              <div class="ops-form-field" *ngIf="canManageEmployeeSelection; else selfLeaveEmployeeNotice">
+                <label for="leaveEmployeeId">Employee</label>
+                <select id="leaveEmployeeId" formControlName="employeeId">
+                  <option value="">Select employee</option>
+                  <option *ngFor="let option of employees" [value]="option.id">{{ option.name }}</option>
+                </select>
+                <div class="ops-field-error" *ngIf="submitted && leaveForm.get('employeeId').invalid">Employee is required.</div>
+              </div>
+
+              <ng-template #selfLeaveEmployeeNotice>
+                <div class="ops-panel-note accent">
+                  <span class="ops-detail-label">Employee</span>
+                  <p>{{ currentEmployee ? currentEmployee.name : 'Your signed-in employee profile will be used automatically.' }}</p>
+                </div>
+              </ng-template>
+
+              <div class="ops-form-field">
+                <label for="leaveTypeId">Leave type</label>
+                <select id="leaveTypeId" formControlName="leaveTypeId">
+                  <option value="">Select leave type</option>
+                  <option *ngFor="let option of leaveTypes" [value]="option.id">{{ option.name }}</option>
+                </select>
+                <div class="ops-field-error" *ngIf="submitted && leaveForm.get('leaveTypeId').invalid">Leave type is required.</div>
+              </div>
+
+              <div class="ops-form-split">
+                <div class="ops-form-field">
+                  <label for="leaveStartDate">Start date</label>
+                  <input id="leaveStartDate" type="date" formControlName="startDate" />
+                  <div class="ops-field-error" *ngIf="submitted && leaveForm.get('startDate').invalid">Start date is required.</div>
+                </div>
+
+                <div class="ops-form-field">
+                  <label for="leaveEndDate">End date</label>
+                  <input id="leaveEndDate" type="date" formControlName="endDate" />
+                  <div class="ops-field-error" *ngIf="submitted && leaveForm.get('endDate').invalid">End date is required.</div>
+                </div>
+              </div>
+
+              <div class="ops-form-field">
+                <label for="leaveAttachment">Attachment path</label>
+                <input id="leaveAttachment" type="text" formControlName="attachment" placeholder="Example: /files/medical-note.pdf" />
+              </div>
+
+              <div class="ops-form-field">
+                <label for="leaveRemarks">Remarks</label>
+                <input id="leaveRemarks" type="text" formControlName="remarks" placeholder="Optional planning note" />
+              </div>
+
+              <div class="ops-form-field">
+                <label for="leaveReason">Reason</label>
+                <textarea id="leaveReason" rows="5" formControlName="reason" placeholder="Explain the context for the leave request."></textarea>
+              </div>
+            </section>
+
+            <aside class="ops-form-preview">
+              <span class="ops-panel-kicker">Live preview</span>
+              <h4>{{ draftEmployeeName || 'Employee pending' }}</h4>
+              <p>{{ draftLeaveTypeName || 'Leave type pending' }} • {{ draftDurationLabel }}</p>
+
+              <div class="ops-progress-wrap">
+                <div class="ops-progress-top">
+                  <span>Readiness</span>
+                  <strong>{{ draftQuality.score }}%</strong>
+                </div>
+                <div class="ops-progress-track">
+                  <span [style.width.%]="draftQuality.score"></span>
+                </div>
+              </div>
+
+              <div class="ops-chip-row">
+                <span class="ops-chip">{{ draftQuality.label }}</span>
+                <span class="ops-chip">{{ draftDurationLabel }}</span>
+              </div>
+            </aside>
+          </div>
+
+          <div class="ops-modal-actions">
+            <button type="button" class="btn btn-light" data-bs-dismiss="modal" id="leaveCrudModalClose">Cancel</button>
+            <button type="submit" class="btn btn-primary" [disabled]="saving">
+              <i class="bi" [ngClass]="saving ? 'bi-arrow-repeat' : 'bi-check2-circle'"></i>
+              {{ saving ? 'Saving...' : modalMode === 'create' ? (isEmployeeWorkspace ? 'Apply leave' : 'Create leave request') : 'Save changes' }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
 </div>

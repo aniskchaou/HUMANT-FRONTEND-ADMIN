@@ -1,0 +1,57 @@
+<div class="page-heading mb-3 d-flex justify-content-between align-items-center gap-2 flex-wrap">
+  <div>
+    <h3>Documentation: Modules Guide</h3>
+    <p class="text-muted mb-0">Functional map of modules, ownership, and operating intent.</p>
+  </div>
+  <a routerLink="/documentation" class="btn btn-outline-primary">Back to Documentation</a>
+</div>
+
+<div class="card shadow-sm mb-3">
+  <div class="card-body">
+    <h5>Module Governance Notes</h5>
+    <p class="mb-0">
+      Modules are grouped by business capability to support clear ownership,
+      predictable handoffs, and controlled execution of high-impact HR and payroll processes.
+    </p>
+  </div>
+</div>
+
+<div class="row g-4">
+  <div class="col-12" *ngFor="let group of moduleGroups">
+    <div class="card h-100 shadow-sm">
+      <div class="card-body">
+        <h5>{{ group.title }}</h5>
+        <p class="text-muted mb-2"><strong>Objective:</strong> {{ group.objective }}</p>
+        <p class="text-muted mb-3"><strong>Owner:</strong> {{ group.operationalOwner }}</p>
+
+        <div class="row g-3">
+          <div class="col-md-6 col-xl-4" *ngFor="let module of group.modules">
+            <div class="module-card border rounded p-3 h-100">
+              <h6 class="mb-2">{{ module.name }}</h6>
+              <p class="text-muted small mb-2">{{ module.description }}</p>
+              <span class="badge bg-light text-dark border">
+                Primary users: {{ module.primaryUsers }}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="card shadow-sm mt-4">
+  <div class="card-body">
+    <h5>Standard Operating Flows</h5>
+    <div class="row g-3 mt-1">
+      <div class="col-lg-4" *ngFor="let flow of lifecycleFlows">
+        <div class="border rounded p-3 h-100">
+          <h6>{{ flow.title }}</h6>
+          <ol class="mb-0">
+            <li *ngFor="let step of flow.steps">{{ step }}</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

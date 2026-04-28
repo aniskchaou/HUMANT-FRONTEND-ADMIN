@@ -1,73 +1,448 @@
-<div class="page-heading">
-  <section class="section">
-    <div class="card">
-      <div class="card-header">
-        <h2>Announcements</h2>
-      </div>
-      <div class="card-body">
-        <div class="dataTable-container">
-          <app-announcement-modal
-            [id]="id"
-            (refresh)="refresh()"
-          ></app-announcement-modal>
+<div class="page-heading ops-page">
+  <section class="ops-shell">
+    <article class="card ops-hero">
+      <div class="ops-hero-copy">
+        <span class="ops-eyebrow">Internal communications</span>
+        <h2>See announcement details on selection instead of bouncing through old modals.</h2>
+        <p>
+          Track timing, department scope, attachments, and message quality so every announcement
+          feels ready to publish and easy to review.
+        </p>
+
+        <div class="ops-hero-actions">
           <button
             type="button"
-            class="btn btn-success btn-sm"
+            class="btn btn-primary"
             data-bs-toggle="modal"
-            data-bs-target="#add"
+            data-bs-target="#announcementCrudModal"
+            (click)="openCreateModal()"
           >
-            <i class="fas fa-plus-square"></i> Create
+            <i class="bi bi-plus-square-fill"></i>
+            Create announcement
           </button>
-          <table
-            class="table table-bordered"
-            id="table"
-            width="100%"
-            cellspacing="0"
+          <button
+            type="button"
+            class="btn btn-light"
+            (click)="refreshAnnouncements()"
+            [disabled]="loading"
           >
-            <thead>
-              <tr>
-                <th>Title</th>
-                <th>Start Date</th>
-                <th>End Date</th>
-                <th></th>
-              </tr>
-            </thead>
-            <tfoot>
-              <tr>
-                <th>Title</th>
-                <th>Start Date</th>
-                <th>End Date</th>
-                <th></th>
-              </tr>
-            </tfoot>
-            <tbody>
-              <tr *ngFor="let c of announcement$">
-                <td>{{ c.title }}</td>
-                <td>{{ c.startDate }}</td>
-                <td>{{ c.endDate }}</td>
-                <td>
-                  <button
-                    type="button"
-                    data-bs-toggle="modal"
-                    (click)="edit(c.id)"
-                    data-bs-target="#edit"
-                    class="btn btn-warning btn-sm"
-                  >
-                    <i class="fas fa-edit"></i>
-                  </button>
-                  <button
-                    type="button"
-                    class="btn btn-danger btn-sm"
-                    (click)="delete(c.id)"
-                  >
-                    <i class="fas fa-trash-alt"></i>
-                  </button>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+            <i class="bi bi-arrow-repeat"></i>
+            Refresh
+          </button>
+        </div>
+
+        <div class="ops-hero-notice" *ngIf="loadError">{{ loadError }}</div>
+      </div>
+
+      <div class="ops-hero-panel">
+        <span class="ops-panel-kicker">Comms pulse</span>
+        <h3>Publishing readiness across the announcement library</h3>
+
+        <div class="ops-metric-grid">
+          <div class="ops-metric-card">
+            <span>Total announcements</span>
+            <strong>{{ totalAnnouncementsCount }}</strong>
+            <p>All announcement records currently available from the backend.</p>
+          </div>
+          <div class="ops-metric-card">
+            <span>Live now</span>
+            <strong>{{ activeAnnouncementsCount }}</strong>
+            <p>Announcements whose publish window is active today.</p>
+          </div>
+        </div>
+
+        <div class="ops-progress-wrap">
+          <div class="ops-progress-top">
+            <span>Message coverage</span>
+            <strong>{{ documentationCoverage }}%</strong>
+          </div>
+          <div class="ops-progress-track">
+            <span [style.width.%]="documentationCoverage"></span>
+          </div>
+          <p>
+            {{ attachmentCount }} announcement{{ attachmentCount === 1 ? '' : 's' }} include an attachment reference.
+          </p>
         </div>
       </div>
+    </article>
+
+    <div class="ops-stat-grid">
+      <article class="card ops-stat-card tone-primary">
+        <span>Announcements</span>
+        <strong>{{ totalAnnouncementsCount }}</strong>
+        <p>Messages currently tracked inside the communication workspace.</p>
+      </article>
+
+      <article class="card ops-stat-card tone-secondary">
+        <span>Live now</span>
+        <strong>{{ activeAnnouncementsCount }}</strong>
+        <p>Announcements that should be visible to teams today.</p>
+      </article>
+
+      <article class="card ops-stat-card tone-warning">
+        <span>Upcoming</span>
+        <strong>{{ upcomingAnnouncementsCount }}</strong>
+        <p>Messages already drafted for a future publish window.</p>
+      </article>
+
+      <article class="card ops-stat-card tone-danger">
+        <span>With attachments</span>
+        <strong>{{ attachmentCount }}</strong>
+        <p>Announcements that already reference a file or linked resource.</p>
+      </article>
+    </div>
+
+    <article class="card ops-toolbar-card">
+      <div class="ops-toolbar">
+        <label class="ops-search-field">
+          <i class="bi bi-search"></i>
+          <input
+            type="text"
+            [ngModel]="searchTerm"
+            (ngModelChange)="onSearchTermChange($event)"
+            placeholder="Search announcements, departments, or message text"
+          />
+        </label>
+
+        <div class="ops-toolbar-controls">
+          <label>
+            <span>Filter</span>
+            <select
+              [ngModel]="activeFilter"
+              (ngModelChange)="onFilterChange($event)"
+            >
+              <option value="all">All announcements</option>
+              <option value="active">Live now</option>
+              <option value="upcoming">Upcoming</option>
+              <option value="expired">Expired</option>
+              <option value="needs-attachment">Needs attachment</option>
+            </select>
+          </label>
+
+          <label>
+            <span>Sort</span>
+            <select
+              [ngModel]="activeSort"
+              (ngModelChange)="onSortChange($event)"
+            >
+              <option value="quality">Readiness</option>
+              <option value="latest-start">Latest start</option>
+              <option value="title-asc">Title A-Z</option>
+            </select>
+          </label>
+        </div>
+      </div>
+
+      <div class="ops-toolbar-footer">
+        <span>{{ filteredResultsLabel }}</span>
+        <span>
+          {{ featuredAnnouncement ? featuredAnnouncement.title : 'No announcement selected' }}
+        </span>
+      </div>
+    </article>
+
+    <div class="ops-layout">
+      <div class="ops-main">
+        <div class="ops-loading-grid" *ngIf="loading; else announcementReady">
+          <div
+            class="ops-skeleton-card"
+            *ngFor="let item of loadingPlaceholders"
+          ></div>
+        </div>
+
+        <ng-template #announcementReady>
+          <div class="ops-grid" *ngIf="filteredAnnouncements.length; else announcementEmpty">
+            <article
+              class="card ops-card"
+              *ngFor="let item of filteredAnnouncements; trackBy: trackByAnnouncementId"
+              [class.is-active]="featuredAnnouncement ? featuredAnnouncement.id === item.id : false"
+              (click)="selectAnnouncement(item)"
+              (keydown.enter)="selectAnnouncement(item)"
+              (keydown.space)="selectAnnouncement(item); $event.preventDefault()"
+              tabindex="0"
+              role="button"
+            >
+              <div class="ops-card-head">
+                <div>
+                  <span class="ops-panel-kicker">Announcement</span>
+                  <h3>{{ item.title }}</h3>
+                </div>
+                <span class="ops-status" [ngClass]="'tone-' + item.qualityTone">
+                  {{ item.qualityLabel }}
+                </span>
+              </div>
+
+              <p>{{ item.summary || item.description || item.timelineLabel }}</p>
+
+              <div class="ops-progress-wrap">
+                <div class="ops-progress-top">
+                  <span>Readiness</span>
+                  <strong>{{ item.qualityScore }}%</strong>
+                </div>
+                <div class="ops-progress-track">
+                  <span [style.width.%]="item.qualityScore"></span>
+                </div>
+              </div>
+
+              <div class="ops-chip-row">
+                <span class="ops-chip">{{ item.departmentName || 'All departments' }}</span>
+                <span class="ops-chip">{{ item.timelineLabel }}</span>
+              </div>
+
+              <div class="ops-card-actions">
+                <button
+                  type="button"
+                  class="btn btn-light btn-sm"
+                  data-bs-toggle="modal"
+                  data-bs-target="#announcementCrudModal"
+                  (click)="openEditModal(item); $event.stopPropagation()"
+                >
+                  <i class="bi bi-pencil-square"></i>
+                  Edit
+                </button>
+                <button
+                  type="button"
+                  class="btn btn-light btn-sm"
+                  (click)="deleteAnnouncement(item); $event.stopPropagation()"
+                  [disabled]="deletingId === item.id"
+                >
+                  <i class="bi bi-trash3"></i>
+                  {{ deletingId === item.id ? 'Deleting...' : 'Delete' }}
+                </button>
+              </div>
+            </article>
+          </div>
+        </ng-template>
+
+        <ng-template #announcementEmpty>
+          <article class="card ops-empty-card">
+            <span class="ops-empty-kicker">No matching announcements</span>
+            <h3>The current search or filter does not match any announcement.</h3>
+            <p>
+              Reset the filters or create a new message to rebuild the communications queue.
+            </p>
+            <button
+              type="button"
+              class="btn btn-primary"
+              data-bs-toggle="modal"
+              data-bs-target="#announcementCrudModal"
+              (click)="openCreateModal()"
+            >
+              <i class="bi bi-plus-square-fill"></i>
+              Create announcement
+            </button>
+          </article>
+        </ng-template>
+      </div>
+
+      <aside class="ops-side">
+        <article class="card ops-panel-card" *ngIf="featuredAnnouncement; else emptyAnnouncementPanel">
+          <div class="ops-panel-head">
+            <div>
+              <span>Selected announcement</span>
+              <h3>{{ featuredAnnouncement.title }}</h3>
+            </div>
+            <span class="ops-status" [ngClass]="'tone-' + featuredAnnouncement.qualityTone">
+              {{ featuredAnnouncement.qualityLabel }}
+            </span>
+          </div>
+
+          <p>{{ featuredAnnouncement.summary || featuredAnnouncement.description }}</p>
+
+          <div class="ops-fact-grid">
+            <div>
+              <span class="ops-detail-label">Department</span>
+              <strong>{{ featuredAnnouncement.departmentName || 'All departments' }}</strong>
+            </div>
+            <div>
+              <span class="ops-detail-label">Window</span>
+              <strong>{{ featuredAnnouncement.startDateLabel }} - {{ featuredAnnouncement.endDateLabel }}</strong>
+            </div>
+          </div>
+
+          <div class="ops-panel-note accent">
+            <span class="ops-detail-label">Publishing detail</span>
+            <p>{{ featuredAnnouncement.timelineLabel }}</p>
+            <p *ngIf="featuredAnnouncement.attachment">
+              Attachment: {{ featuredAnnouncement.attachment }}
+            </p>
+            <p *ngIf="featuredAnnouncement.description">
+              {{ featuredAnnouncement.description }}
+            </p>
+          </div>
+
+          <button
+            type="button"
+            class="btn btn-primary"
+            data-bs-toggle="modal"
+            data-bs-target="#announcementCrudModal"
+            (click)="openEditModal(featuredAnnouncement)"
+          >
+            <i class="bi bi-pencil-square"></i>
+            Edit selected announcement
+          </button>
+        </article>
+
+        <ng-template #emptyAnnouncementPanel>
+          <article class="card ops-panel-card">
+            <span class="ops-empty-kicker">Announcement preview</span>
+            <h3>Select an announcement to inspect it here.</h3>
+            <p>
+              The side panel shows timing, department scope, attachment info, and the full message context.
+            </p>
+          </article>
+        </ng-template>
+      </aside>
     </div>
   </section>
+</div>
+
+<div
+  class="modal fade text-left"
+  id="announcementCrudModal"
+  tabindex="-1"
+  aria-labelledby="announcementCrudModalLabel"
+  aria-hidden="true"
+>
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content ops-modal-content">
+      <div class="ops-modal-header">
+        <div>
+          <span class="ops-eyebrow">Announcement editor</span>
+          <h5 class="modal-title ops-modal-title" id="announcementCrudModalLabel">
+            {{ modalTitle }}
+          </h5>
+          <p class="ops-modal-copy">{{ modalSubtitle }}</p>
+        </div>
+        <button
+          type="button"
+          class="ops-modal-close"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+        >
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+
+      <div class="ops-modal-body">
+        <form [formGroup]="announcementForm" (ngSubmit)="saveAnnouncement()">
+          <div class="ops-form-grid">
+            <section class="ops-form-section">
+              <span class="ops-panel-kicker">Message setup</span>
+              <h6>Core information</h6>
+
+              <div class="ops-form-field">
+                <label for="announcementTitle">Title</label>
+                <input
+                  id="announcementTitle"
+                  type="text"
+                  formControlName="title"
+                  placeholder="Example: Benefits enrollment opens"
+                />
+                <div class="ops-field-error" *ngIf="submitted && announcementForm.get('title').invalid">
+                  Title is required.
+                </div>
+              </div>
+
+              <div class="ops-form-field">
+                <label for="announcementDepartmentId">Department</label>
+                <select id="announcementDepartmentId" formControlName="departmentId">
+                  <option value="">All departments</option>
+                  <option *ngFor="let option of departements" [value]="option.id">
+                    {{ option.name }}
+                  </option>
+                </select>
+              </div>
+
+              <div class="ops-form-split">
+                <div class="ops-form-field">
+                  <label for="announcementStartDate">Start date</label>
+                  <input id="announcementStartDate" type="date" formControlName="startDate" />
+                  <div class="ops-field-error" *ngIf="submitted && announcementForm.get('startDate').invalid">
+                    Start date is required.
+                  </div>
+                </div>
+
+                <div class="ops-form-field">
+                  <label for="announcementEndDate">End date</label>
+                  <input id="announcementEndDate" type="date" formControlName="endDate" />
+                  <div class="ops-field-error" *ngIf="submitted && announcementForm.get('endDate').invalid">
+                    End date is required.
+                  </div>
+                </div>
+              </div>
+
+              <div class="ops-form-field">
+                <label for="announcementAttachment">Attachment path</label>
+                <input
+                  id="announcementAttachment"
+                  type="text"
+                  formControlName="attachment"
+                  placeholder="Example: /files/benefits-guide.pdf"
+                />
+              </div>
+
+              <div class="ops-form-field">
+                <label for="announcementSummary">Summary</label>
+                <textarea
+                  id="announcementSummary"
+                  rows="3"
+                  formControlName="summary"
+                  placeholder="Write the short version that should surface first in the workspace."
+                ></textarea>
+              </div>
+
+              <div class="ops-form-field">
+                <label for="announcementDescription">Description</label>
+                <textarea
+                  id="announcementDescription"
+                  rows="5"
+                  formControlName="description"
+                  placeholder="Capture the full message, actions, or context teams need to respond well."
+                ></textarea>
+              </div>
+            </section>
+
+            <aside class="ops-form-preview">
+              <span class="ops-panel-kicker">Live preview</span>
+              <h4>{{ draftTitle }}</h4>
+              <p>
+                {{ draftDepartmentName || 'All departments' }}
+              </p>
+
+              <div class="ops-progress-wrap">
+                <div class="ops-progress-top">
+                  <span>Readiness</span>
+                  <strong>{{ draftQuality.score }}%</strong>
+                </div>
+                <div class="ops-progress-track">
+                  <span [style.width.%]="draftQuality.score"></span>
+                </div>
+              </div>
+
+              <div class="ops-chip-row">
+                <span class="ops-chip">{{ draftQuality.label }}</span>
+                <span class="ops-chip">{{ draftDepartmentName || 'Global' }}</span>
+              </div>
+            </aside>
+          </div>
+
+          <div class="ops-modal-actions">
+            <button
+              type="button"
+              class="btn btn-light"
+              data-bs-dismiss="modal"
+              id="announcementCrudModalClose"
+            >
+              Cancel
+            </button>
+            <button type="submit" class="btn btn-primary" [disabled]="saving">
+              <i class="bi" [ngClass]="saving ? 'bi-arrow-repeat' : 'bi-check2-circle'"></i>
+              {{ saving ? 'Saving...' : modalMode === 'create' ? 'Create announcement' : 'Save changes' }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
 </div>

@@ -1,3 +1,9 @@
+:host {
+  display: block;
+  --ops-accent: #0f4c5c;
+  --ops-accent-alt: #2c7da0;
+  --ops-accent-soft: rgba(15, 76, 92, 0.12);
+}
 button{
   margin:4px;
 }

@@ -1,23 +1,400 @@
-<div class="page-heading">
-  <section class="section">
-    <div class="card">
-      <div class="card-header">
-        <h2>Résilliations</h2>
-      </div>
-      <div class="card-body">
-        <div class="dataTable-container">
-          <app-event-list [event]="event$"></app-event-list>
+<div class="page-heading ops-page">
+  <section class="ops-shell">
+    <article class="card ops-hero">
+      <div class="ops-hero-copy">
+        <span class="ops-eyebrow">Events</span>
+        <h2>See what is coming, what just happened, and what still lacks context.</h2>
+        <p>
+          Replace the old event stub with a proper planning workspace that shows timing,
+          supporting notes, and live selection details on every record.
+        </p>
+
+        <div class="ops-hero-actions">
           <button
             type="button"
-            class="btn btn-success btn-sm"
+            class="btn btn-primary"
             data-bs-toggle="modal"
-            data-bs-target="#add"
+            data-bs-target="#eventCrudModal"
+            (click)="openCreateModal()"
           >
-            <i class="fas fa-plus-square"></i>
+            <i class="bi bi-plus-square-fill"></i>
+            Create event
           </button>
-          <app-add-event></app-add-event>
+          <button
+            type="button"
+            class="btn btn-light"
+            (click)="refreshEvents()"
+            [disabled]="loading"
+          >
+            <i class="bi bi-arrow-repeat"></i>
+            Refresh
+          </button>
+        </div>
+
+        <div class="ops-hero-notice" *ngIf="loadError">{{ loadError }}</div>
+      </div>
+
+      <div class="ops-hero-panel">
+        <span class="ops-panel-kicker">Calendar pulse</span>
+        <h3>Scheduling clarity across the event timeline</h3>
+
+        <div class="ops-metric-grid">
+          <div class="ops-metric-card">
+            <span>Total events</span>
+            <strong>{{ totalEventsCount }}</strong>
+            <p>All event records currently available in the backend.</p>
+          </div>
+          <div class="ops-metric-card">
+            <span>Upcoming</span>
+            <strong>{{ upcomingEventsCount }}</strong>
+            <p>Events scheduled in the future from this point forward.</p>
+          </div>
+        </div>
+
+        <div class="ops-progress-wrap">
+          <div class="ops-progress-top">
+            <span>Note coverage</span>
+            <strong>{{ noteCoverage }}%</strong>
+          </div>
+          <div class="ops-progress-track">
+            <span [style.width.%]="noteCoverage"></span>
+          </div>
+          <p>
+            {{ documentedEventsCount }} event{{ documentedEventsCount === 1 ? '' : 's' }} include a supporting note.
+          </p>
         </div>
       </div>
+    </article>
+
+    <div class="ops-stat-grid">
+      <article class="card ops-stat-card tone-primary">
+        <span>Events</span>
+        <strong>{{ totalEventsCount }}</strong>
+        <p>All meetings, workshops, and time-based activities in the workspace.</p>
+      </article>
+
+      <article class="card ops-stat-card tone-secondary">
+        <span>Upcoming</span>
+        <strong>{{ upcomingEventsCount }}</strong>
+        <p>Events that are still ahead on the calendar.</p>
+      </article>
+
+      <article class="card ops-stat-card tone-warning">
+        <span>This month</span>
+        <strong>{{ thisMonthEventsCount }}</strong>
+        <p>Events falling inside the current calendar month.</p>
+      </article>
+
+      <article class="card ops-stat-card tone-danger">
+        <span>With notes</span>
+        <strong>{{ documentedEventsCount }}</strong>
+        <p>Events that already include context, agenda, or planning notes.</p>
+      </article>
+    </div>
+
+    <article class="card ops-toolbar-card">
+      <div class="ops-toolbar">
+        <label class="ops-search-field">
+          <i class="bi bi-search"></i>
+          <input
+            type="text"
+            [ngModel]="searchTerm"
+            (ngModelChange)="onSearchTermChange($event)"
+            placeholder="Search event titles or notes"
+          />
+        </label>
+
+        <div class="ops-toolbar-controls">
+          <label>
+            <span>Filter</span>
+            <select
+              [ngModel]="activeFilter"
+              (ngModelChange)="onFilterChange($event)"
+            >
+              <option value="all">All events</option>
+              <option value="upcoming">Upcoming</option>
+              <option value="this-month">This month</option>
+              <option value="past">Past</option>
+            </select>
+          </label>
+
+          <label>
+            <span>Sort</span>
+            <select
+              [ngModel]="activeSort"
+              (ngModelChange)="onSortChange($event)"
+            >
+              <option value="nearest">Nearest first</option>
+              <option value="latest">Latest first</option>
+              <option value="title-asc">Title A-Z</option>
+            </select>
+          </label>
+        </div>
+      </div>
+
+      <div class="ops-toolbar-footer">
+        <span>{{ filteredResultsLabel }}</span>
+        <span>{{ featuredEvent ? featuredEvent.eventTitle : 'No event selected' }}</span>
+      </div>
+    </article>
+
+    <div class="ops-layout">
+      <div class="ops-main">
+        <div class="ops-loading-grid" *ngIf="loading; else eventReady">
+          <div
+            class="ops-skeleton-card"
+            *ngFor="let item of loadingPlaceholders"
+          ></div>
+        </div>
+
+        <ng-template #eventReady>
+          <div class="ops-grid" *ngIf="filteredEvents.length; else eventEmpty">
+            <article
+              class="card ops-card"
+              *ngFor="let item of filteredEvents; trackBy: trackByEventId"
+              [class.is-active]="featuredEvent ? featuredEvent.id === item.id : false"
+              (click)="selectEvent(item)"
+              (keydown.enter)="selectEvent(item)"
+              (keydown.space)="selectEvent(item); $event.preventDefault()"
+              tabindex="0"
+              role="button"
+            >
+              <div class="ops-card-head">
+                <div>
+                  <span class="ops-panel-kicker">Event</span>
+                  <h3>{{ item.eventTitle }}</h3>
+                </div>
+                <span class="ops-status" [ngClass]="'tone-' + item.qualityTone">
+                  {{ item.qualityLabel }}
+                </span>
+              </div>
+
+              <p>{{ item.summary }}</p>
+
+              <div class="ops-progress-wrap">
+                <div class="ops-progress-top">
+                  <span>Readiness</span>
+                  <strong>{{ item.qualityScore }}%</strong>
+                </div>
+                <div class="ops-progress-track">
+                  <span [style.width.%]="item.qualityScore"></span>
+                </div>
+              </div>
+
+              <div class="ops-chip-row">
+                <span class="ops-chip">{{ item.eventDateTimeLabel }}</span>
+                <span class="ops-chip">{{ item.relativeLabel }}</span>
+              </div>
+
+              <div class="ops-card-actions">
+                <button
+                  type="button"
+                  class="btn btn-light btn-sm"
+                  data-bs-toggle="modal"
+                  data-bs-target="#eventCrudModal"
+                  (click)="openEditModal(item); $event.stopPropagation()"
+                >
+                  <i class="bi bi-pencil-square"></i>
+                  Edit
+                </button>
+                <button
+                  type="button"
+                  class="btn btn-light btn-sm"
+                  (click)="deleteEvent(item); $event.stopPropagation()"
+                  [disabled]="deletingId === item.id"
+                >
+                  <i class="bi bi-trash3"></i>
+                  {{ deletingId === item.id ? 'Deleting...' : 'Delete' }}
+                </button>
+              </div>
+            </article>
+          </div>
+        </ng-template>
+
+        <ng-template #eventEmpty>
+          <article class="card ops-empty-card">
+            <span class="ops-empty-kicker">No matching events</span>
+            <h3>The current search or filter does not match any event.</h3>
+            <p>
+              Reset the filters or create a new event to rebuild the calendar view.
+            </p>
+            <button
+              type="button"
+              class="btn btn-primary"
+              data-bs-toggle="modal"
+              data-bs-target="#eventCrudModal"
+              (click)="openCreateModal()"
+            >
+              <i class="bi bi-plus-square-fill"></i>
+              Create event
+            </button>
+          </article>
+        </ng-template>
+      </div>
+
+      <aside class="ops-side">
+        <article class="card ops-panel-card" *ngIf="featuredEvent; else emptyEventPanel">
+          <div class="ops-panel-head">
+            <div>
+              <span>Selected event</span>
+              <h3>{{ featuredEvent.eventTitle }}</h3>
+            </div>
+            <span class="ops-status" [ngClass]="'tone-' + featuredEvent.qualityTone">
+              {{ featuredEvent.qualityLabel }}
+            </span>
+          </div>
+
+          <p>{{ featuredEvent.eventNote || featuredEvent.relativeLabel }}</p>
+
+          <div class="ops-fact-grid">
+            <div>
+              <span class="ops-detail-label">Date</span>
+              <strong>{{ featuredEvent.eventDateTimeLabel }}</strong>
+            </div>
+            <div>
+              <span class="ops-detail-label">Status</span>
+              <strong>{{ featuredEvent.relativeLabel }}</strong>
+            </div>
+          </div>
+
+          <div class="ops-panel-note accent">
+            <span class="ops-detail-label">Planning note</span>
+            <p>
+              {{ featuredEvent.eventNote || 'No supporting note has been added yet. Add context so this event is easier to execute.' }}
+            </p>
+          </div>
+
+          <button
+            type="button"
+            class="btn btn-primary"
+            data-bs-toggle="modal"
+            data-bs-target="#eventCrudModal"
+            (click)="openEditModal(featuredEvent)"
+          >
+            <i class="bi bi-pencil-square"></i>
+            Edit selected event
+          </button>
+        </article>
+
+        <ng-template #emptyEventPanel>
+          <article class="card ops-panel-card">
+            <span class="ops-empty-kicker">Event preview</span>
+            <h3>Select an event to inspect it here.</h3>
+            <p>
+              The side panel highlights timing, current status, and the supporting note for the selected event.
+            </p>
+          </article>
+        </ng-template>
+      </aside>
     </div>
   </section>
+</div>
+
+<div
+  class="modal fade text-left"
+  id="eventCrudModal"
+  tabindex="-1"
+  aria-labelledby="eventCrudModalLabel"
+  aria-hidden="true"
+>
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content ops-modal-content">
+      <div class="ops-modal-header">
+        <div>
+          <span class="ops-eyebrow">Event editor</span>
+          <h5 class="modal-title ops-modal-title" id="eventCrudModalLabel">
+            {{ modalTitle }}
+          </h5>
+          <p class="ops-modal-copy">{{ modalSubtitle }}</p>
+        </div>
+        <button
+          type="button"
+          class="ops-modal-close"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+        >
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+
+      <div class="ops-modal-body">
+        <form [formGroup]="eventForm" (ngSubmit)="saveEvent()">
+          <div class="ops-form-grid">
+            <section class="ops-form-section">
+              <span class="ops-panel-kicker">Event setup</span>
+              <h6>Core information</h6>
+
+              <div class="ops-form-field">
+                <label for="eventTitle">Event title</label>
+                <input
+                  id="eventTitle"
+                  type="text"
+                  formControlName="eventTitle"
+                  placeholder="Example: Leadership workshop"
+                />
+                <div class="ops-field-error" *ngIf="submitted && eventForm.get('eventTitle').invalid">
+                  Event title is required.
+                </div>
+              </div>
+
+              <div class="ops-form-field">
+                <label for="eventDateTime">Date and time</label>
+                <input id="eventDateTime" type="datetime-local" formControlName="eventDateTime" />
+                <div class="ops-field-error" *ngIf="submitted && eventForm.get('eventDateTime').invalid">
+                  Event date and time are required.
+                </div>
+              </div>
+
+              <div class="ops-form-field">
+                <label for="eventNote">Note</label>
+                <textarea
+                  id="eventNote"
+                  rows="5"
+                  formControlName="eventNote"
+                  placeholder="Add the purpose, agenda, or execution note for this event."
+                ></textarea>
+              </div>
+            </section>
+
+            <aside class="ops-form-preview">
+              <span class="ops-panel-kicker">Live preview</span>
+              <h4>{{ normalizeText(eventForm.value.eventTitle) || 'Untitled event' }}</h4>
+              <p>
+                {{ eventForm.value.eventDateTime || 'Schedule pending' }}
+              </p>
+
+              <div class="ops-progress-wrap">
+                <div class="ops-progress-top">
+                  <span>Readiness</span>
+                  <strong>{{ draftQuality.score }}%</strong>
+                </div>
+                <div class="ops-progress-track">
+                  <span [style.width.%]="draftQuality.score"></span>
+                </div>
+              </div>
+
+              <div class="ops-chip-row">
+                <span class="ops-chip">{{ draftQuality.label }}</span>
+              </div>
+            </aside>
+          </div>
+
+          <div class="ops-modal-actions">
+            <button
+              type="button"
+              class="btn btn-light"
+              data-bs-dismiss="modal"
+              id="eventCrudModalClose"
+            >
+              Cancel
+            </button>
+            <button type="submit" class="btn btn-primary" [disabled]="saving">
+              <i class="bi" [ngClass]="saving ? 'bi-arrow-repeat' : 'bi-check2-circle'"></i>
+              {{ saving ? 'Saving...' : modalMode === 'create' ? 'Create event' : 'Save changes' }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
 </div>

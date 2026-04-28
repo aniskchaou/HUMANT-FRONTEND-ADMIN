@@ -1,0 +1,399 @@
+<div class="expense-shell">
+  <section class="expense-hero">
+    <div>
+      <p class="eyebrow">Employee Expenses</p>
+      <h1>Claims, approvals, and reimbursements in one workspace</h1>
+      <p class="hero-copy">
+        Submit employee expenses with receipt evidence, move them through review,
+        and keep reimbursement progress visible from request to payout.
+      </p>
+    </div>
+
+    <div class="hero-highlight">
+      <span class="hero-highlight__label">Visible to your role</span>
+      <strong>{{ canManageReimbursements ? 'Submit, approve, and reimburse' : canApproveClaims ? 'Submit and review claims' : 'Submit claims and track payouts' }}</strong>
+      <span>{{ authentificationService.getPrimaryRoleLabel() }} workspace</span>
+    </div>
+  </section>
+
+  <section class="metrics-grid">
+    <article class="metric-card">
+      <span>Total claims</span>
+      <strong>{{ totalClaimsCount }}</strong>
+      <small>All visible requests in your queue</small>
+    </article>
+
+    <article class="metric-card accent-pending">
+      <span>Pending review</span>
+      <strong>{{ pendingClaimsCount }}</strong>
+      <small>Waiting for manager or HR action</small>
+    </article>
+
+    <article class="metric-card accent-approved">
+      <span>Approved</span>
+      <strong>{{ approvedClaimsCount }}</strong>
+      <small>Cleared and ready for reimbursement follow-up</small>
+    </article>
+
+    <article class="metric-card accent-reimbursed">
+      <span>Reimbursed</span>
+      <strong>{{ reimbursedClaimsCount }}</strong>
+      <small>Claims marked as paid back</small>
+    </article>
+
+    <article class="metric-card accent-receipts">
+      <span>Receipt coverage</span>
+      <strong>{{ receiptCoverageLabel }}</strong>
+      <small>Claims that already include evidence</small>
+    </article>
+  </section>
+
+  <p class="workspace-error" *ngIf="loadError">{{ loadError }}</p>
+
+  <section class="workspace-grid">
+    <div class="workspace-column">
+      <article class="panel submit-panel">
+        <div class="panel-head">
+          <div>
+            <p class="panel-kicker">New Claim</p>
+            <h2>Submit an expense claim</h2>
+          </div>
+          <button class="ghost-button" type="button" (click)="refreshWorkspace()">
+            Refresh
+          </button>
+        </div>
+
+        <form [formGroup]="claimForm" (ngSubmit)="submitClaim()" novalidate>
+          <div class="info-banner" *ngIf="!canAssignEmployee">
+            Claims submit under your current session. If your account is linked to an
+            employee record, it will be attached automatically.
+          </div>
+
+          <div class="form-grid two-columns">
+            <label>
+              <span>Expense type</span>
+              <select formControlName="claimType">
+                <option *ngFor="let option of claimTypeOptions" [value]="option">
+                  {{ option }}
+                </option>
+              </select>
+            </label>
+
+            <label *ngIf="canAssignEmployee">
+              <span>Employee</span>
+              <select formControlName="employeeId">
+                <option value="">Select employee</option>
+                <option *ngFor="let employee of employees" [value]="employee.id">
+                  {{ employee.fullName }}
+                </option>
+              </select>
+            </label>
+
+            <label>
+              <span>Amount</span>
+              <input type="number" min="0" step="0.01" formControlName="amount" />
+            </label>
+
+            <label>
+              <span>Expense date</span>
+              <input type="date" formControlName="claimDate" />
+            </label>
+          </div>
+
+          <label>
+            <span>Description</span>
+            <textarea
+              rows="4"
+              formControlName="description"
+              placeholder="Explain the business purpose, attendees, or context."
+            ></textarea>
+          </label>
+
+          <label>
+            <span>Notes</span>
+            <textarea
+              rows="3"
+              formControlName="notes"
+              placeholder="Add route, policy, or reimbursement notes if needed."
+            ></textarea>
+          </label>
+
+          <label class="receipt-uploader">
+            <span>Receipt upload</span>
+            <input
+              type="file"
+              accept="image/*,.pdf,.png,.jpg,.jpeg"
+              (change)="onReceiptSelected($event)"
+            />
+          </label>
+
+          <div class="receipt-pill" *ngIf="pendingReceiptName">
+            Receipt ready: {{ pendingReceiptName }}
+          </div>
+
+          <div class="form-actions">
+            <button class="primary-button" type="submit" [disabled]="submittingClaim">
+              {{ submittingClaim ? 'Submitting…' : 'Submit claim' }}
+            </button>
+          </div>
+        </form>
+      </article>
+
+      <article class="panel detail-panel" *ngIf="selectedClaim; else emptySelection">
+        <div class="panel-head compact">
+          <div>
+            <p class="panel-kicker">Selected Claim</p>
+            <h2>{{ selectedClaimTitle }}</h2>
+            <p>{{ selectedClaimSubtitle }}</p>
+          </div>
+          <span [class]="statusBadgeClass(selectedClaim)">{{ selectedClaim.status }}</span>
+        </div>
+
+        <div class="detail-grid">
+          <div>
+            <span class="detail-label">Amount</span>
+            <strong>{{ selectedClaim.amount | currency:'USD':'symbol':'1.2-2' }}</strong>
+          </div>
+          <div>
+            <span class="detail-label">Expense date</span>
+            <strong>{{ selectedClaim.claimDateLabel }}</strong>
+          </div>
+          <div>
+            <span class="detail-label">Submitted</span>
+            <strong>{{ selectedClaim.submittedAtLabel }}</strong>
+          </div>
+          <div>
+            <span class="detail-label">Employee</span>
+            <strong>{{ selectedClaim.employeeName }}</strong>
+          </div>
+        </div>
+
+        <p class="detail-description">{{ selectedClaim.description }}</p>
+
+        <div class="detail-notes" *ngIf="selectedClaim.notes">
+          <span>Employee notes</span>
+          <p>{{ selectedClaim.notes }}</p>
+        </div>
+
+        <div class="detail-notes" *ngIf="selectedClaim.reviewNotes">
+          <span>Review notes</span>
+          <p>{{ selectedClaim.reviewNotes }}</p>
+        </div>
+
+        <div class="detail-actions">
+          <button
+            class="ghost-button"
+            type="button"
+            *ngIf="selectedClaim.hasReceipt"
+            (click)="downloadReceipt(selectedClaim)"
+          >
+            Download receipt
+          </button>
+
+          <span class="status-inline" [class]="reimbursementBadgeClass(selectedClaim)">
+            {{ selectedClaim.reimbursementStatusLabel }}
+          </span>
+        </div>
+
+        <section class="review-panel" *ngIf="canApproveClaims && selectedClaim.status === 'PENDING'">
+          <h3>Approval workflow</h3>
+          <p>Record the review outcome so reimbursement can move forward cleanly.</p>
+
+          <textarea
+            rows="3"
+            [(ngModel)]="reviewNotesDraft"
+            [ngModelOptions]="{ standalone: true }"
+            placeholder="Add approval or rejection context for the submitter."
+          ></textarea>
+
+          <div class="review-actions">
+            <button
+              class="primary-button"
+              type="button"
+              [disabled]="reviewingClaim"
+              (click)="reviewSelectedClaim('APPROVED')"
+            >
+              {{ reviewingClaim ? 'Saving…' : 'Approve claim' }}
+            </button>
+
+            <button
+              class="danger-button"
+              type="button"
+              [disabled]="reviewingClaim"
+              (click)="reviewSelectedClaim('REJECTED')"
+            >
+              Reject claim
+            </button>
+          </div>
+        </section>
+
+        <section class="reimbursement-panel" *ngIf="selectedClaim.status === 'APPROVED'">
+          <div class="panel-head compact secondary">
+            <div>
+              <p class="panel-kicker">Reimbursement Tracking</p>
+              <h3>{{ selectedClaim.reimbursementStatusLabel }}</h3>
+            </div>
+            <span [class]="reimbursementBadgeClass(selectedClaim)">
+              {{ selectedClaim.reimbursementStatusLabel }}
+            </span>
+          </div>
+
+          <form
+            *ngIf="canManageReimbursements && selectedClaim.reimbursementId"
+            [formGroup]="reimbursementForm"
+            (ngSubmit)="saveReimbursement()"
+            novalidate
+          >
+            <div class="form-grid two-columns">
+              <label>
+                <span>Status</span>
+                <select formControlName="status">
+                  <option *ngFor="let status of reimbursementStatusOptions" [value]="status">
+                    {{ status }}
+                  </option>
+                </select>
+              </label>
+
+              <label>
+                <span>Amount</span>
+                <input type="number" min="0" step="0.01" formControlName="amount" />
+              </label>
+
+              <label>
+                <span>Reimbursement date</span>
+                <input type="date" formControlName="reimbursementDate" />
+              </label>
+
+              <label>
+                <span>Payment reference</span>
+                <input type="text" formControlName="paymentReference" />
+              </label>
+            </div>
+
+            <label>
+              <span>Description</span>
+              <input type="text" formControlName="description" />
+            </label>
+
+            <label>
+              <span>Finance notes</span>
+              <textarea rows="3" formControlName="notes"></textarea>
+            </label>
+
+            <div class="form-actions">
+              <button class="primary-button" type="submit" [disabled]="updatingReimbursement">
+                {{ updatingReimbursement ? 'Saving…' : 'Update reimbursement' }}
+              </button>
+            </div>
+          </form>
+
+          <div class="detail-notes" *ngIf="!canManageReimbursements && selectedClaim.reimbursementId">
+            <span>Payout summary</span>
+            <p>
+              {{ selectedClaim.reimbursementDescription }}
+              <span *ngIf="selectedClaim.paymentReference">
+                · Ref {{ selectedClaim.paymentReference }}
+              </span>
+            </p>
+            <p *ngIf="selectedClaim.reimbursementDateLabel !== 'No date'">
+              Reimbursement date: {{ selectedClaim.reimbursementDateLabel }}
+            </p>
+            <p *ngIf="selectedClaim.processedBy">
+              Processed by {{ authentificationService.getDisplayName(selectedClaim.processedBy) }}
+              on {{ selectedClaim.processedAtLabel }}
+            </p>
+          </div>
+
+          <div class="info-banner" *ngIf="selectedClaim.status === 'APPROVED' && !selectedClaim.reimbursementId">
+            A reimbursement record will appear once the approved claim is queued for payout.
+          </div>
+        </section>
+      </article>
+
+      <ng-template #emptySelection>
+        <article class="panel detail-panel empty-state">
+          <h2>No claim selected</h2>
+          <p>Select a claim from the right to see approvals, receipt downloads, and reimbursement progress.</p>
+        </article>
+      </ng-template>
+    </div>
+
+    <article class="panel list-panel">
+      <div class="panel-head">
+        <div>
+          <p class="panel-kicker">Claim Queue</p>
+          <h2>{{ filteredResultsLabel }}</h2>
+        </div>
+      </div>
+
+      <div class="toolbar">
+        <select [value]="activeStatusFilter" (change)="onStatusFilterChange($any($event.target).value)">
+          <option *ngFor="let option of claimStatusOptions" [value]="option.value">
+            {{ option.label }}
+          </option>
+        </select>
+
+        <input
+          type="search"
+          [value]="searchTerm"
+          (input)="onSearchTermChange($any($event.target).value)"
+          placeholder="Search by number, employee, or description"
+        />
+      </div>
+
+      <div class="loading-grid" *ngIf="loading">
+        <div class="loading-card" *ngFor="let item of loadingCards"></div>
+      </div>
+
+      <div class="claim-list" *ngIf="!loading && filteredClaims.length">
+        <button
+          class="claim-card"
+          type="button"
+          *ngFor="let claim of filteredClaims; trackBy: trackByClaimId"
+          [class.is-active]="selectedClaim && selectedClaim.id === claim.id"
+          (click)="selectClaim(claim)"
+        >
+          <div class="claim-card__top">
+            <div>
+              <strong>{{ claim.claimNumber }}</strong>
+              <span>{{ claim.claimType }}</span>
+            </div>
+
+            <div class="badge-stack">
+              <span [class]="statusBadgeClass(claim)">{{ claim.status }}</span>
+              <span [class]="reimbursementBadgeClass(claim)">
+                {{ claim.reimbursementStatusLabel }}
+              </span>
+            </div>
+          </div>
+
+          <p class="claim-card__body">{{ claim.description }}</p>
+
+          <div class="claim-card__meta">
+            <span>{{ claim.employeeName }}</span>
+            <span>{{ claim.claimDateLabel }}</span>
+            <span>{{ claim.amount | currency:'USD':'symbol':'1.2-2' }}</span>
+          </div>
+
+          <div class="claim-card__footer">
+            <span>Submitted by {{ claim.submittedByLabel }}</span>
+
+            <button
+              class="mini-button"
+              type="button"
+              *ngIf="claim.hasReceipt"
+              (click)="$event.stopPropagation(); downloadReceipt(claim)"
+            >
+              Receipt
+            </button>
+          </div>
+        </button>
+      </div>
+
+      <div class="empty-state compact" *ngIf="!loading && !filteredClaims.length">
+        <h3>No claims found</h3>
+        <p>Try a different status filter or submit the first expense claim from the form.</p>
+      </div>
+    </article>
+  </section>
+</div>

@@ -1,12 +1,150 @@
-.widget li>.activeLink {
-    font-weight: bold;
-    font-size:large;
-    background-color: #ffffff;
-    color: #000000;
-  }
+.sidebar-brand-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.9rem;
+  color: var(--ink);
+}
 
-  .sidebar-wrapper .sidebar-header img{
-    height: 49px;
-  }
+.sidebar-brand-mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 3rem;
+  height: 3rem;
+  border-radius: 1rem;
+  background: linear-gradient(135deg, var(--accent), var(--accent-strong));
+  color: #fff;
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  font-weight: 700;
+  box-shadow: 0 18px 36px rgba(19, 58, 90, 0.24);
+}
 
-  
+.sidebar-brand-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.sidebar-brand-copy strong {
+  font-family: var(--font-display);
+  font-size: 1rem;
+  letter-spacing: 0.02em;
+  color: var(--ink);
+}
+
+.sidebar-brand-copy small {
+  color: var(--muted);
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.sidebar-overview {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.85rem;
+  margin-top: 1.5rem;
+}
+
+.sidebar-overview div {
+  padding: 0.95rem 1rem;
+  border-radius: 1rem;
+  background: rgba(255, 255, 255, 0.78);
+  border: 1px solid rgba(19, 58, 90, 0.08);
+}
+
+.sidebar-overview span {
+  display: block;
+  color: var(--muted);
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.sidebar-overview strong {
+  display: block;
+  margin-top: 0.3rem;
+  color: var(--ink);
+  font-family: var(--font-display);
+  font-size: 1rem;
+}
+
+.menu-caption {
+  margin: 1.25rem 0 0.65rem;
+  padding: 0 0.85rem;
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  list-style: none;
+  text-transform: uppercase;
+}
+
+.sidebar-wrapper .menu .sidebar-item.has-sub > .sidebar-link {
+  cursor: pointer;
+}
+
+.sidebar-wrapper .menu .sidebar-item.has-sub > .sidebar-link:after {
+  transition: transform 0.2s ease;
+}
+
+.sidebar-wrapper .menu .sidebar-item.open > .sidebar-link:after {
+  transform: translateY(-50%) rotate(180deg);
+}
+
+.sidebar-footer {
+  padding: 0 2rem 2rem;
+}
+
+.sidebar-support-card {
+  padding: 1.2rem;
+  border-radius: 1.3rem;
+  background: linear-gradient(180deg, rgba(16, 45, 73, 0.98), rgba(9, 30, 49, 0.98));
+  color: rgba(255, 255, 255, 0.88);
+  box-shadow: 0 24px 44px rgba(8, 24, 39, 0.28);
+}
+
+.support-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.3rem 0.65rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.14);
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.sidebar-support-card h6 {
+  margin: 0.95rem 0 0.55rem;
+  color: #fff;
+  font-family: var(--font-display);
+  font-size: 1rem;
+}
+
+.sidebar-support-card p {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 0.85rem;
+  line-height: 1.6;
+}
+
+.support-actions {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.support-actions .btn {
+  flex: 1 1 auto;
+}
+
+@media screen and (max-width: 1199px) {
+  .sidebar-footer {
+    padding-bottom: 1.5rem;
+  }
+}
+

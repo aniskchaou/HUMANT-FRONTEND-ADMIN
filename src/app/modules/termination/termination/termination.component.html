@@ -1,68 +1,426 @@
-<div class="page-heading">
-  <section class="section">
-    <div class="card">
-      <div class="card-header">
-        <h2>Terminations</h2>
-      </div>
-      <div class="card-body">
-        <div class="dataTable-container">
-          <button
-            type="button"
-            class="btn btn-success btn-sm"
-            data-bs-toggle="modal"
-            data-bs-target="#add"
-          >
-            <i class="fas fa-plus-square"></i> Create
-          </button>
-          <table
-            id="table"
-            cellpadding="0"
-            cellspacing="0"
-            border="0"
-            class="datatable-1 table table-bordered table-striped display"
-            width="100%"
-          >
-            <thead>
-              <tr>
-                <th>Name</th>
-                <th>Termination Date</th>
-                <th>Termination Type</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr class="odd gradeX" *ngFor="let t of termination$">
-                <td>{{ t.name.fullName }}</td>
-                <td>{{ t.terminationDate }}</td>
-                <td>{{ t.typeTermination }}</td>
-                <td>
-                  <button
-                    type="button"
-                    data-bs-toggle="modal"
-                    (click)="edit(t.id)"
-                    data-bs-target="#edit"
-                    class="btn btn-warning btn-sm"
-                  >
-                    <i class="fas fa-edit"></i>
-                  </button>
-                  <button
-                    type="button"
-                    class="btn btn-danger btn-sm"
-                    (click)="delete(t.id)"
-                  >
-                    <i class="fas fa-trash-alt"></i>
-                  </button>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+<div class="page-heading ops-page">
+  <section class="ops-shell">
+    <article class="card ops-hero">
+      <div class="ops-hero-copy">
+        <span class="ops-eyebrow">Termination</span>
+        <h2>Manage termination timelines with clearer notice windows, reasons, and compliance context.</h2>
+        <p>
+          Review termination records from a routed workspace that surfaces details on click and keeps editing directly inside the page flow.
+        </p>
 
-          <app-termination-modal
-            [id]="id"
-            (refresh)="refresh()"
-          ></app-termination-modal>
+        <div class="ops-hero-actions">
+          <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#terminationCrudModal" (click)="openCreateModal()">
+            <i class="bi bi-plus-square-fill"></i>
+            Create termination
+          </button>
+          <button type="button" class="btn btn-light" (click)="refreshTerminations()" [disabled]="loading">
+            <i class="bi bi-arrow-repeat"></i>
+            Refresh
+          </button>
+        </div>
+
+        <div class="ops-hero-notice" *ngIf="loadError">{{ loadError }}</div>
+      </div>
+
+      <div class="ops-hero-panel">
+        <span class="ops-panel-kicker">Termination pulse</span>
+        <h3>Notice windows, scheduled exits, and record quality</h3>
+
+        <div class="ops-metric-grid">
+          <div class="ops-metric-card">
+            <span>Scheduled terminations</span>
+            <strong>{{ scheduledTerminationsCount }}</strong>
+            <p>Terminations whose exit date is still upcoming or active today.</p>
+          </div>
+          <div class="ops-metric-card">
+            <span>Completed records</span>
+            <strong>{{ completedTerminationsCount }}</strong>
+            <p>Termination records that already sit in the completed archive window.</p>
+          </div>
         </div>
       </div>
+    </article>
+
+    <div class="ops-stat-grid">
+      <article class="card ops-stat-card tone-primary">
+        <span>Terminations</span>
+        <strong>{{ totalTerminationsCount }}</strong>
+        <p>Total termination records currently tracked.</p>
+      </article>
+      <article class="card ops-stat-card tone-secondary">
+        <span>Scheduled</span>
+        <strong>{{ scheduledTerminationsCount }}</strong>
+        <p>Upcoming exits that still need coordinated follow-up.</p>
+      </article>
+      <article class="card ops-stat-card tone-warning">
+        <span>Completed</span>
+        <strong>{{ completedTerminationsCount }}</strong>
+        <p>Termination records whose end date is now in the past.</p>
+      </article>
+      <article class="card ops-stat-card tone-danger">
+        <span>Documented</span>
+        <strong>{{ documentedTerminationsCount }}</strong>
+        <p>Records that already include fuller descriptive context.</p>
+      </article>
+    </div>
+
+    <article class="card ops-toolbar-card">
+      <div class="ops-toolbar">
+        <label class="ops-search-field">
+          <i class="bi bi-search"></i>
+          <input type="text" [ngModel]="searchTerm" (ngModelChange)="onSearchTermChange($event)" placeholder="Search employees, termination types, or reasons" />
+        </label>
+
+        <div class="ops-toolbar-controls">
+          <label>
+            <span>Filter</span>
+            <select [ngModel]="activeFilter" (ngModelChange)="onFilterChange($event)">
+              <option value="all">All terminations</option>
+              <option value="scheduled">Scheduled</option>
+              <option value="completed">Completed</option>
+              <option value="needs-context">Needs context</option>
+            </select>
+          </label>
+
+          <label>
+            <span>Sort</span>
+            <select [ngModel]="activeSort" (ngModelChange)="onSortChange($event)">
+              <option value="latest-date">Latest termination date</option>
+              <option value="employee-asc">Employee A-Z</option>
+              <option value="type-asc">Type A-Z</option>
+            </select>
+          </label>
+        </div>
+      </div>
+
+      <div class="ops-toolbar-footer">
+        <span>{{ filteredResultsLabel }}</span>
+        <span>{{ featuredTermination ? featuredTermination.employeeName : 'No termination selected' }}</span>
+      </div>
+    </article>
+
+    <div class="ops-layout">
+      <div class="ops-main">
+        <div class="ops-loading-grid" *ngIf="loading; else terminationReady">
+          <div class="ops-skeleton-card" *ngFor="let item of loadingPlaceholders"></div>
+        </div>
+
+        <ng-template #terminationReady>
+          <div class="ops-grid" *ngIf="filteredTerminations.length; else terminationEmpty">
+            <article
+              class="card ops-card"
+              *ngFor="let item of filteredTerminations; trackBy: trackByTerminationId"
+              [class.is-active]="featuredTermination ? featuredTermination.id === item.id : false"
+              (click)="openDetailsModal(item)"
+              (keydown.enter)="openDetailsModal(item)"
+              (keydown.space)="$event.preventDefault(); openDetailsModal(item)"
+              tabindex="0"
+              role="button"
+              aria-label="Open termination details"
+            >
+              <div class="ops-card-head">
+                <div>
+                  <span class="ops-panel-kicker">Termination</span>
+                  <h3>{{ item.employeeName }}</h3>
+                </div>
+                <span class="ops-status" [ngClass]="'tone-' + item.qualityTone">{{ item.qualityLabel }}</span>
+              </div>
+
+              <p>{{ item.summary }}</p>
+
+              <div class="ops-progress-wrap">
+                <div class="ops-progress-top">
+                  <span>Record readiness</span>
+                  <strong>{{ item.qualityScore }}%</strong>
+                </div>
+                <div class="ops-progress-track">
+                  <span [style.width.%]="item.qualityScore"></span>
+                </div>
+              </div>
+
+              <div class="ops-chip-row">
+                <span class="ops-chip">{{ item.typeTermination }}</span>
+                <span class="ops-chip">{{ item.terminationDateLabel }}</span>
+              </div>
+
+              <div class="ops-card-view">
+                <span>Click to view details</span>
+                <i class="bi bi-arrow-up-right"></i>
+              </div>
+
+              <div class="ops-card-actions">
+                <button type="button" class="btn btn-light btn-sm" data-bs-toggle="modal" data-bs-target="#terminationCrudModal" (click)="openEditModal(item); $event.stopPropagation()">
+                  <i class="bi bi-pencil-square"></i>
+                  Edit
+                </button>
+                <button type="button" class="btn btn-light btn-sm" (click)="deleteTermination(item); $event.stopPropagation()" [disabled]="deletingId === item.id">
+                  <i class="bi bi-trash3"></i>
+                  {{ deletingId === item.id ? 'Deleting...' : 'Delete' }}
+                </button>
+              </div>
+            </article>
+          </div>
+        </ng-template>
+
+        <ng-template #terminationEmpty>
+          <article class="card ops-empty-card">
+            <span class="ops-empty-kicker">No matching terminations</span>
+            <h3>The current search or filter does not match any termination record.</h3>
+            <p>Reset the filters or create a termination to rebuild the exit-control view.</p>
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#terminationCrudModal" (click)="openCreateModal()">
+              <i class="bi bi-plus-square-fill"></i>
+              Create termination
+            </button>
+          </article>
+        </ng-template>
+      </div>
+
+      <aside class="ops-side">
+        <article class="card ops-panel-card" *ngIf="featuredTermination; else emptyTerminationPanel">
+          <div class="ops-panel-head">
+            <div>
+              <span>Selected termination</span>
+              <h3>{{ featuredTermination.employeeName }}</h3>
+            </div>
+            <span class="ops-status" [ngClass]="'tone-' + featuredTermination.qualityTone">{{ featuredTermination.qualityLabel }}</span>
+          </div>
+
+          <p>{{ featuredTermination.summary }}</p>
+
+          <div class="ops-fact-grid">
+            <div>
+              <span class="ops-detail-label">Type</span>
+              <strong>{{ featuredTermination.typeTermination }}</strong>
+            </div>
+            <div>
+              <span class="ops-detail-label">Notice date</span>
+              <strong>{{ featuredTermination.noticeDateLabel }}</strong>
+            </div>
+            <div>
+              <span class="ops-detail-label">Termination date</span>
+              <strong>{{ featuredTermination.terminationDateLabel }}</strong>
+            </div>
+            <div>
+              <span class="ops-detail-label">Documented</span>
+              <strong>{{ featuredTermination.documented ? 'Yes' : 'No' }}</strong>
+            </div>
+          </div>
+
+          <div class="ops-note-card">
+            <h4>Recommendation</h4>
+            <p>{{ featuredRecommendation }}</p>
+          </div>
+
+          <div class="ops-note-card accent-soft">
+            <h4>Next action</h4>
+            <p>{{ featuredNextAction }}</p>
+          </div>
+
+          <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#terminationCrudModal" (click)="openEditModal(featuredTermination)">
+            <i class="bi bi-pencil-square"></i>
+            Edit selected termination
+          </button>
+        </article>
+
+        <ng-template #emptyTerminationPanel>
+          <article class="card ops-panel-card">
+            <span class="ops-empty-kicker">Termination preview</span>
+            <h3>Select a termination to inspect it here.</h3>
+            <p>The side panel highlights timing, type, and the quality of the termination context.</p>
+          </article>
+        </ng-template>
+      </aside>
     </div>
   </section>
+</div>
+
+<div class="modal fade text-left" id="terminationDetailsModal" tabindex="-1" aria-labelledby="terminationDetailsModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content ops-modal-content" *ngIf="featuredTermination">
+      <div class="ops-modal-header">
+        <div>
+          <span class="ops-eyebrow">Termination details</span>
+          <h5 class="modal-title ops-modal-title" id="terminationDetailsModalLabel">{{ featuredTermination.employeeName }}</h5>
+          <p class="ops-modal-copy">Review the notice window, type, reason, and recorded description for the selected termination.</p>
+        </div>
+
+        <div class="ops-details-actions">
+          <span class="ops-status" [ngClass]="'tone-' + featuredTermination.qualityTone">{{ featuredTermination.qualityLabel }}</span>
+          <button type="button" class="ops-modal-close" data-bs-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="ops-modal-body">
+        <div class="ops-details-layout">
+          <div class="ops-details-main">
+            <section class="ops-details-section">
+              <span class="ops-panel-kicker">Termination summary</span>
+              <h6>Exit control overview</h6>
+              <p class="ops-detail-copy">{{ featuredTermination.summary }}</p>
+            </section>
+
+            <div class="ops-details-metrics">
+              <article class="ops-details-metric">
+                <span class="ops-detail-label">Type</span>
+                <strong>{{ featuredTermination.typeTermination }}</strong>
+              </article>
+              <article class="ops-details-metric">
+                <span class="ops-detail-label">Notice</span>
+                <strong>{{ featuredTermination.noticeDateLabel }}</strong>
+              </article>
+              <article class="ops-details-metric">
+                <span class="ops-detail-label">Termination</span>
+                <strong>{{ featuredTermination.terminationDateLabel }}</strong>
+              </article>
+            </div>
+
+            <section class="ops-details-section">
+              <span class="ops-panel-kicker">Recorded context</span>
+              <h6>Reason and description</h6>
+              <p class="ops-detail-copy">{{ featuredTermination.description || featuredTermination.reason }}</p>
+            </section>
+
+            <section class="ops-details-section accent-soft">
+              <span class="ops-panel-kicker">Recommendation</span>
+              <h6>Compliance follow-up</h6>
+              <p>{{ featuredRecommendation }}</p>
+            </section>
+          </div>
+
+          <aside class="ops-details-side">
+            <section class="ops-details-facts">
+              <span class="ops-panel-kicker">Quick facts</span>
+              <h6>Termination overview</h6>
+
+              <div class="ops-details-fact">
+                <strong>Reason</strong>
+                <span>{{ featuredTermination.reason }}</span>
+              </div>
+              <div class="ops-details-fact">
+                <strong>Scheduled</strong>
+                <span>{{ featuredTermination.scheduled ? 'Yes' : 'No' }}</span>
+              </div>
+              <div class="ops-details-fact">
+                <strong>Completed</strong>
+                <span>{{ featuredTermination.completed ? 'Yes' : 'No' }}</span>
+              </div>
+              <div class="ops-details-fact">
+                <strong>Record ID</strong>
+                <span>#{{ featuredTermination.id }}</span>
+              </div>
+            </section>
+          </aside>
+        </div>
+      </div>
+
+      <div class="ops-modal-footer">
+        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary" data-bs-dismiss="modal" data-bs-toggle="modal" data-bs-target="#terminationCrudModal" (click)="openEditModal(featuredTermination)">
+          <i class="bi bi-pencil-square"></i>
+          Edit termination
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade text-left" id="terminationCrudModal" tabindex="-1" aria-labelledby="terminationCrudModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content ops-modal-content">
+      <div class="ops-modal-header">
+        <div>
+          <span class="ops-eyebrow">Termination editor</span>
+          <h5 class="modal-title ops-modal-title" id="terminationCrudModalLabel">{{ modalTitle }}</h5>
+          <p class="ops-modal-copy">{{ modalSubtitle }}</p>
+        </div>
+        <button type="button" class="ops-modal-close" data-bs-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+
+      <div class="ops-modal-body">
+        <form [formGroup]="terminationForm" (ngSubmit)="saveTermination()">
+          <div class="ops-form-grid">
+            <section class="ops-form-section">
+              <span class="ops-panel-kicker">Termination setup</span>
+              <h6>Core record information</h6>
+
+              <div class="ops-form-field">
+                <label for="terminationEmployeeId">Employee</label>
+                <select id="terminationEmployeeId" formControlName="employeeId">
+                  <option value="">Select employee</option>
+                  <option *ngFor="let option of employees" [value]="option.id">{{ option.name }}</option>
+                </select>
+                <div class="ops-field-error" *ngIf="submitted && terminationForm.get('employeeId').invalid">Employee is required.</div>
+              </div>
+
+              <div class="ops-form-split">
+                <div class="ops-form-field">
+                  <label for="terminationType">Termination type</label>
+                  <input id="terminationType" type="text" formControlName="typeTermination" placeholder="Example: Layoff" />
+                  <div class="ops-field-error" *ngIf="submitted && terminationForm.get('typeTermination').invalid">Termination type is required.</div>
+                </div>
+
+                <div class="ops-form-field">
+                  <label for="terminationReason">Reason</label>
+                  <input id="terminationReason" type="text" formControlName="reason" placeholder="Example: Budget" />
+                  <div class="ops-field-error" *ngIf="submitted && terminationForm.get('reason').invalid">Reason is required.</div>
+                </div>
+              </div>
+
+              <div class="ops-form-split">
+                <div class="ops-form-field">
+                  <label for="terminationNoticeDate">Notice date</label>
+                  <input id="terminationNoticeDate" type="date" formControlName="noticeDate" />
+                  <div class="ops-field-error" *ngIf="submitted && terminationForm.get('noticeDate').invalid">Notice date is required.</div>
+                </div>
+
+                <div class="ops-form-field">
+                  <label for="terminationDate">Termination date</label>
+                  <input id="terminationDate" type="date" formControlName="terminationDate" />
+                  <div class="ops-field-error" *ngIf="submitted && terminationForm.get('terminationDate').invalid">Termination date is required.</div>
+                </div>
+              </div>
+
+              <div class="ops-form-field">
+                <label for="terminationDescription">Description</label>
+                <textarea id="terminationDescription" rows="4" formControlName="description" placeholder="Add supporting compliance or operational context."></textarea>
+              </div>
+            </section>
+
+            <aside class="ops-form-preview">
+              <span class="ops-panel-kicker">Live preview</span>
+              <h4>{{ draftEmployeeName || 'Employee pending' }}</h4>
+              <p>Termination record readiness is driven by notice timing, type, and supporting description quality.</p>
+
+              <div class="ops-progress-wrap">
+                <div class="ops-progress-top">
+                  <span>Readiness</span>
+                  <strong>{{ draftQuality.score }}%</strong>
+                </div>
+                <div class="ops-progress-track">
+                  <span [style.width.%]="draftQuality.score"></span>
+                </div>
+              </div>
+
+              <div class="ops-chip-row">
+                <span class="ops-chip">{{ draftQuality.label }}</span>
+                <span class="ops-chip">{{ normalizeText(terminationForm.value.typeTermination) || 'Type pending' }}</span>
+              </div>
+            </aside>
+          </div>
+
+          <div class="ops-modal-actions">
+            <button type="button" class="btn btn-light" data-bs-dismiss="modal" id="terminationCrudModalClose">Cancel</button>
+            <button type="submit" class="btn btn-primary" [disabled]="saving">
+              <i class="bi" [ngClass]="saving ? 'bi-arrow-repeat' : 'bi-check2-circle'"></i>
+              {{ saving ? 'Saving...' : modalMode === 'create' ? 'Create termination' : 'Save changes' }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
 </div>

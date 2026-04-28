@@ -1,0 +1,292 @@
+<div class="page-heading mb-3 d-flex justify-content-between align-items-center gap-2 flex-wrap">
+  <div>
+    <h3>Documentation: Installation Guide</h3>
+    <p class="text-muted mb-0">Installation is divided into two tracks: Local Installation and Remote Installation.</p>
+  </div>
+  <a routerLink="/documentation" class="btn btn-outline-primary">Back to Documentation</a>
+</div>
+
+<div class="card shadow-sm mb-3">
+  <div class="card-body d-flex flex-wrap justify-content-between align-items-center gap-2">
+    <div>
+      <h5 class="mb-1">Track A: Local Installation</h5>
+      <p class="text-muted mb-0">Use this for development, testing, and first-time setup on your own machine.</p>
+    </div>
+    <span class="badge bg-primary">Local</span>
+  </div>
+</div>
+
+<div class="card shadow-sm mb-3">
+  <div class="card-body">
+    <h5>Step 1: Install Prerequisites</h5>
+    <div class="row g-3">
+      <div class="col-md-6">
+        <h6>Required Software</h6>
+        <ul class="mb-0">
+          <li>Node.js 14.x or 16.x</li>
+          <li>npm</li>
+          <li>Java 11 JDK</li>
+          <li>PostgreSQL 12+</li>
+        </ul>
+      </div>
+      <div class="col-md-6">
+        <h6>Recommended Tools</h6>
+        <ul class="mb-0">
+          <li>Git</li>
+          <li>pgAdmin or another PostgreSQL client</li>
+          <li>Terminal access with admin permissions</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="card shadow-sm mb-3">
+  <div class="card-body">
+    <h5>Step 2: Local Installation</h5>
+    <ol>
+      <li>Clone project and move into root folder.</li>
+      <li>Run <code>npm install</code>.</li>
+      <li>Create PostgreSQL database named <strong>humant</strong>.</li>
+      <li>Update datasource values in <code>backend/src/main/resources/application.properties</code>.</li>
+      <li>Start backend from <code>backend</code> folder.</li>
+      <li>Start frontend on port 4201.</li>
+      <li>Open app and verify login plus module navigation.</li>
+    </ol>
+
+    <h6 class="mt-3">Reference Commands</h6>
+    <div class="bg-light border rounded p-3 mb-2">
+      <div class="small text-muted mb-2">Project Setup</div>
+      <code>git clone &lt;repository-url&gt;</code><br />
+      <code>cd humant</code><br />
+      <code>npm install</code>
+    </div>
+    <div class="bg-light border rounded p-3 mb-2">
+      <div class="small text-muted mb-2">Database</div>
+      <code>CREATE DATABASE humant;</code>
+    </div>
+    <div class="bg-light border rounded p-3 mb-2">
+      <div class="small text-muted mb-2">Backend (Windows)</div>
+      <code>Push-Location .\backend</code><br />
+      <code>.\mvnw.cmd spring-boot:run</code>
+    </div>
+    <div class="bg-light border rounded p-3">
+      <div class="small text-muted mb-2">Backend (Linux/macOS)</div>
+      <code>cd backend</code><br />
+      <code>./mvnw spring-boot:run</code>
+    </div>
+    <div class="bg-light border rounded p-3">
+      <div class="small text-muted mb-2">Frontend</div>
+      <code>npm run serve -- --port 4201</code>
+    </div>
+
+    <p class="text-muted mt-3 mb-0">
+      Verify endpoints: frontend at http://localhost:4201 and backend at http://localhost:8080.
+    </p>
+  </div>
+</div>
+
+<div class="card shadow-sm mb-3">
+  <div class="card-body">
+    <h5>Track B: Remote Installation (Server/Cloud)</h5>
+    <p class="text-muted">Use one of the following options to deploy HUMANT remotely.</p>
+
+    <h6 class="mt-3">Step 3: Choose Deployment Target</h6>
+    <div class="row g-3">
+      <div class="col-lg-4">
+        <div class="border rounded p-3 h-100">
+          <h6>AWS Deployment</h6>
+          <ol class="mb-0">
+            <li>Provision RDS PostgreSQL instance.</li>
+            <li>Deploy backend to EC2, Elastic Beanstalk, or ECS.</li>
+            <li>Deploy frontend to S3 + CloudFront.</li>
+            <li>Use ALB or Nginx for API routing and TLS.</li>
+            <li>Store secrets in AWS Systems Manager Parameter Store.</li>
+            <li>Enable CloudWatch alarms and backup policies.</li>
+          </ol>
+        </div>
+      </div>
+      <div class="col-lg-4">
+        <div class="border rounded p-3 h-100">
+          <h6>Heroku Deployment</h6>
+          <ol class="mb-0">
+            <li>Create separate apps for backend and frontend static host.</li>
+            <li>Add Heroku Postgres addon for database.</li>
+            <li>Set backend env vars for DB URL/user/password.</li>
+            <li>Deploy backend JAR via GitHub integration or Heroku CLI.</li>
+            <li>Publish Angular build to static host and point API base URL.</li>
+            <li>Validate login flow and role-based route access.</li>
+          </ol>
+        </div>
+      </div>
+      <div class="col-lg-4">
+        <div class="border rounded p-3 h-100">
+          <h6>VPS Deployment</h6>
+          <ol class="mb-0">
+            <li>Install Java 11, PostgreSQL, Nginx, and Node.js.</li>
+            <li>Build frontend and backend artifacts.</li>
+            <li>Run backend as systemd service.</li>
+            <li>Serve frontend with Nginx and proxy API to backend.</li>
+            <li>Configure firewall, TLS certificates, and backups.</li>
+            <li>Run smoke tests after each deployment.</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+
+    <div class="alert alert-light border mt-3 mb-0">
+      <strong>Recommended:</strong> keep backend private to internal traffic and expose only reverse-proxy endpoints publicly.
+    </div>
+  </div>
+</div>
+
+<div class="card shadow-sm mb-3">
+  <div class="card-body">
+    <h5>Complete VPS Deployment Steps (Ubuntu)</h5>
+    <ol>
+      <li>Install packages: Nginx, Java 11, PostgreSQL, certbot.</li>
+      <li>Create PostgreSQL database and dedicated DB user.</li>
+      <li>Build project artifacts (frontend + backend JAR).</li>
+      <li>Upload backend JAR to <code>/opt/humant/backend/app.jar</code>.</li>
+      <li>Upload frontend build to <code>/var/www/humant</code>.</li>
+      <li>Create and enable <code>humant-backend.service</code>.</li>
+      <li>Configure Nginx for Angular SPA and API proxy.</li>
+      <li>Enable TLS and firewall rules, then run smoke tests.</li>
+    </ol>
+
+    <h6>Key Commands</h6>
+    <div class="bg-light border rounded p-3 mb-2">
+      <code>sudo apt update</code><br />
+      <code>sudo apt install -y nginx postgresql postgresql-contrib openjdk-11-jre-headless certbot python3-certbot-nginx</code>
+    </div>
+    <div class="bg-light border rounded p-3 mb-2">
+      <code>sudo systemctl enable humant-backend</code><br />
+      <code>sudo systemctl restart humant-backend</code><br />
+      <code>sudo nginx -t ; sudo systemctl reload nginx</code>
+    </div>
+    <div class="bg-light border rounded p-3">
+      <code>sudo certbot --nginx -d your-domain.example.com</code>
+    </div>
+  </div>
+</div>
+
+<div class="card shadow-sm mb-3">
+  <div class="card-body">
+    <h5>Complete AWS Deployment Steps</h5>
+    <ol>
+      <li>Create RDS PostgreSQL instance and secure access from app layer only.</li>
+      <li>Deploy backend artifact to EC2, ECS, or Elastic Beanstalk.</li>
+      <li>Set datasource environment variables with RDS endpoint.</li>
+      <li>Build frontend and upload static files to S3.</li>
+      <li>Put CloudFront in front of S3 and configure SPA fallback.</li>
+      <li>Configure API routing via ALB or reverse proxy.</li>
+      <li>Enable ACM certificates, CloudWatch logs, alarms, and backups.</li>
+    </ol>
+
+    <h6>Key Commands</h6>
+    <div class="bg-light border rounded p-3 mb-2">
+      <code>npm ci</code><br />
+      <code>npm run build</code><br />
+      <code>cd backend ; ./mvnw clean package</code>
+    </div>
+    <div class="bg-light border rounded p-3">
+      <code>aws s3 sync dist/ s3://your-frontend-bucket --delete</code>
+    </div>
+  </div>
+</div>
+
+<div class="card shadow-sm mb-3">
+  <div class="card-body">
+    <h5>Complete Heroku Deployment Steps</h5>
+    <ol>
+      <li>Create Heroku app for backend and add Heroku Postgres.</li>
+      <li>Set Java buildpack and backend datasource config vars.</li>
+      <li>Deploy backend and watch logs for startup success.</li>
+      <li>Deploy frontend to static hosting and point API URL to Heroku backend.</li>
+      <li>Validate login, data read/write, and role-based route access.</li>
+    </ol>
+
+    <h6>Key Commands</h6>
+    <div class="bg-light border rounded p-3 mb-2">
+      <code>heroku login</code><br />
+      <code>heroku create humant-backend</code><br />
+      <code>heroku addons:create heroku-postgresql:essential-0 -a humant-backend</code>
+    </div>
+    <div class="bg-light border rounded p-3">
+      <code>heroku config:set SPRING_DATASOURCE_URL=&lt;jdbc-url&gt; -a humant-backend</code><br />
+      <code>heroku config:set SPRING_DATASOURCE_USERNAME=&lt;db-user&gt; -a humant-backend</code><br />
+      <code>heroku config:set SPRING_DATASOURCE_PASSWORD=&lt;db-password&gt; -a humant-backend</code><br />
+      <code>git push heroku main</code>
+    </div>
+  </div>
+</div>
+
+<div class="card shadow-sm mb-3">
+  <div class="card-body">
+    <h5>Step 4: User Panel Details</h5>
+    <p>
+      User Panel behavior is role-based. Each logged-in user sees only modules
+      allowed by access policy and assigned authority.
+    </p>
+    <div class="row g-3">
+      <div class="col-md-6">
+        <h6>Panel Sections</h6>
+        <ul class="mb-0">
+          <li>Executive Dashboard</li>
+          <li>People and Structure modules</li>
+          <li>Talent and Growth modules</li>
+          <li>Time and Compensation modules</li>
+          <li>Risk, Exit, Settings, and Documentation</li>
+        </ul>
+      </div>
+      <div class="col-md-6">
+        <h6>Role Visibility (Typical)</h6>
+        <ul class="mb-0">
+          <li>Admin: full workspace visibility</li>
+          <li>HR: people, talent, and compliance modules</li>
+          <li>Payroll/Finance: salary, payslip, loan, expenses, advances</li>
+          <li>Manager: team operations and review-related modules</li>
+          <li>Employee: self-service modules (profile, leave, payslip, expense)</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="card shadow-sm">
+  <div class="card-body">
+    <h5>Step 5: Go-Live Checklist</h5>
+    <div class="row g-3">
+      <div class="col-md-6">
+        <h6>Security</h6>
+        <ul class="mb-0">
+          <li>Strong DB and service credentials configured</li>
+          <li>TLS certificates installed and auto-renewal validated</li>
+          <li>Least-privilege access to deployment hosts</li>
+          <li>Sensitive modules restricted by policy and role</li>
+        </ul>
+      </div>
+      <div class="col-md-6">
+        <h6>Operations</h6>
+        <ul class="mb-0">
+          <li>Health checks and alerting enabled</li>
+          <li>Database backup and restore test completed</li>
+          <li>Rollback procedure documented and validated</li>
+          <li>User login and role-routing smoke test completed</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="card shadow-sm mt-3">
+  <div class="card-body">
+    <h5>Troubleshooting</h5>
+    <ul class="mb-0">
+      <li><strong>DB connection failed:</strong> verify PostgreSQL service, credentials, and database name.</li>
+      <li><strong>Frontend not loading:</strong> re-run <code>npm install</code> and use Node.js 14/16.</li>
+      <li><strong>Port conflict:</strong> change frontend port or stop process on 4201/8080.</li>
+      <li><strong>Access denied after login:</strong> verify role assignment and access policy rules.</li>
+    </ul>
+  </div>
+</div>

@@ -1,9 +1,42 @@
-<a class="nav-link active dropdown-toggle" href="#" data-bs-toggle="dropdown" aria-expanded="false">
-    <i class='bi bi-envelope bi-sub fs-4 text-gray-600'></i>
+<a
+    class="nav-link dropdown-toggle topbar-menu-trigger"
+    href="#"
+    data-bs-toggle="dropdown"
+    aria-expanded="false"
+>
+    <span class="topbar-icon-shell">
+        <i class="bi bi-envelope-fill"></i>
+        <span class="topbar-badge" *ngIf="unreadCount > 0">{{ unreadCount > 99 ? '99+' : unreadCount }}</span>
+    </span>
 </a>
-<ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuButton">
-    <li>
-        <h6 class="dropdown-header">Mail</h6>
+<ul class="dropdown-menu dropdown-menu-end topbar-dropdown topbar-dropdown-wide">
+    <li class="dropdown-header-block">
+        <div>
+            <span class="dropdown-eyebrow">Inbox</span>
+            <h6>Recent communications</h6>
+        </div>
+        <span class="dropdown-count">{{ unreadCount }} unread</span>
     </li>
-    <li><a class="dropdown-item" href="#">No new mail</a></li>
+    <li *ngIf="loading">
+        <span class="dropdown-item topbar-empty-state">Loading communications...</span>
+    </li>
+    <li *ngIf="!loading && !notifications.length">
+        <span class="dropdown-item topbar-empty-state">No recent communications available.</span>
+    </li>
+    <li *ngFor="let item of notifications">
+        <a class="dropdown-item topbar-list-item" [class.is-read]="item.read" [routerLink]="item.route || '/communication'" (click)="markAsRead(item)">
+            <span class="topbar-list-accent" [ngClass]="item.accentClass"></span>
+            <span>
+                <small class="topbar-list-type">{{ item.typeLabel }}</small>
+                <strong class="topbar-list-title">{{ item.title }}</strong>
+                <small class="topbar-list-copy">
+                    {{ item.message }}
+                </small>
+            </span>
+            <span class="topbar-list-meta">{{ item.createdAtLabel }}</span>
+        </a>
+    </li>
+    <li class="dropdown-footer-block">
+        <a class="dropdown-item topbar-footer-link" routerLink="/communication">Open communication center</a>
+    </li>
 </ul>

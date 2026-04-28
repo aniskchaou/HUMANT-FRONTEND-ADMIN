@@ -1,150 +1,444 @@
-<div class="page-heading">
-  <section class="section">
-    <div class="card">
-      <div class="card-header">
-        <h2>Trainings</h2>
-      </div>
-      <div class="card-body">
-        <div class="dataTable-container">
+<div class="page-heading ops-page">
+  <section class="ops-shell">
+    <article class="card ops-hero">
+      <div class="ops-hero-copy">
+        <span class="ops-eyebrow">Learning programs</span>
+        <h2>Track every program with enough detail to manage delivery confidently.</h2>
+        <p>
+          See who is enrolled, which learning track they belong to, and how each
+          program is progressing without dropping back into modal-heavy legacy tables.
+        </p>
+
+        <div class="ops-hero-actions">
           <button
             type="button"
-            class="btn btn-success btn-sm"
+            class="btn btn-primary"
             data-bs-toggle="modal"
-            data-bs-target="#add"
+            data-bs-target="#trainingCrudModal"
+            (click)="openCreateModal()"
           >
-            <i class="fas fa-plus-square"></i> Create
+            <i class="bi bi-plus-square-fill"></i>
+            Create learning program
           </button>
-          <table
-            id="table"
-            cellpadding="0"
-            cellspacing="0"
-            border="0"
-            class="datatable-1 table table-bordered table-striped display"
-            width="100%"
+          <button
+            type="button"
+            class="btn btn-light"
+            (click)="refreshTrainings()"
+            [disabled]="loading"
           >
-            <thead>
-              <tr>
-                <th>Employee</th>
-                <th>Start</th>
-                <th>End</th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr class="odd gradeX" *ngFor="let t of training$">
-                <td>{{ t.employee?.fullName }}</td>
-                <td>{{ t.startDate }}</td>
-                <td>{{ t.endDate }}</td>
-                <td>
-                  <!--  <button
-                    type="button"
-                    data-bs-toggle="modal"
-                    (click)="edit(t.id)"
-                    data-bs-target="#edit"
-                    class="btn btn-warning btn-sm"
-                  >
-                    <i class="fas fa-edit"></i>
-                  </button> -->
-                  <button
-                    type="button"
-                    class="btn btn-danger btn-sm"
-                    (click)="delete(t.id)"
-                  >
-                    <i class="fas fa-trash-alt"></i>
-                  </button>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+            <i class="bi bi-arrow-repeat"></i>
+            Refresh
+          </button>
+        </div>
 
-          <div
-            class="modal fade text-left"
-            id="edit"
-            tabindex="-1"
-            aria-labelledby="myModalLabel1"
-            style="display: none"
-            aria-hidden="true"
-          >
-            <div
-              class="modal-dialog modal-dialog-scrollable modal-lg"
-              role="document"
-            >
-              <div class="modal-content">
-                <div class="modal-header">
-                  <h5 class="modal-title" id="myModalLabel1">Edit</h5>
-                  <button
-                    type="button"
-                    class="close rounded-pill"
-                    data-bs-dismiss="modal"
-                    aria-label="Close"
-                  >
-                    <i data-feather="x"></i>
-                  </button>
-                </div>
-                <div class="modal-body">
-                  <app-edit-training
-                    (closeModalEvent)="closeModalEdit()"
-                    [id]="id"
-                  ></app-edit-training>
-                </div>
-                <div class="modal-footer">
-                  <button
-                    type="button"
-                    class="btn closeEdit"
-                    data-bs-dismiss="modal"
-                  >
-                    <i class="bx bx-x d-block d-sm-none"></i>
-                    <span class="d-none d-sm-block">Close</span>
-                  </button>
-                </div>
-              </div>
-            </div>
+        <div class="ops-hero-notice" *ngIf="loadError">{{ loadError }}</div>
+      </div>
+
+      <div class="ops-hero-panel">
+        <span class="ops-panel-kicker">Learning pulse</span>
+        <h3>Program activity and record quality across the workspace</h3>
+
+        <div class="ops-metric-grid">
+          <div class="ops-metric-card">
+            <span>Total programs</span>
+            <strong>{{ totalTrainingsCount }}</strong>
+            <p>All learning programs currently available from the backend.</p>
           </div>
-
-          <div
-            class="modal fade text-left"
-            id="add"
-            tabindex="-1"
-            aria-labelledby="myModalLabel1"
-            style="display: none"
-            aria-hidden="true"
-          >
-            <div
-              class="modal-dialog modal-dialog-scrollable modal-lg"
-              role="document"
-            >
-              <div class="modal-content">
-                <div class="modal-header">
-                  <h5 class="modal-title" id="myModalLabel1">Create</h5>
-                  <button
-                    type="button"
-                    class="close rounded-pill"
-                    data-bs-dismiss="modal"
-                    aria-label="Close"
-                  >
-                    <i data-feather="x"></i>
-                  </button>
-                </div>
-                <div class="modal-body">
-                  <app-add-training
-                    (closeModalEvent)="closeModalAdd()"
-                  ></app-add-training>
-                </div>
-                <div class="modal-footer">
-                  <button
-                    type="button"
-                    class="btn closeAdd"
-                    data-bs-dismiss="modal"
-                  >
-                    <i class="bx bx-x d-block d-sm-none"></i>
-                    <span class="d-none d-sm-block">Close</span>
-                  </button>
-                </div>
-              </div>
-            </div>
+          <div class="ops-metric-card">
+            <span>Active now</span>
+            <strong>{{ activeTrainingsCount }}</strong>
+            <p>Programs whose learning window is currently in progress.</p>
           </div>
         </div>
+
+        <div class="ops-progress-wrap">
+          <div class="ops-progress-top">
+            <span>Documentation coverage</span>
+            <strong>{{ documentationCoverage }}%</strong>
+          </div>
+          <div class="ops-progress-track">
+            <span [style.width.%]="documentationCoverage"></span>
+          </div>
+          <p>
+            {{ documentedTrainingsCount }} of {{ totalTrainingsCount }} program{{ totalTrainingsCount === 1 ? '' : 's' }} include supporting notes.
+          </p>
+        </div>
       </div>
+    </article>
+
+    <div class="ops-stat-grid">
+      <article class="card ops-stat-card tone-primary">
+        <span>Learning programs</span>
+        <strong>{{ totalTrainingsCount }}</strong>
+        <p>All active and planned programs currently tracked in the admin workspace.</p>
+      </article>
+
+      <article class="card ops-stat-card tone-secondary">
+        <span>In progress</span>
+        <strong>{{ activeTrainingsCount }}</strong>
+        <p>Programs that are actively running for participants right now.</p>
+      </article>
+
+      <article class="card ops-stat-card tone-warning">
+        <span>Upcoming</span>
+        <strong>{{ upcomingTrainingsCount }}</strong>
+        <p>Scheduled learning programs that have not started yet.</p>
+      </article>
+
+      <article class="card ops-stat-card tone-danger">
+        <span>With notes</span>
+        <strong>{{ documentedTrainingsCount }}</strong>
+        <p>Programs that include useful delivery or objective context.</p>
+      </article>
+    </div>
+
+    <article class="card ops-toolbar-card">
+      <div class="ops-toolbar">
+        <label class="ops-search-field">
+          <i class="bi bi-search"></i>
+          <input
+            type="text"
+            [ngModel]="searchTerm"
+            (ngModelChange)="onSearchTermChange($event)"
+            placeholder="Search programs, participants, or learning tracks"
+          />
+        </label>
+
+        <div class="ops-toolbar-controls">
+          <label>
+            <span>Filter</span>
+            <select
+              [ngModel]="activeFilter"
+              (ngModelChange)="onFilterChange($event)"
+            >
+              <option value="all">All programs</option>
+              <option value="active">In progress</option>
+              <option value="upcoming">Upcoming</option>
+              <option value="completed">Completed</option>
+            </select>
+          </label>
+
+          <label>
+            <span>Sort</span>
+            <select
+              [ngModel]="activeSort"
+              (ngModelChange)="onSortChange($event)"
+            >
+              <option value="quality">Readiness</option>
+              <option value="nearest">Nearest start</option>
+              <option value="name-asc">Name A-Z</option>
+            </select>
+          </label>
+        </div>
+      </div>
+
+      <div class="ops-toolbar-footer">
+        <span>{{ filteredResultsLabel }}</span>
+        <span>
+          {{ featuredTraining ? featuredTraining.name : 'No learning program selected' }}
+        </span>
+      </div>
+    </article>
+
+    <div class="ops-layout">
+      <div class="ops-main">
+        <div class="ops-loading-grid" *ngIf="loading; else trainingReady">
+          <div
+            class="ops-skeleton-card"
+            *ngFor="let item of loadingPlaceholders"
+          ></div>
+        </div>
+
+        <ng-template #trainingReady>
+          <div class="ops-grid" *ngIf="filteredTrainings.length; else trainingEmpty">
+            <article
+              class="card ops-card"
+              *ngFor="let item of filteredTrainings; trackBy: trackByTrainingId"
+              [class.is-active]="featuredTraining ? featuredTraining.id === item.id : false"
+              (click)="selectTraining(item)"
+              (keydown.enter)="selectTraining(item)"
+              (keydown.space)="selectTraining(item); $event.preventDefault()"
+              tabindex="0"
+              role="button"
+            >
+              <div class="ops-card-head">
+                <div>
+                  <span class="ops-panel-kicker">Learning program</span>
+                  <h3>{{ item.name }}</h3>
+                </div>
+                <span class="ops-status" [ngClass]="'tone-' + item.qualityTone">
+                  {{ item.qualityLabel }}
+                </span>
+              </div>
+
+              <p>{{ item.summary }}</p>
+
+              <div class="ops-progress-wrap">
+                <div class="ops-progress-top">
+                  <span>Readiness</span>
+                  <strong>{{ item.qualityScore }}%</strong>
+                </div>
+                <div class="ops-progress-track">
+                  <span [style.width.%]="item.qualityScore"></span>
+                </div>
+              </div>
+
+              <div class="ops-chip-row">
+                <span class="ops-chip">{{ item.employeeName || 'Participant pending' }}</span>
+                <span class="ops-chip">{{ item.trainingTypeName || 'Track pending' }}</span>
+                <span class="ops-chip">{{ item.durationLabel }}</span>
+              </div>
+
+              <div class="ops-card-actions">
+                <button
+                  type="button"
+                  class="btn btn-light btn-sm"
+                  data-bs-toggle="modal"
+                  data-bs-target="#trainingCrudModal"
+                  (click)="openEditModal(item); $event.stopPropagation()"
+                >
+                  <i class="bi bi-pencil-square"></i>
+                  Edit
+                </button>
+                <button
+                  type="button"
+                  class="btn btn-light btn-sm"
+                  (click)="deleteTraining(item); $event.stopPropagation()"
+                  [disabled]="deletingId === item.id"
+                >
+                  <i class="bi bi-trash3"></i>
+                  {{ deletingId === item.id ? 'Deleting...' : 'Delete' }}
+                </button>
+              </div>
+            </article>
+          </div>
+        </ng-template>
+
+        <ng-template #trainingEmpty>
+          <article class="card ops-empty-card">
+            <span class="ops-empty-kicker">No matching learning programs</span>
+            <h3>The current search or filter does not match any program.</h3>
+            <p>
+              Reset the filters or create a new program to rebuild the learning workspace.
+            </p>
+            <button
+              type="button"
+              class="btn btn-primary"
+              data-bs-toggle="modal"
+              data-bs-target="#trainingCrudModal"
+              (click)="openCreateModal()"
+            >
+              <i class="bi bi-plus-square-fill"></i>
+              Create learning program
+            </button>
+          </article>
+        </ng-template>
+      </div>
+
+      <aside class="ops-side">
+        <article class="card ops-panel-card" *ngIf="featuredTraining; else emptyTrainingPanel">
+          <div class="ops-panel-head">
+            <div>
+              <span>Selected program</span>
+              <h3>{{ featuredTraining.name }}</h3>
+            </div>
+            <span class="ops-status" [ngClass]="'tone-' + featuredTraining.qualityTone">
+              {{ featuredTraining.qualityLabel }}
+            </span>
+          </div>
+
+          <p>{{ featuredTraining.summary }}</p>
+
+          <div class="ops-fact-grid">
+            <div>
+              <span class="ops-detail-label">Participant</span>
+              <strong>{{ featuredTraining.employeeName || 'Pending' }}</strong>
+            </div>
+            <div>
+              <span class="ops-detail-label">Track</span>
+              <strong>{{ featuredTraining.trainingTypeName || 'Pending' }}</strong>
+            </div>
+            <div>
+              <span class="ops-detail-label">Start</span>
+              <strong>{{ featuredTraining.startDateLabel }}</strong>
+            </div>
+            <div>
+              <span class="ops-detail-label">End</span>
+              <strong>{{ featuredTraining.endDateLabel }}</strong>
+            </div>
+          </div>
+
+          <div class="ops-panel-note accent">
+            <span class="ops-detail-label">Program status</span>
+            <p>{{ featuredTraining.timelineLabel }}</p>
+            <p *ngIf="featuredTraining.description">
+              {{ featuredTraining.description }}
+            </p>
+          </div>
+
+          <button
+            type="button"
+            class="btn btn-primary"
+            data-bs-toggle="modal"
+            data-bs-target="#trainingCrudModal"
+            (click)="openEditModal(featuredTraining)"
+          >
+            <i class="bi bi-pencil-square"></i>
+            Edit selected program
+          </button>
+        </article>
+
+        <ng-template #emptyTrainingPanel>
+          <article class="card ops-panel-card">
+            <span class="ops-empty-kicker">Program preview</span>
+            <h3>Select a learning program to inspect it here.</h3>
+            <p>
+              The side panel surfaces the participant, training track, dates, and delivery context for the selected program.
+            </p>
+          </article>
+        </ng-template>
+      </aside>
     </div>
   </section>
+</div>
+
+<div
+  class="modal fade text-left"
+  id="trainingCrudModal"
+  tabindex="-1"
+  aria-labelledby="trainingCrudModalLabel"
+  aria-hidden="true"
+>
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content ops-modal-content">
+      <div class="ops-modal-header">
+        <div>
+          <span class="ops-eyebrow">Learning program editor</span>
+          <h5 class="modal-title ops-modal-title" id="trainingCrudModalLabel">
+            {{ modalTitle }}
+          </h5>
+          <p class="ops-modal-copy">{{ modalSubtitle }}</p>
+        </div>
+        <button
+          type="button"
+          class="ops-modal-close"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+        >
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+
+      <div class="ops-modal-body">
+        <form [formGroup]="trainingForm" (ngSubmit)="saveTraining()">
+          <div class="ops-form-grid">
+            <section class="ops-form-section">
+              <span class="ops-panel-kicker">Program setup</span>
+              <h6>Core information</h6>
+
+              <div class="ops-form-field">
+                <label for="trainingName">Program name</label>
+                <input
+                  id="trainingName"
+                  type="text"
+                  formControlName="name"
+                  placeholder="Example: Leadership Accelerator"
+                />
+                <div class="ops-field-error" *ngIf="submitted && trainingForm.get('name').invalid">
+                  Program name is required.
+                </div>
+              </div>
+
+              <div class="ops-form-field">
+                <label for="trainingTypeId">Training type</label>
+                <select id="trainingTypeId" formControlName="trainingTypeId">
+                  <option value="">Select a learning track</option>
+                  <option *ngFor="let option of trainingTypes" [value]="option.id">
+                    {{ option.name }}
+                  </option>
+                </select>
+                <div class="ops-field-error" *ngIf="submitted && trainingForm.get('trainingTypeId').invalid">
+                  Training type is required.
+                </div>
+              </div>
+
+              <div class="ops-form-field">
+                <label for="trainingEmployeeId">Participant</label>
+                <select id="trainingEmployeeId" formControlName="employeeId">
+                  <option value="">Select an employee</option>
+                  <option *ngFor="let option of employees" [value]="option.id">
+                    {{ option.name }}
+                  </option>
+                </select>
+                <div class="ops-field-error" *ngIf="submitted && trainingForm.get('employeeId').invalid">
+                  Participant is required.
+                </div>
+              </div>
+
+              <div class="ops-form-split">
+                <div class="ops-form-field">
+                  <label for="trainingStartDate">Start date</label>
+                  <input id="trainingStartDate" type="date" formControlName="startDate" />
+                </div>
+
+                <div class="ops-form-field">
+                  <label for="trainingEndDate">End date</label>
+                  <input id="trainingEndDate" type="date" formControlName="endDate" />
+                </div>
+              </div>
+
+              <div class="ops-form-field">
+                <label for="trainingDescription">Description</label>
+                <textarea
+                  id="trainingDescription"
+                  rows="5"
+                  formControlName="description"
+                  placeholder="Capture the learning objective, delivery format, or notes for managers and HR."
+                ></textarea>
+              </div>
+            </section>
+
+            <aside class="ops-form-preview">
+              <span class="ops-panel-kicker">Live preview</span>
+              <h4>{{ draftProgramName }}</h4>
+              <p>
+                {{ draftEmployeeName || 'Select a participant' }}
+                <span *ngIf="draftTrainingTypeName"> • {{ draftTrainingTypeName }}</span>
+              </p>
+
+              <div class="ops-progress-wrap">
+                <div class="ops-progress-top">
+                  <span>Readiness</span>
+                  <strong>{{ draftQuality.score }}%</strong>
+                </div>
+                <div class="ops-progress-track">
+                  <span [style.width.%]="draftQuality.score"></span>
+                </div>
+              </div>
+
+              <div class="ops-chip-row">
+                <span class="ops-chip">{{ draftQuality.label }}</span>
+                <span class="ops-chip">{{ draftTrainingTypeName || 'Track pending' }}</span>
+              </div>
+            </aside>
+          </div>
+
+          <div class="ops-modal-actions">
+            <button
+              type="button"
+              class="btn btn-light"
+              data-bs-dismiss="modal"
+              id="trainingCrudModalClose"
+            >
+              Cancel
+            </button>
+            <button type="submit" class="btn btn-primary" [disabled]="saving">
+              <i class="bi" [ngClass]="saving ? 'bi-arrow-repeat' : 'bi-check2-circle'"></i>
+              {{ saving ? 'Saving...' : modalMode === 'create' ? 'Create program' : 'Save changes' }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
 </div>

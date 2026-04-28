@@ -1,68 +1,83 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import Service from '../interfaces/Service';
-import CONFIG from '../urls/urls';
 import { BehaviorSubject, Observable } from 'rxjs';
+import { AuthentificationService } from '../security/authentification.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class HTTPService implements Service {
   public ID = new BehaviorSubject<string>(null);
-  headers = { 'content-type': 'application/json' };
   model = '';
-  header = new HttpHeaders({
-    Authorization:
-      'Basic ' +
-      btoa(
-        //sessionStorage.getItem('username') +
-        'admin:admin' //+
-        //  sessionStorage.getItem('password')
-      ),
-  });
-  constructor(private http: HttpClient) {}
+  constructor(
+    private http: HttpClient,
+    private authentificationService: AuthentificationService
+  ) {}
+
+  private buildAuthHeader(includeContentType = false): HttpHeaders {
+    return this.authentificationService.getAuthHeaders(includeContentType);
+  }
+
   async update(url, data) {
-    await this.http.put(url, data);
+    const body = JSON.stringify(data);
+    await this.http
+      .put(url, body, { headers: this.buildAuthHeader(true) })
+      .toPromise();
   }
+
   getAll(url: string) {
-    return this.http.get(url, { headers: this.header });
+    return this.http.get(url, { headers: this.buildAuthHeader() });
   }
+
   get(id: string) {
-    return this.http.get(id, { headers: this.header });
+    return this.http.get(id, { headers: this.buildAuthHeader() });
   }
+
   async create(url, data) {
     const body = JSON.stringify(data);
-    const headers = new HttpHeaders({
-      'content-type': 'application/json',
-      Authorization: 'Basic ' + btoa('admin:admin'),
-    });
-    await this.http.post(url, body, { headers: headers }).toPromise();
+    await this.http
+      .post(url, body, { headers: this.buildAuthHeader(true) })
+      .toPromise();
+  }
+
+  async postWithResponse<T>(url: string, data: unknown): Promise<T> {
+    const body = JSON.stringify(data);
+    return await this.http
+      .post<T>(url, body, { headers: this.buildAuthHeader(true) })
+      .toPromise();
+  }
+
+  async putWithResponse<T>(url: string, data: unknown): Promise<T> {
+    const body = JSON.stringify(data);
+    return await this.http
+      .put<T>(url, body, { headers: this.buildAuthHeader(true) })
+      .toPromise();
+  }
+
+  async postFormDataWithResponse<T>(url: string, data: FormData): Promise<T> {
+    return await this.http
+      .post<T>(url, data, { headers: this.buildAuthHeader() })
+      .toPromise();
+  }
+
+  async getBlob(url: string): Promise<Blob> {
+    return await this.http
+      .get(url, { headers: this.buildAuthHeader(), responseType: 'blob' })
+      .toPromise();
   }
 
   async filter(url, data) {
     const body = JSON.stringify(data);
-    const headers = new HttpHeaders({
-      'content-type': 'application/json',
-      Authorization:
-        'Basic ' +
-        btoa(
-          sessionStorage.getItem('username') +
-            ':' +
-            sessionStorage.getItem('password')
-        ),
-    });
-    await this.http.post(url, body, { headers: headers }).toPromise();
+    await this.http
+      .post(url, body, { headers: this.buildAuthHeader(true) })
+      .toPromise();
   }
 
   async remove(url) {
-    const headers = new HttpHeaders({
-      'content-type': 'application/json',
-      Authorization: 'Basic ' + btoa('admin' + ':' + 'admin'),
-      responseType: 'text',
-    });
     await this.http
       .delete(url, {
-        headers: headers,
+        headers: this.buildAuthHeader(true),
       })
       .toPromise();
   }

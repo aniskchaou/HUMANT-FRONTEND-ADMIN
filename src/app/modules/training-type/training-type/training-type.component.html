@@ -1,150 +1,389 @@
-<div class="page-heading">
-  <section class="section">
-    <div class="card">
-      <div class="card-header">
-        <h2>Training types</h2>
-      </div>
-      <div class="card-body">
-        <div class="dataTable-container">
+<div class="page-heading ops-page">
+  <section class="ops-shell">
+    <article class="card ops-hero">
+      <div class="ops-hero-copy">
+        <span class="ops-eyebrow">Learning taxonomy</span>
+        <h2>Keep training categories clear before the learning catalog grows.</h2>
+        <p>
+          Define reusable learning types, spot unused categories quickly, and keep
+          program naming consistent across the admin workspace.
+        </p>
+
+        <div class="ops-hero-actions">
           <button
             type="button"
-            class="btn btn-success btn-sm"
+            class="btn btn-primary"
             data-bs-toggle="modal"
-            data-bs-target="#add"
+            data-bs-target="#trainingTypeCrudModal"
+            (click)="openCreateModal()"
           >
-            <i class="fas fa-plus-square"></i> Create
+            <i class="bi bi-plus-square-fill"></i>
+            Create training type
           </button>
-          <table
-            class="table table-bordered"
-            id="table"
-            width="100%"
-            cellspacing="0"
+          <button
+            type="button"
+            class="btn btn-light"
+            (click)="refreshTrainingTypes()"
+            [disabled]="loading"
           >
-            <thead>
-              <tr>
-                <th>Name</th>
-                <th></th>
-              </tr>
-            </thead>
-            <tfoot>
-              <tr>
-                <th>Name</th>
-                <th></th>
-              </tr>
-            </tfoot>
-            <tbody>
-              <tr *ngFor="let c of typeTerminations$">
-                <td>{{ c.name }}</td>
-                <td>
-                  <button
-                    type="button"
-                    data-bs-toggle="modal"
-                    (click)="edit(c.id)"
-                    data-bs-target="#edit"
-                    class="btn btn-warning btn-sm"
-                  >
-                    <i class="fas fa-edit"></i>
-                  </button>
-                  <button
-                    type="button"
-                    class="btn btn-danger btn-sm"
-                    (click)="delete(c.id)"
-                  >
-                    <i class="fas fa-trash-alt"></i>
-                  </button>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+            <i class="bi bi-arrow-repeat"></i>
+            Refresh
+          </button>
+        </div>
 
-          <div
-            class="modal fade text-left"
-            id="edit"
-            tabindex="-1"
-            aria-labelledby="myModalLabel1"
-            style="display: none"
-            aria-hidden="true"
-          >
-            <div
-              class="modal-dialog modal-dialog-scrollable modal-lg"
-              role="document"
-            >
-              <div class="modal-content">
-                <div class="modal-header">
-                  <h5 class="modal-title" id="myModalLabel1">Edit</h5>
-                  <button
-                    type="button"
-                    class="close rounded-pill"
-                    data-bs-dismiss="modal"
-                    aria-label="Close"
-                  >
-                    <i data-feather="x"></i>
-                  </button>
-                </div>
-                <div class="modal-body">
-                  <app-edit-training-type
-                    [id]="id"
-                    (closeModalEvent)="closeModalEdit()"
-                  ></app-edit-training-type>
-                </div>
-                <div class="modal-footer">
-                  <button
-                    type="button"
-                    class="btn closeEdit"
-                    data-bs-dismiss="modal"
-                  >
-                    <i class="bx bx-x d-block d-sm-none"></i>
-                    <span class="d-none d-sm-block">Close</span>
-                  </button>
-                </div>
-              </div>
-            </div>
+        <div class="ops-hero-notice" *ngIf="loadError">{{ loadError }}</div>
+      </div>
+
+      <div class="ops-hero-panel">
+        <span class="ops-panel-kicker">Catalog pulse</span>
+        <h3>How structured the training library feels today</h3>
+
+        <div class="ops-metric-grid">
+          <div class="ops-metric-card">
+            <span>Total types</span>
+            <strong>{{ totalTypesCount }}</strong>
+            <p>All learning categories available to assign to programs.</p>
           </div>
-
-          <div
-            class="modal fade text-left"
-            id="add"
-            tabindex="-1"
-            aria-labelledby="myModalLabel1"
-            style="display: none"
-            aria-hidden="true"
-          >
-            <div
-              class="modal-dialog modal-dialog-scrollable modal-lg"
-              role="document"
-            >
-              <div class="modal-content">
-                <div class="modal-header">
-                  <h5 class="modal-title" id="myModalLabel1">Create</h5>
-                  <button
-                    type="button"
-                    class="close rounded-pill"
-                    data-bs-dismiss="modal"
-                    aria-label="Close"
-                  >
-                    <i data-feather="x"></i>
-                  </button>
-                </div>
-                <div class="modal-body">
-                  <add-training-type
-                    (closeModalEvent)="closeModalAdd()"
-                  ></add-training-type>
-                </div>
-                <div class="modal-footer">
-                  <button
-                    type="button"
-                    class="btn closeAdd"
-                    data-bs-dismiss="modal"
-                  >
-                    <i class="bx bx-x d-block d-sm-none"></i>
-                    <span class="d-none d-sm-block">Close</span>
-                  </button>
-                </div>
-              </div>
-            </div>
+          <div class="ops-metric-card">
+            <span>Active types</span>
+            <strong>{{ activeTypesCount }}</strong>
+            <p>Categories already linked to live learning programs.</p>
           </div>
         </div>
+
+        <div class="ops-progress-wrap">
+          <div class="ops-progress-top">
+            <span>Usage coverage</span>
+            <strong>{{ usageCoverage }}%</strong>
+          </div>
+          <div class="ops-progress-track">
+            <span [style.width.%]="usageCoverage"></span>
+          </div>
+          <p>
+            {{ unusedTypesCount }} type{{ unusedTypesCount === 1 ? '' : 's' }} still need a linked program.
+          </p>
+        </div>
       </div>
+    </article>
+
+    <div class="ops-stat-grid">
+      <article class="card ops-stat-card tone-primary">
+        <span>Training types</span>
+        <strong>{{ totalTypesCount }}</strong>
+        <p>Reusable categories that organize the learning catalog.</p>
+      </article>
+
+      <article class="card ops-stat-card tone-secondary">
+        <span>Active categories</span>
+        <strong>{{ activeTypesCount }}</strong>
+        <p>Types currently used by at least one learning program.</p>
+      </article>
+
+      <article class="card ops-stat-card tone-warning">
+        <span>Unused types</span>
+        <strong>{{ unusedTypesCount }}</strong>
+        <p>Categories available but not yet assigned to any program.</p>
+      </article>
+
+      <article class="card ops-stat-card tone-danger">
+        <span>Linked programs</span>
+        <strong>{{ linkedProgramsCount }}</strong>
+        <p>Total learning programs mapped into the type taxonomy.</p>
+      </article>
+    </div>
+
+    <article class="card ops-toolbar-card">
+      <div class="ops-toolbar">
+        <label class="ops-search-field">
+          <i class="bi bi-search"></i>
+          <input
+            type="text"
+            [ngModel]="searchTerm"
+            (ngModelChange)="onSearchTermChange($event)"
+            placeholder="Search types or linked learning programs"
+          />
+        </label>
+
+        <div class="ops-toolbar-controls">
+          <label>
+            <span>Filter</span>
+            <select
+              [ngModel]="activeFilter"
+              (ngModelChange)="onFilterChange($event)"
+            >
+              <option value="all">All types</option>
+              <option value="used">In use</option>
+              <option value="unused">Unused</option>
+            </select>
+          </label>
+
+          <label>
+            <span>Sort</span>
+            <select
+              [ngModel]="activeSort"
+              (ngModelChange)="onSortChange($event)"
+            >
+              <option value="usage">Usage</option>
+              <option value="quality">Readiness</option>
+              <option value="name-asc">Name A-Z</option>
+            </select>
+          </label>
+        </div>
+      </div>
+
+      <div class="ops-toolbar-footer">
+        <span>{{ filteredResultsLabel }}</span>
+        <span>
+          {{ featuredTrainingType ? featuredTrainingType.name : 'No training type selected' }}
+        </span>
+      </div>
+    </article>
+
+    <div class="ops-layout">
+      <div class="ops-main">
+        <div class="ops-loading-grid" *ngIf="loading; else trainingTypeReady">
+          <div
+            class="ops-skeleton-card"
+            *ngFor="let item of loadingPlaceholders"
+          ></div>
+        </div>
+
+        <ng-template #trainingTypeReady>
+          <div class="ops-grid" *ngIf="filteredTrainingTypes.length; else trainingTypeEmpty">
+            <article
+              class="card ops-card"
+              *ngFor="let item of filteredTrainingTypes; trackBy: trackByTrainingTypeId"
+              [class.is-active]="featuredTrainingType ? featuredTrainingType.id === item.id : false"
+              (click)="selectTrainingType(item)"
+              (keydown.enter)="selectTrainingType(item)"
+              (keydown.space)="selectTrainingType(item); $event.preventDefault()"
+              tabindex="0"
+              role="button"
+            >
+              <div class="ops-card-head">
+                <div>
+                  <span class="ops-panel-kicker">Training type</span>
+                  <h3>{{ item.name }}</h3>
+                </div>
+                <span class="ops-status" [ngClass]="'tone-' + item.qualityTone">
+                  {{ item.qualityLabel }}
+                </span>
+              </div>
+
+              <p>{{ item.summary }}</p>
+
+              <div class="ops-progress-wrap">
+                <div class="ops-progress-top">
+                  <span>Catalog strength</span>
+                  <strong>{{ item.qualityScore }}%</strong>
+                </div>
+                <div class="ops-progress-track">
+                  <span [style.width.%]="item.qualityScore"></span>
+                </div>
+              </div>
+
+              <div class="ops-chip-row">
+                <span class="ops-chip">
+                  {{ item.programCount }} linked program{{ item.programCount === 1 ? '' : 's' }}
+                </span>
+              </div>
+
+              <div class="ops-card-actions">
+                <button
+                  type="button"
+                  class="btn btn-light btn-sm"
+                  data-bs-toggle="modal"
+                  data-bs-target="#trainingTypeCrudModal"
+                  (click)="openEditModal(item); $event.stopPropagation()"
+                >
+                  <i class="bi bi-pencil-square"></i>
+                  Edit
+                </button>
+                <button
+                  type="button"
+                  class="btn btn-light btn-sm"
+                  (click)="deleteTrainingType(item); $event.stopPropagation()"
+                  [disabled]="deletingId === item.id"
+                >
+                  <i class="bi bi-trash3"></i>
+                  {{ deletingId === item.id ? 'Deleting...' : 'Delete' }}
+                </button>
+              </div>
+            </article>
+          </div>
+        </ng-template>
+
+        <ng-template #trainingTypeEmpty>
+          <article class="card ops-empty-card">
+            <span class="ops-empty-kicker">No matching training types</span>
+            <h3>The current search or filter does not match any training type.</h3>
+            <p>
+              Reset the filters or create a new learning category to continue organizing the catalog.
+            </p>
+            <button
+              type="button"
+              class="btn btn-primary"
+              data-bs-toggle="modal"
+              data-bs-target="#trainingTypeCrudModal"
+              (click)="openCreateModal()"
+            >
+              <i class="bi bi-plus-square-fill"></i>
+              Create training type
+            </button>
+          </article>
+        </ng-template>
+      </div>
+
+      <aside class="ops-side">
+        <article class="card ops-panel-card" *ngIf="featuredTrainingType; else emptyTrainingTypePanel">
+          <div class="ops-panel-head">
+            <div>
+              <span>Selected type</span>
+              <h3>{{ featuredTrainingType.name }}</h3>
+            </div>
+            <span class="ops-status" [ngClass]="'tone-' + featuredTrainingType.qualityTone">
+              {{ featuredTrainingType.qualityLabel }}
+            </span>
+          </div>
+
+          <p>{{ featuredTrainingType.summary }}</p>
+
+          <div class="ops-fact-grid">
+            <div>
+              <span class="ops-detail-label">Linked programs</span>
+              <strong>{{ featuredTrainingType.programCount }}</strong>
+            </div>
+            <div>
+              <span class="ops-detail-label">Readiness</span>
+              <strong>{{ featuredTrainingType.qualityScore }}%</strong>
+            </div>
+          </div>
+
+          <div class="ops-panel-note accent">
+            <span class="ops-detail-label">Programs in this type</span>
+            <p *ngIf="featuredTrainingType.linkedPrograms.length; else noLinkedPrograms">
+              {{ featuredTrainingType.linkedPrograms.slice(0, 4).join(' • ') }}
+            </p>
+            <ng-template #noLinkedPrograms>
+              <p>
+                No programs are linked yet. This category is ready for the next learning initiative.
+              </p>
+            </ng-template>
+          </div>
+
+          <button
+            type="button"
+            class="btn btn-primary"
+            data-bs-toggle="modal"
+            data-bs-target="#trainingTypeCrudModal"
+            (click)="openEditModal(featuredTrainingType)"
+          >
+            <i class="bi bi-pencil-square"></i>
+            Edit selected type
+          </button>
+        </article>
+
+        <ng-template #emptyTrainingTypePanel>
+          <article class="card ops-panel-card">
+            <span class="ops-empty-kicker">Training type preview</span>
+            <h3>Select a training type to inspect it here.</h3>
+            <p>
+              The side panel highlights usage, connected programs, and where the catalog needs more structure.
+            </p>
+          </article>
+        </ng-template>
+      </aside>
     </div>
   </section>
+</div>
+
+<div
+  class="modal fade text-left"
+  id="trainingTypeCrudModal"
+  tabindex="-1"
+  aria-labelledby="trainingTypeCrudModalLabel"
+  aria-hidden="true"
+>
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content ops-modal-content">
+      <div class="ops-modal-header">
+        <div>
+          <span class="ops-eyebrow">Training type editor</span>
+          <h5 class="modal-title ops-modal-title" id="trainingTypeCrudModalLabel">
+            {{ modalTitle }}
+          </h5>
+          <p class="ops-modal-copy">{{ modalSubtitle }}</p>
+        </div>
+        <button
+          type="button"
+          class="ops-modal-close"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+        >
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+
+      <div class="ops-modal-body">
+        <form [formGroup]="trainingTypeForm" (ngSubmit)="saveTrainingType()">
+          <div class="ops-form-grid">
+            <section class="ops-form-section">
+              <span class="ops-panel-kicker">Category setup</span>
+              <h6>Core information</h6>
+
+              <div class="ops-form-field">
+                <label for="trainingTypeName">Type name</label>
+                <input
+                  id="trainingTypeName"
+                  type="text"
+                  formControlName="name"
+                  placeholder="Example: Leadership"
+                />
+                <div class="ops-field-error" *ngIf="submitted && trainingTypeForm.get('name').invalid">
+                  Training type name is required.
+                </div>
+              </div>
+            </section>
+
+            <aside class="ops-form-preview">
+              <span class="ops-panel-kicker">Live preview</span>
+              <h4>{{ draftName }}</h4>
+              <p>
+                Use concise, reusable language so future programs can slot into this learning category cleanly.
+              </p>
+
+              <div class="ops-progress-wrap">
+                <div class="ops-progress-top">
+                  <span>Readiness</span>
+                  <strong>{{ draftQuality.score }}%</strong>
+                </div>
+                <div class="ops-progress-track">
+                  <span [style.width.%]="draftQuality.score"></span>
+                </div>
+              </div>
+
+              <div class="ops-chip-row">
+                <span class="ops-chip">{{ draftQuality.label }}</span>
+              </div>
+            </aside>
+          </div>
+
+          <div class="ops-modal-actions">
+            <button
+              type="button"
+              class="btn btn-light"
+              data-bs-dismiss="modal"
+              id="trainingTypeCrudModalClose"
+            >
+              Cancel
+            </button>
+            <button type="submit" class="btn btn-primary" [disabled]="saving">
+              <i class="bi" [ngClass]="saving ? 'bi-arrow-repeat' : 'bi-check2-circle'"></i>
+              {{ saving ? 'Saving...' : modalMode === 'create' ? 'Create type' : 'Save changes' }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
 </div>

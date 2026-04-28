@@ -1,33 +1,36 @@
-<div id="app" *ngIf="!hasRoute('login')">
+<div id="app" *ngIf="!hasRoute('login')" class="app-shell">
   <app-navigation></app-navigation>
   <div id="main" class="layout-navbar">
-    <header class="mb-3">
-      <nav class="navbar navbar-expand navbar-light">
-        <div class="container-fluid">
-          <a href="#" class="burger-btn d-block">
-            <i class="bi bi-justify fs-3"></i>
-          </a>
+    <header class="app-topbar">
+      <nav class="navbar navbar-expand premium-navbar">
+        <div class="container-fluid app-topbar-inner">
+          <div class="app-topbar-start">
+            <button type="button" class="burger-btn d-block" aria-label="Toggle navigation">
+              <i class="bi bi-layout-sidebar-inset"></i>
+            </button>
 
-          <button
-            class="navbar-toggler"
-            type="button"
-            data-bs-toggle="collapse"
-            data-bs-target="#navbarSupportedContent"
-            aria-controls="navbarSupportedContent"
-            aria-expanded="false"
-            aria-label="Toggle navigation"
-          >
-            <span class="navbar-toggler-icon"></span>
-          </button>
-          <div class="collapse navbar-collapse" id="navbarSupportedContent">
-            <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
-              <li class="nav-item dropdown me-1">
+            <div class="app-page-meta">
+              <span class="app-page-kicker">{{ getCurrentPageTag() }}</span>
+              <h1>{{ getCurrentPageTitle() }}</h1>
+              <p>{{ getCurrentPageSummary() }}</p>
+            </div>
+          </div>
+
+          <div class="app-topbar-actions">
+            <span class="app-live-pill">
+              <span class="app-live-dot"></span>
+              Ready for review
+            </span>
+
+            <ul class="navbar-nav app-toolbar-list">
+              <li class="nav-item dropdown">
                 <app-messages></app-messages>
               </li>
-              <li class="nav-item dropdown me-3">
+              <li class="nav-item dropdown">
                 <app-shortcut-menu></app-shortcut-menu>
               </li>
             </ul>
+
             <div class="dropdown">
               <app-user-menu></app-user-menu>
             </div>
@@ -35,7 +38,7 @@
         </div>
       </nav>
     </header>
-    <div id="main-content">
+    <div id="main-content" class="app-content">
       <router-outlet></router-outlet>
       <app-footer></app-footer>
     </div>
@@ -48,8 +51,5 @@
 
 <script src="/assets/vendors/perfect-scrollbar/perfect-scrollbar.min.js"></script>
 <script src="/assets/js/bootstrap.bundle.min.js"></script>
-
-<script src="/assets/vendors/apexcharts/apexcharts.js"></script>
-<script src="/assets/js/pages/dashboard.js"></script>
 
 <script src="/assets/js/main.js"></script>

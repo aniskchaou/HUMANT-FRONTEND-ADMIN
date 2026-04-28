@@ -1,115 +1,518 @@
-<div class="page-heading">
-  <section class="section">
-    <div class="card">
-      <div class="card-header">
-        <h2>Contracts</h2>
-      </div>
-      <div class="card-body">
-        <div class="dataTable-container">
+<div class="page-heading ops-page">
+  <section class="ops-shell">
+    <article class="card ops-hero">
+      <div class="ops-hero-copy">
+        <span class="ops-eyebrow">Employment terms</span>
+        <h2>Run agreements from one cleaner contract desk.</h2>
+        <p>
+          Create, review, and maintain employee contracts with linked people,
+          contract types, dates, and operational terms in one place.
+        </p>
+
+        <div class="ops-hero-actions">
           <button
             type="button"
-            class="btn btn-success btn-sm"
+            class="btn btn-primary"
             data-bs-toggle="modal"
-            data-bs-target="#add"
+            data-bs-target="#contractCrudModal"
+            (click)="openCreateModal()"
           >
-            <i class="fas fa-plus-square"></i> Create
+            <i class="bi bi-plus-square-fill"></i>
+            Create contract
           </button>
-          <table
-            class="table table-bordered"
-            id="table"
-            width="100%"
-            cellspacing="0"
+          <button
+            type="button"
+            class="btn btn-light"
+            (click)="refreshContracts()"
+            [disabled]="loading"
           >
-            <thead>
-              <tr>
-                <th>Employee</th>
-                <th>Start Date</th>
-                <th>End Date</th>
-                <th>Status</th>
-                <th></th>
-              </tr>
-            </thead>
-            <tfoot>
-              <tr>
-                <th>Employee</th>
-                <th>Start Date</th>
-                <th>End Date</th>
-                <th>Status</th>
-                <th></th>
-              </tr>
-            </tfoot>
-            <tbody>
-              <tr *ngFor="let c of contract$">
-                <td>{{ c.employee?.fullName }}</td>
-                <td>{{ c.startDate }}</td>
-                <td>{{ c.endDate }}</td>
-                <td>{{ c.status }}</td>
-                <td>
-                  <button
-                    type="button"
-                    data-toggle="modal"
-                    (click)="edit(c.id)"
-                    data-target="#edit"
-                    class="btn btn-warning btn-sm"
-                  >
-                    <i class="fas fa-edit"></i>
-                  </button>
-                  <button
-                    type="button"
-                    class="btn btn-danger btn-sm"
-                    (click)="delete(c.id)"
-                  >
-                    <i class="fas fa-trash-alt"></i>
-                  </button>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+            <i class="bi bi-arrow-repeat"></i>
+            Refresh
+          </button>
+        </div>
 
-          <div
-            class="modal fade text-left"
-            id="add"
-            tabindex="-1"
-            aria-labelledby="myModalLabel1"
-            style="display: none"
-            aria-hidden="true"
-          >
-            <div
-              class="modal-dialog modal-dialog-scrollable modal-lg"
-              role="document"
+        <div class="ops-hero-notice" *ngIf="loadError">{{ loadError }}</div>
+      </div>
+
+      <div class="ops-hero-panel">
+        <span class="ops-panel-kicker">Agreement health</span>
+        <h3>How complete the contract desk is right now</h3>
+
+        <div class="ops-metric-grid">
+          <div class="ops-metric-card">
+            <span>Total contracts</span>
+            <strong>{{ totalContractsCount }}</strong>
+            <p>Agreement records currently returned by the backend.</p>
+          </div>
+          <div class="ops-metric-card">
+            <span>Active agreements</span>
+            <strong>{{ activeContractsCount }}</strong>
+            <p>Contracts marked as active and currently in force.</p>
+          </div>
+        </div>
+
+        <div class="ops-progress-wrap">
+          <div class="ops-progress-top">
+            <span>Documentation coverage</span>
+            <strong>{{ documentationCoverage }}%</strong>
+          </div>
+          <div class="ops-progress-track">
+            <span [style.width.%]="documentationCoverage"></span>
+          </div>
+          <p>
+            {{ expiringSoonCount }} contract{{ expiringSoonCount === 1 ? '' : 's' }} are ending within the next 90 days.
+          </p>
+        </div>
+      </div>
+    </article>
+
+    <div class="ops-stat-grid">
+      <article class="card ops-stat-card tone-primary">
+        <span>Contracts</span>
+        <strong>{{ totalContractsCount }}</strong>
+        <p>Total agreements currently maintained in the admin workspace.</p>
+      </article>
+
+      <article class="card ops-stat-card tone-secondary">
+        <span>Active</span>
+        <strong>{{ activeContractsCount }}</strong>
+        <p>Contracts actively supporting current employees or engagements.</p>
+      </article>
+
+      <article class="card ops-stat-card tone-warning">
+        <span>Expiring soon</span>
+        <strong>{{ expiringSoonCount }}</strong>
+        <p>Agreements that should be reviewed before they lapse.</p>
+      </article>
+
+      <article class="card ops-stat-card tone-danger">
+        <span>Documented</span>
+        <strong>{{ documentedContractsCount }}</strong>
+        <p>Contracts that already include a written summary or description.</p>
+      </article>
+    </div>
+
+    <article class="card ops-toolbar-card">
+      <div class="ops-toolbar">
+        <label class="ops-search-field">
+          <i class="bi bi-search"></i>
+          <input
+            type="text"
+            [ngModel]="searchTerm"
+            (ngModelChange)="onSearchTermChange($event)"
+            placeholder="Search subjects, employees, types, or departments"
+          />
+        </label>
+
+        <div class="ops-toolbar-controls">
+          <label>
+            <span>Filter</span>
+            <select
+              [ngModel]="activeFilter"
+              (ngModelChange)="onFilterChange($event)"
             >
-              <div class="modal-content">
-                <div class="modal-header">
-                  <h5 class="modal-title" id="myModalLabel1">Create</h5>
+              <option value="all">All contracts</option>
+              <option value="active">Active only</option>
+              <option value="expiring">Expiring soon</option>
+              <option value="needs-detail">Needs detail</option>
+            </select>
+          </label>
+
+          <label>
+            <span>Sort</span>
+            <select
+              [ngModel]="activeSort"
+              (ngModelChange)="onSortChange($event)"
+            >
+              <option value="quality">Readiness</option>
+              <option value="latest-start">Latest start date</option>
+              <option value="highest-value">Highest value</option>
+            </select>
+          </label>
+        </div>
+      </div>
+
+      <div class="ops-toolbar-footer">
+        <span>{{ filteredResultsLabel }}</span>
+        <span>{{ featuredContract ? featuredContract.subject : 'No contract selected' }}</span>
+      </div>
+    </article>
+
+    <div class="ops-layout">
+      <div class="ops-main">
+        <div class="ops-loading-grid" *ngIf="loading; else contractsReady">
+          <div class="ops-skeleton-card" *ngFor="let item of loadingPlaceholders"></div>
+        </div>
+
+        <ng-template #contractsReady>
+          <div class="ops-grid" *ngIf="filteredContracts.length; else contractsEmpty">
+            <article
+              class="card ops-card"
+              *ngFor="let item of filteredContracts; trackBy: trackByContractId"
+              [class.is-active]="featuredContract ? featuredContract.id === item.id : false"
+              (click)="selectContract(item)"
+              tabindex="0"
+              role="button"
+            >
+              <div class="ops-card-head">
+                <div>
+                  <span class="ops-panel-kicker">Agreement</span>
+                  <h3>{{ item.subject }}</h3>
+                </div>
+                <span class="ops-status" [ngClass]="'tone-' + item.qualityTone">
+                  {{ item.qualityLabel }}
+                </span>
+              </div>
+
+              <p>{{ item.summary }}</p>
+
+              <div class="ops-progress-wrap">
+                <div class="ops-progress-top">
+                  <span>Record quality</span>
+                  <strong>{{ item.qualityScore }}%</strong>
+                </div>
+                <div class="ops-progress-track">
+                  <span [style.width.%]="item.qualityScore"></span>
+                </div>
+              </div>
+
+              <div class="ops-chip-row">
+                <span class="ops-chip">{{ item.employeeName ? item.employeeName : 'Employee pending' }}</span>
+                <span class="ops-chip">{{ item.contractTypeName ? item.contractTypeName : 'Type pending' }}</span>
+                <span class="ops-chip">{{ item.contractValueLabel }}</span>
+              </div>
+
+              <div class="ops-card-actions">
+                <span class="ops-detail-label">{{ item.timelineLabel }}</span>
+                <div class="ops-form-inline">
                   <button
                     type="button"
-                    class="close rounded-pill"
-                    data-bs-dismiss="modal"
-                    aria-label="Close"
+                    class="btn btn-light btn-sm"
+                    data-bs-toggle="modal"
+                    data-bs-target="#contractCrudModal"
+                    (click)="openEditModal(item); $event.stopPropagation()"
                   >
-                    <i data-feather="x"></i>
+                    <i class="bi bi-pencil-square"></i>
+                    Edit
                   </button>
-                </div>
-                <div class="modal-body">
-                  <app-add-contract
-                    (closeModalEvent)="closeModalAdd()"
-                  ></app-add-contract>
-                </div>
-                <div class="modal-footer">
                   <button
                     type="button"
-                    class="btn closeAdd"
-                    data-bs-dismiss="modal"
+                    class="btn btn-light btn-sm"
+                    (click)="deleteContract(item); $event.stopPropagation()"
+                    [disabled]="deletingId === item.id"
                   >
-                    <i class="bx bx-x d-block d-sm-none"></i>
-                    <span class="d-none d-sm-block">Close</span>
+                    <i class="bi bi-trash3"></i>
+                    {{ deletingId === item.id ? 'Deleting...' : 'Delete' }}
                   </button>
                 </div>
               </div>
+            </article>
+          </div>
+        </ng-template>
+
+        <ng-template #contractsEmpty>
+          <article class="card ops-empty-card">
+            <span class="ops-empty-kicker">No matching contracts</span>
+            <h3>The current search or filter does not match any agreement.</h3>
+            <p>
+              Reset the filters or create a new contract to rebuild the agreement desk.
+            </p>
+            <button
+              type="button"
+              class="btn btn-primary"
+              data-bs-toggle="modal"
+              data-bs-target="#contractCrudModal"
+              (click)="openCreateModal()"
+            >
+              <i class="bi bi-plus-square-fill"></i>
+              Create contract
+            </button>
+          </article>
+        </ng-template>
+      </div>
+
+      <aside class="ops-side">
+        <article class="card ops-panel-card" *ngIf="featuredContract; else emptyContractPanel">
+          <div class="ops-panel-head">
+            <div>
+              <span>Selected contract</span>
+              <h3>{{ featuredContract.subject }}</h3>
+            </div>
+            <span class="ops-status" [ngClass]="'tone-' + featuredContract.qualityTone">
+              {{ featuredContract.qualityLabel }}
+            </span>
+          </div>
+
+          <p>{{ featuredContract.summary }}</p>
+
+          <div class="ops-fact-grid">
+            <div>
+              <span class="ops-detail-label">Employee</span>
+              <strong>{{ featuredContract.employeeName ? featuredContract.employeeName : 'Pending' }}</strong>
+            </div>
+            <div>
+              <span class="ops-detail-label">Contract type</span>
+              <strong>{{ featuredContract.contractTypeName ? featuredContract.contractTypeName : 'Pending' }}</strong>
+            </div>
+            <div>
+              <span class="ops-detail-label">Start date</span>
+              <strong>{{ featuredContract.startDateLabel }}</strong>
+            </div>
+            <div>
+              <span class="ops-detail-label">End date</span>
+              <strong>{{ featuredContract.endDateLabel }}</strong>
+            </div>
+            <div>
+              <span class="ops-detail-label">Value</span>
+              <strong>{{ featuredContract.contractValueLabel }}</strong>
+            </div>
+            <div>
+              <span class="ops-detail-label">Status</span>
+              <strong>{{ featuredContract.status }}</strong>
             </div>
           </div>
-        </div>
-      </div>
+
+          <div class="ops-chip-row">
+            <span class="ops-chip">{{ featuredContract.departement ? featuredContract.departement : 'Department pending' }}</span>
+            <span class="ops-chip">{{ featuredContract.job ? featuredContract.job : 'Job pending' }}</span>
+            <span class="ops-chip">{{ featuredContract.workingSchedule ? featuredContract.workingSchedule : 'Schedule pending' }}</span>
+          </div>
+
+          <div class="ops-panel-note accent">
+            <span class="ops-detail-label">Next action</span>
+            <p>
+              {{ featuredContract.expiringSoon
+                ? 'Review this agreement soon so the renewal or closeout decision happens before the end date.'
+                : featuredContract.qualityScore >= 80
+                ? 'This contract record is in strong shape. Keep dates and working terms current as changes happen.'
+                : 'Fill the missing employee, type, dates, or summary fields so the contract is reliable for operations.' }}
+            </p>
+          </div>
+
+          <button
+            type="button"
+            class="btn btn-primary"
+            data-bs-toggle="modal"
+            data-bs-target="#contractCrudModal"
+            (click)="openEditModal(featuredContract)"
+          >
+            <i class="bi bi-pencil-square"></i>
+            Edit selected contract
+          </button>
+        </article>
+
+        <ng-template #emptyContractPanel>
+          <article class="card ops-panel-card">
+            <span class="ops-empty-kicker">Contract preview</span>
+            <h3>Select a contract to inspect it here.</h3>
+            <p>
+              The side panel highlights the selected agreement, its timeline, and the next operational action.
+            </p>
+          </article>
+        </ng-template>
+      </aside>
     </div>
   </section>
+</div>
+
+<div
+  class="modal fade text-left"
+  id="contractCrudModal"
+  tabindex="-1"
+  aria-labelledby="contractCrudModalLabel"
+  aria-hidden="true"
+>
+  <div class="modal-dialog modal-dialog-scrollable modal-xl" role="document">
+    <div class="modal-content ops-modal-content">
+      <div class="ops-modal-header">
+        <div>
+          <span class="ops-eyebrow">Contract editor</span>
+          <h5 class="modal-title ops-modal-title" id="contractCrudModalLabel">
+            {{ modalTitle }}
+          </h5>
+          <p class="ops-modal-copy">{{ modalSubtitle }}</p>
+        </div>
+        <button
+          type="button"
+          class="ops-modal-close"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+        >
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+
+      <div class="ops-modal-body">
+        <form [formGroup]="contractForm" (ngSubmit)="saveContract()">
+          <div class="ops-form-grid">
+            <section class="ops-form-section">
+              <span class="ops-panel-kicker">Agreement details</span>
+              <h6>Core information</h6>
+
+              <div class="ops-form-field">
+                <label for="contractEmployee">Employee</label>
+                <select id="contractEmployee" formControlName="employeeId">
+                  <option value="">Select an employee</option>
+                  <option *ngFor="let item of employees" [value]="item.id">
+                    {{ item.name }}
+                  </option>
+                </select>
+                <div class="ops-field-error" *ngIf="submitted && contractForm.get('employeeId').invalid">
+                  Employee is required.
+                </div>
+              </div>
+
+              <div class="ops-form-field">
+                <label for="contractSubject">Subject</label>
+                <input id="contractSubject" type="text" formControlName="subject" />
+                <div class="ops-field-error" *ngIf="submitted && contractForm.get('subject').invalid">
+                  Subject is required.
+                </div>
+              </div>
+
+              <div class="ops-form-field">
+                <label for="contractType">Contract type</label>
+                <select id="contractType" formControlName="contractTypeId">
+                  <option value="">Select a contract type</option>
+                  <option *ngFor="let item of contractTypes" [value]="item.id">
+                    {{ item.name }}
+                  </option>
+                </select>
+                <div class="ops-field-error" *ngIf="submitted && contractForm.get('contractTypeId').invalid">
+                  Contract type is required.
+                </div>
+              </div>
+
+              <div class="ops-form-field">
+                <label for="contractValue">Contract value</label>
+                <input id="contractValue" type="text" formControlName="contractValue" />
+              </div>
+
+              <div class="ops-form-field">
+                <label for="contractStatus">Status</label>
+                <input id="contractStatus" type="text" formControlName="status" placeholder="Active, Draft, Probation..." />
+              </div>
+
+              <div class="ops-form-field">
+                <label for="contractStartDate">Start date</label>
+                <input id="contractStartDate" type="date" formControlName="startDate" />
+              </div>
+
+              <div class="ops-form-field">
+                <label for="contractEndDate">End date</label>
+                <input id="contractEndDate" type="date" formControlName="endDate" />
+              </div>
+
+              <div class="ops-form-field">
+                <label for="contractDepartement">Department</label>
+                <select id="contractDepartement" formControlName="departement">
+                  <option value="">Select a department</option>
+                  <option *ngFor="let item of departements" [value]="item.name">
+                    {{ item.name }}
+                  </option>
+                </select>
+              </div>
+
+              <div class="ops-form-field">
+                <label for="contractJob">Job</label>
+                <select id="contractJob" formControlName="job">
+                  <option value="">Select a job</option>
+                  <option *ngFor="let item of jobs" [value]="item.name">
+                    {{ item.name }}
+                  </option>
+                </select>
+              </div>
+
+              <div class="ops-form-field">
+                <label for="contractSalaryStructure">Salary structure type</label>
+                <input
+                  id="contractSalaryStructure"
+                  type="text"
+                  formControlName="salaryStructureType"
+                />
+              </div>
+
+              <div class="ops-form-field">
+                <label for="contractWorkingSchedule">Working schedule</label>
+                <input
+                  id="contractWorkingSchedule"
+                  type="text"
+                  formControlName="workingSchedule"
+                />
+              </div>
+
+              <div class="ops-form-field">
+                <label for="contractDescription">Description</label>
+                <textarea id="contractDescription" formControlName="description"></textarea>
+              </div>
+            </section>
+
+            <aside class="ops-form-preview">
+              <span class="ops-panel-kicker">Live preview</span>
+              <h4>
+                {{ contractForm.value.subject ? contractForm.value.subject : 'Untitled contract' }}
+              </h4>
+              <p>
+                {{ contractForm.value.description
+                  ? contractForm.value.description
+                  : (draftEmployeeName || 'Employee pending') + ' • ' + (draftContractTypeName || 'Contract type pending') }}
+              </p>
+
+              <div class="ops-progress-wrap">
+                <div class="ops-progress-top">
+                  <span>Readiness</span>
+                  <strong>{{ draftQuality.score }}%</strong>
+                </div>
+                <div class="ops-progress-track">
+                  <span [style.width.%]="draftQuality.score"></span>
+                </div>
+              </div>
+
+              <div class="ops-chip-row">
+                <span class="ops-chip">{{ draftEmployeeName ? draftEmployeeName : 'Employee pending' }}</span>
+                <span class="ops-chip">{{ draftContractTypeName ? draftContractTypeName : 'Type pending' }}</span>
+                <span class="ops-chip">
+                  {{ contractForm.value.contractValue ? contractForm.value.contractValue : 'Value pending' }}
+                </span>
+              </div>
+
+              <div class="ops-panel-note">
+                <span class="ops-detail-label">Timeline</span>
+                <p>
+                  {{ contractForm.value.startDate ? contractForm.value.startDate : 'Start date pending' }}
+                  {{ contractForm.value.endDate ? 'to ' + contractForm.value.endDate : '' }}
+                </p>
+              </div>
+
+              <div class="ops-panel-note accent">
+                <span class="ops-detail-label">Working terms</span>
+                <p>
+                  {{ contractForm.value.workingSchedule || 'Working schedule pending' }}
+                  {{ contractForm.value.salaryStructureType ? ' • ' + contractForm.value.salaryStructureType : '' }}
+                </p>
+              </div>
+
+              <span class="ops-status" [ngClass]="'tone-' + draftQuality.tone">
+                {{ draftQuality.label }}
+              </span>
+            </aside>
+          </div>
+
+          <div class="modal-footer">
+            <button
+              id="contractCrudModalClose"
+              type="button"
+              class="btn btn-light"
+              data-bs-dismiss="modal"
+            >
+              Close
+            </button>
+            <button type="submit" class="btn btn-primary" [disabled]="saving">
+              {{ saving ? 'Saving...' : modalMode === 'create' ? 'Create contract' : 'Save changes' }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
 </div>

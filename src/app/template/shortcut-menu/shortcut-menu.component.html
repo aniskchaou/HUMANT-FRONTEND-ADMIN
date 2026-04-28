@@ -1,9 +1,39 @@
-<a class="nav-link active dropdown-toggle" href="#" data-bs-toggle="dropdown" aria-expanded="false">
-    <i class='bi bi-bell bi-sub fs-4 text-gray-600'></i>
+<a
+    class="nav-link dropdown-toggle topbar-menu-trigger"
+    href="#"
+    data-bs-toggle="dropdown"
+    aria-expanded="false"
+>
+    <span class="topbar-icon-shell topbar-icon-shell-alt">
+        <i class="bi bi-grid-1x2-fill"></i>
+    </span>
 </a>
-<ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuButton">
-    <li>
-        <h6 class="dropdown-header">Notifications</h6>
+<ul class="dropdown-menu dropdown-menu-end topbar-dropdown topbar-dropdown-grid">
+    <li class="dropdown-header-block">
+        <div>
+            <span class="dropdown-eyebrow">Shortcuts</span>
+            <h6>Quick actions</h6>
+        </div>
+        <span class="dropdown-count">4 actions</span>
     </li>
-    <li><a class="dropdown-item">No notification available</a></li>
+    <li>
+        <div class="shortcut-grid">
+            <a class="shortcut-card" routerLink="/employee">
+                <i class="bi bi-people-fill"></i>
+                <span>Employees</span>
+            </a>
+            <a class="shortcut-card" routerLink="/salary">
+                <i class="bi bi-wallet2"></i>
+                <span>Payroll</span>
+            </a>
+            <a class="shortcut-card" routerLink="/job">
+                <i class="bi bi-briefcase-fill"></i>
+                <span>Hiring</span>
+            </a>
+            <a class="shortcut-card" routerLink="/training">
+                <i class="bi bi-mortarboard-fill"></i>
+                <span>Training</span>
+            </a>
+        </div>
+    </li>
 </ul>

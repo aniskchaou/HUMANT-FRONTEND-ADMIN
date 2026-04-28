@@ -1,21 +1,290 @@
-<div class="page-heading">
-  <section class="section">
-    <div class="card">
-      <div class="card-header">
-        <h2>Holidays</h2>
-      </div>
-      <div class="card-body">
-        <div class="dataTable-container">
-          <button
-            type="button"
-            class="btn btn-success btn-sm"
-            data-bs-toggle="modal"
-            data-bs-target="#add"
-          >
-            <i class="fas fa-plus-square"></i>
+<div class="page-heading ops-page">
+  <section class="ops-shell">
+    <article class="card ops-hero">
+      <div class="ops-hero-copy">
+        <span class="ops-eyebrow">Holiday calendar</span>
+        <h2>Make the holiday schedule visible enough for real workforce planning.</h2>
+        <p>
+          Manage one-time closures and recurring holidays in a single calendar workspace with clear
+          detail views and schedule awareness.
+        </p>
+
+        <div class="ops-hero-actions">
+          <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#holidayCrudModal" (click)="openCreateModal()">
+            <i class="bi bi-plus-square-fill"></i>
+            Create holiday
+          </button>
+          <button type="button" class="btn btn-light" (click)="refreshHolidays()" [disabled]="loading">
+            <i class="bi bi-arrow-repeat"></i>
+            Refresh
           </button>
         </div>
+
+        <div class="ops-hero-notice" *ngIf="loadError">{{ loadError }}</div>
       </div>
+
+      <div class="ops-hero-panel">
+        <span class="ops-panel-kicker">Calendar pulse</span>
+        <h3>Upcoming closures and recurring dates at a glance</h3>
+
+        <div class="ops-metric-grid">
+          <div class="ops-metric-card">
+            <span>Total holidays</span>
+            <strong>{{ totalHolidaysCount }}</strong>
+            <p>Holiday entries currently tracked in the workspace.</p>
+          </div>
+          <div class="ops-metric-card">
+            <span>Recurring</span>
+            <strong>{{ recurringHolidaysCount }}</strong>
+            <p>Dates that repeat yearly and should stay on the long-range calendar.</p>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <div class="ops-stat-grid">
+      <article class="card ops-stat-card tone-primary">
+        <span>Holidays</span>
+        <strong>{{ totalHolidaysCount }}</strong>
+        <p>All holiday entries currently managed in the calendar.</p>
+      </article>
+      <article class="card ops-stat-card tone-secondary">
+        <span>Upcoming</span>
+        <strong>{{ upcomingHolidaysCount }}</strong>
+        <p>Dates that still sit ahead on the current timeline.</p>
+      </article>
+      <article class="card ops-stat-card tone-warning">
+        <span>Recurring</span>
+        <strong>{{ recurringHolidaysCount }}</strong>
+        <p>Holidays that repeat and should carry into future planning cycles.</p>
+      </article>
+      <article class="card ops-stat-card tone-danger">
+        <span>Past</span>
+        <strong>{{ totalHolidaysCount - upcomingHolidaysCount }}</strong>
+        <p>Historical holiday entries already behind the current date.</p>
+      </article>
+    </div>
+
+    <article class="card ops-toolbar-card">
+      <div class="ops-toolbar">
+        <label class="ops-search-field">
+          <i class="bi bi-search"></i>
+          <input type="text" [ngModel]="searchTerm" (ngModelChange)="onSearchTermChange($event)" placeholder="Search holiday names" />
+        </label>
+
+        <div class="ops-toolbar-controls">
+          <label>
+            <span>Filter</span>
+            <select [ngModel]="activeFilter" (ngModelChange)="onFilterChange($event)">
+              <option value="all">All holidays</option>
+              <option value="upcoming">Upcoming</option>
+              <option value="recurring">Recurring</option>
+              <option value="past">Past</option>
+            </select>
+          </label>
+
+          <label>
+            <span>Sort</span>
+            <select [ngModel]="activeSort" (ngModelChange)="onSortChange($event)">
+              <option value="nearest">Nearest first</option>
+              <option value="latest">Latest first</option>
+              <option value="name-asc">Name A-Z</option>
+            </select>
+          </label>
+        </div>
+      </div>
+
+      <div class="ops-toolbar-footer">
+        <span>{{ filteredResultsLabel }}</span>
+        <span>{{ featuredHoliday ? featuredHoliday.name : 'No holiday selected' }}</span>
+      </div>
+    </article>
+
+    <div class="ops-layout">
+      <div class="ops-main">
+        <div class="ops-loading-grid" *ngIf="loading; else holidayReady">
+          <div class="ops-skeleton-card" *ngFor="let item of loadingPlaceholders"></div>
+        </div>
+
+        <ng-template #holidayReady>
+          <div class="ops-grid" *ngIf="filteredHolidays.length; else holidayEmpty">
+            <article
+              class="card ops-card"
+              *ngFor="let item of filteredHolidays; trackBy: trackByHolidayId"
+              [class.is-active]="featuredHoliday ? featuredHoliday.id === item.id : false"
+              (click)="selectHoliday(item)"
+              (keydown.enter)="selectHoliday(item)"
+              (keydown.space)="selectHoliday(item); $event.preventDefault()"
+              tabindex="0"
+              role="button"
+            >
+              <div class="ops-card-head">
+                <div>
+                  <span class="ops-panel-kicker">Holiday</span>
+                  <h3>{{ item.name }}</h3>
+                </div>
+                <span class="ops-status" [ngClass]="'tone-' + item.qualityTone">{{ item.qualityLabel }}</span>
+              </div>
+
+              <p>{{ item.summary }}</p>
+
+              <div class="ops-progress-wrap">
+                <div class="ops-progress-top">
+                  <span>Calendar readiness</span>
+                  <strong>{{ item.qualityScore }}%</strong>
+                </div>
+                <div class="ops-progress-track">
+                  <span [style.width.%]="item.qualityScore"></span>
+                </div>
+              </div>
+
+              <div class="ops-chip-row">
+                <span class="ops-chip">{{ item.dateLabel }}</span>
+                <span class="ops-chip">{{ item.recurring ? 'Recurring' : 'One-time' }}</span>
+              </div>
+
+              <div class="ops-card-actions">
+                <button type="button" class="btn btn-light btn-sm" data-bs-toggle="modal" data-bs-target="#holidayCrudModal" (click)="openEditModal(item); $event.stopPropagation()">
+                  <i class="bi bi-pencil-square"></i>
+                  Edit
+                </button>
+                <button type="button" class="btn btn-light btn-sm" (click)="deleteHoliday(item); $event.stopPropagation()" [disabled]="deletingId === item.id">
+                  <i class="bi bi-trash3"></i>
+                  {{ deletingId === item.id ? 'Deleting...' : 'Delete' }}
+                </button>
+              </div>
+            </article>
+          </div>
+        </ng-template>
+
+        <ng-template #holidayEmpty>
+          <article class="card ops-empty-card">
+            <span class="ops-empty-kicker">No matching holidays</span>
+            <h3>The current search or filter does not match any holiday.</h3>
+            <p>Reset the filters or create a holiday entry to keep the calendar complete.</p>
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#holidayCrudModal" (click)="openCreateModal()">
+              <i class="bi bi-plus-square-fill"></i>
+              Create holiday
+            </button>
+          </article>
+        </ng-template>
+      </div>
+
+      <aside class="ops-side">
+        <article class="card ops-panel-card" *ngIf="featuredHoliday; else emptyHolidayPanel">
+          <div class="ops-panel-head">
+            <div>
+              <span>Selected holiday</span>
+              <h3>{{ featuredHoliday.name }}</h3>
+            </div>
+            <span class="ops-status" [ngClass]="'tone-' + featuredHoliday.qualityTone">{{ featuredHoliday.qualityLabel }}</span>
+          </div>
+
+          <p>{{ featuredHoliday.summary }}</p>
+
+          <div class="ops-fact-grid">
+            <div>
+              <span class="ops-detail-label">Date</span>
+              <strong>{{ featuredHoliday.dateLabel }}</strong>
+            </div>
+            <div>
+              <span class="ops-detail-label">Timing</span>
+              <strong>{{ featuredHoliday.relativeLabel }}</strong>
+            </div>
+            <div>
+              <span class="ops-detail-label">Pattern</span>
+              <strong>{{ featuredHoliday.recurring ? 'Recurring yearly' : 'One-time closure' }}</strong>
+            </div>
+          </div>
+
+          <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#holidayCrudModal" (click)="openEditModal(featuredHoliday)">
+            <i class="bi bi-pencil-square"></i>
+            Edit selected holiday
+          </button>
+        </article>
+
+        <ng-template #emptyHolidayPanel>
+          <article class="card ops-panel-card">
+            <span class="ops-empty-kicker">Holiday preview</span>
+            <h3>Select a holiday to inspect it here.</h3>
+            <p>The side panel highlights the date, recurrence pattern, and planning status for the selected holiday.</p>
+          </article>
+        </ng-template>
+      </aside>
     </div>
   </section>
+</div>
+
+<div class="modal fade text-left" id="holidayCrudModal" tabindex="-1" aria-labelledby="holidayCrudModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content ops-modal-content">
+      <div class="ops-modal-header">
+        <div>
+          <span class="ops-eyebrow">Holiday editor</span>
+          <h5 class="modal-title ops-modal-title" id="holidayCrudModalLabel">{{ modalTitle }}</h5>
+          <p class="ops-modal-copy">{{ modalSubtitle }}</p>
+        </div>
+        <button type="button" class="ops-modal-close" data-bs-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+
+      <div class="ops-modal-body">
+        <form [formGroup]="holidayForm" (ngSubmit)="saveHoliday()">
+          <div class="ops-form-grid">
+            <section class="ops-form-section">
+              <span class="ops-panel-kicker">Calendar setup</span>
+              <h6>Core information</h6>
+
+              <div class="ops-form-field">
+                <label for="holidayName">Holiday name</label>
+                <input id="holidayName" type="text" formControlName="name" placeholder="Example: New Year's Day" />
+                <div class="ops-field-error" *ngIf="submitted && holidayForm.get('name').invalid">Holiday name is required.</div>
+              </div>
+
+              <div class="ops-form-field">
+                <label for="holidayDate">Date</label>
+                <input id="holidayDate" type="date" formControlName="date" />
+                <div class="ops-field-error" *ngIf="submitted && holidayForm.get('date').invalid">Holiday date is required.</div>
+              </div>
+
+              <label class="ops-check-field">
+                <input type="checkbox" formControlName="recurring" />
+                <span>Recurring yearly holiday</span>
+              </label>
+            </section>
+
+            <aside class="ops-form-preview">
+              <span class="ops-panel-kicker">Live preview</span>
+              <h4>{{ draftName }}</h4>
+              <p>{{ draftDateLabel }}</p>
+
+              <div class="ops-progress-wrap">
+                <div class="ops-progress-top">
+                  <span>Readiness</span>
+                  <strong>{{ draftQuality.score }}%</strong>
+                </div>
+                <div class="ops-progress-track">
+                  <span [style.width.%]="draftQuality.score"></span>
+                </div>
+              </div>
+
+              <div class="ops-chip-row">
+                <span class="ops-chip">{{ draftQuality.label }}</span>
+                <span class="ops-chip">{{ holidayForm.value.recurring ? 'Recurring' : 'One-time' }}</span>
+              </div>
+            </aside>
+          </div>
+
+          <div class="ops-modal-actions">
+            <button type="button" class="btn btn-light" data-bs-dismiss="modal" id="holidayCrudModalClose">Cancel</button>
+            <button type="submit" class="btn btn-primary" [disabled]="saving">
+              <i class="bi" [ngClass]="saving ? 'bi-arrow-repeat' : 'bi-check2-circle'"></i>
+              {{ saving ? 'Saving...' : modalMode === 'create' ? 'Create holiday' : 'Save changes' }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
 </div>

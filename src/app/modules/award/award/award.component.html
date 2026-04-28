@@ -1,77 +1,418 @@
-<div class="page-heading">
-  <section class="section">
-    <div class="card">
-      <div class="card-header">
-        <h2>Awards</h2>
-      </div>
-      <div class="card-body">
-        <div class="dataTable-container">
+<div class="page-heading ops-page">
+  <section class="ops-shell">
+    <article class="card ops-hero">
+      <div class="ops-hero-copy">
+        <span class="ops-eyebrow">Recognition</span>
+        <h2>Make employee recognition visible instead of leaving it trapped in flat tables.</h2>
+        <p>
+          Track who was recognized, why the award mattered, and which categories are
+          driving recognition across the organization.
+        </p>
+
+        <div class="ops-hero-actions">
           <button
             type="button"
-            class="btn btn-success btn-sm"
+            class="btn btn-primary"
             data-bs-toggle="modal"
-            data-bs-target="#add"
+            data-bs-target="#awardCrudModal"
+            (click)="openCreateModal()"
           >
-            <i class="fas fa-plus-square"></i> Create
+            <i class="bi bi-plus-square-fill"></i>
+            Create award
           </button>
-
-          <app-modal-award [id]="id"></app-modal-award>
-          <table
-            class="table table-bordered"
-            id="table"
-            width="100%"
-            cellspacing="0"
+          <button
+            type="button"
+            class="btn btn-light"
+            (click)="refreshAwards()"
+            [disabled]="loading"
           >
-            <thead>
-              <tr>
-                <th>Employee</th>
-                <th>Type Award</th>
-                <th>Date</th>
-                <th></th>
-              </tr>
-            </thead>
-            <tfoot>
-              <tr>
-                <th>Employee</th>
-                <th>Type</th>
-                <th>Date</th>
-                <th></th>
-              </tr>
-            </tfoot>
-            <tbody>
-              <tr *ngFor="let c of award$">
-                <td>
-                  <span class="badge-primary">{{
-                    c.employeeName.fullName
-                  }}</span>
-                </td>
-                <td>{{ c.awardType.name }}</td>
-                <td>
-                  <span class="badge-light">{{ c.awardDate }}</span>
-                </td>
-                <td>
-                  <button
-                    type="button"
-                    data-bs-toggle="modal"
-                    (click)="edit(c.id)"
-                    data-bs-target="#edit"
-                    class="btn btn-warning btn-sm"
-                  >
-                    <i class="fas fa-edit"></i>
-                  </button>
-                  <button
-                    type="button"
-                    class="btn btn-danger btn-sm"
-                    (click)="delete(c.id)"
-                  >
-                    <i class="fas fa-trash-alt"></i>
-                  </button>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+            <i class="bi bi-arrow-repeat"></i>
+            Refresh
+          </button>
+        </div>
+
+        <div class="ops-hero-notice" *ngIf="loadError">{{ loadError }}</div>
+      </div>
+
+      <div class="ops-hero-panel">
+        <span class="ops-panel-kicker">Recognition pulse</span>
+        <h3>How complete the award history looks right now</h3>
+
+        <div class="ops-metric-grid">
+          <div class="ops-metric-card">
+            <span>Total awards</span>
+            <strong>{{ totalAwardsCount }}</strong>
+            <p>Recognition records currently available in the backend.</p>
+          </div>
+          <div class="ops-metric-card">
+            <span>Recent awards</span>
+            <strong>{{ recentAwardsCount }}</strong>
+            <p>Recognition given within the last 90 days.</p>
+          </div>
+        </div>
+
+        <div class="ops-progress-wrap">
+          <div class="ops-progress-top">
+            <span>Recognition context coverage</span>
+            <strong>{{ noteCoverage }}%</strong>
+          </div>
+          <div class="ops-progress-track">
+            <span [style.width.%]="noteCoverage"></span>
+          </div>
+          <p>
+            {{ documentedAwardsCount }} of {{ totalAwardsCount }} award{{ totalAwardsCount === 1 ? '' : 's' }} include a written note.
+          </p>
         </div>
       </div>
+    </article>
+
+    <div class="ops-stat-grid">
+      <article class="card ops-stat-card tone-primary">
+        <span>Awards</span>
+        <strong>{{ totalAwardsCount }}</strong>
+        <p>Total recognition records captured across the organization.</p>
+      </article>
+
+      <article class="card ops-stat-card tone-secondary">
+        <span>Recognized people</span>
+        <strong>{{ recognizedEmployeesCount }}</strong>
+        <p>Employees who currently appear in the recognition history.</p>
+      </article>
+
+      <article class="card ops-stat-card tone-warning">
+        <span>Recent awards</span>
+        <strong>{{ recentAwardsCount }}</strong>
+        <p>Recognition activity from the most recent 90-day window.</p>
+      </article>
+
+      <article class="card ops-stat-card tone-danger">
+        <span>With notes</span>
+        <strong>{{ documentedAwardsCount }}</strong>
+        <p>Awards that include a clear description of the accomplishment.</p>
+      </article>
+    </div>
+
+    <article class="card ops-toolbar-card">
+      <div class="ops-toolbar">
+        <label class="ops-search-field">
+          <i class="bi bi-search"></i>
+          <input
+            type="text"
+            [ngModel]="searchTerm"
+            (ngModelChange)="onSearchTermChange($event)"
+            placeholder="Search recipients, award types, or descriptions"
+          />
+        </label>
+
+        <div class="ops-toolbar-controls">
+          <label>
+            <span>Filter</span>
+            <select
+              [ngModel]="activeFilter"
+              (ngModelChange)="onFilterChange($event)"
+            >
+              <option value="all">All awards</option>
+              <option value="recent">Recent</option>
+              <option value="needs-note">Needs note</option>
+              <option value="archive">Older awards</option>
+            </select>
+          </label>
+
+          <label>
+            <span>Sort</span>
+            <select
+              [ngModel]="activeSort"
+              (ngModelChange)="onSortChange($event)"
+            >
+              <option value="recent">Newest first</option>
+              <option value="quality">Readiness</option>
+              <option value="employee-asc">Employee A-Z</option>
+            </select>
+          </label>
+        </div>
+      </div>
+
+      <div class="ops-toolbar-footer">
+        <span>{{ filteredResultsLabel }}</span>
+        <span>
+          {{ featuredAward ? featuredAward.employeeName : 'No award selected' }}
+        </span>
+      </div>
+    </article>
+
+    <div class="ops-layout">
+      <div class="ops-main">
+        <div class="ops-loading-grid" *ngIf="loading; else awardReady">
+          <div
+            class="ops-skeleton-card"
+            *ngFor="let item of loadingPlaceholders"
+          ></div>
+        </div>
+
+        <ng-template #awardReady>
+          <div class="ops-grid" *ngIf="filteredAwards.length; else awardEmpty">
+            <article
+              class="card ops-card"
+              *ngFor="let item of filteredAwards; trackBy: trackByAwardId"
+              [class.is-active]="featuredAward ? featuredAward.id === item.id : false"
+              (click)="selectAward(item)"
+              (keydown.enter)="selectAward(item)"
+              (keydown.space)="selectAward(item); $event.preventDefault()"
+              tabindex="0"
+              role="button"
+            >
+              <div class="ops-card-head">
+                <div>
+                  <span class="ops-panel-kicker">Award</span>
+                  <h3>{{ item.employeeName || 'Recipient pending' }}</h3>
+                </div>
+                <span class="ops-status" [ngClass]="'tone-' + item.qualityTone">
+                  {{ item.qualityLabel }}
+                </span>
+              </div>
+
+              <p>{{ item.summary }}</p>
+
+              <div class="ops-progress-wrap">
+                <div class="ops-progress-top">
+                  <span>Recognition quality</span>
+                  <strong>{{ item.qualityScore }}%</strong>
+                </div>
+                <div class="ops-progress-track">
+                  <span [style.width.%]="item.qualityScore"></span>
+                </div>
+              </div>
+
+              <div class="ops-chip-row">
+                <span class="ops-chip">{{ item.awardTypeName || 'Type pending' }}</span>
+                <span class="ops-chip">{{ item.awardDateLabel }}</span>
+              </div>
+
+              <div class="ops-card-actions">
+                <button
+                  type="button"
+                  class="btn btn-light btn-sm"
+                  data-bs-toggle="modal"
+                  data-bs-target="#awardCrudModal"
+                  (click)="openEditModal(item); $event.stopPropagation()"
+                >
+                  <i class="bi bi-pencil-square"></i>
+                  Edit
+                </button>
+                <button
+                  type="button"
+                  class="btn btn-light btn-sm"
+                  (click)="deleteAward(item); $event.stopPropagation()"
+                  [disabled]="deletingId === item.id"
+                >
+                  <i class="bi bi-trash3"></i>
+                  {{ deletingId === item.id ? 'Deleting...' : 'Delete' }}
+                </button>
+              </div>
+            </article>
+          </div>
+        </ng-template>
+
+        <ng-template #awardEmpty>
+          <article class="card ops-empty-card">
+            <span class="ops-empty-kicker">No matching awards</span>
+            <h3>The current search or filter does not match any recognition records.</h3>
+            <p>
+              Reset the filters or create a new award to keep employee recognition visible.
+            </p>
+            <button
+              type="button"
+              class="btn btn-primary"
+              data-bs-toggle="modal"
+              data-bs-target="#awardCrudModal"
+              (click)="openCreateModal()"
+            >
+              <i class="bi bi-plus-square-fill"></i>
+              Create award
+            </button>
+          </article>
+        </ng-template>
+      </div>
+
+      <aside class="ops-side">
+        <article class="card ops-panel-card" *ngIf="featuredAward; else emptyAwardPanel">
+          <div class="ops-panel-head">
+            <div>
+              <span>Selected award</span>
+              <h3>{{ featuredAward.employeeName || 'Recipient pending' }}</h3>
+            </div>
+            <span class="ops-status" [ngClass]="'tone-' + featuredAward.qualityTone">
+              {{ featuredAward.qualityLabel }}
+            </span>
+          </div>
+
+          <p>{{ featuredAward.summary }}</p>
+
+          <div class="ops-fact-grid">
+            <div>
+              <span class="ops-detail-label">Award type</span>
+              <strong>{{ featuredAward.awardTypeName || 'Pending' }}</strong>
+            </div>
+            <div>
+              <span class="ops-detail-label">Awarded on</span>
+              <strong>{{ featuredAward.awardDateLabel }}</strong>
+            </div>
+          </div>
+
+          <div class="ops-panel-note accent">
+            <span class="ops-detail-label">Recognition note</span>
+            <p>{{ featuredAward.timelineLabel }}</p>
+            <p *ngIf="featuredAward.description">
+              {{ featuredAward.description }}
+            </p>
+          </div>
+
+          <button
+            type="button"
+            class="btn btn-primary"
+            data-bs-toggle="modal"
+            data-bs-target="#awardCrudModal"
+            (click)="openEditModal(featuredAward)"
+          >
+            <i class="bi bi-pencil-square"></i>
+            Edit selected award
+          </button>
+        </article>
+
+        <ng-template #emptyAwardPanel>
+          <article class="card ops-panel-card">
+            <span class="ops-empty-kicker">Award preview</span>
+            <h3>Select an award to inspect it here.</h3>
+            <p>
+              The side panel shows the recipient, category, date, and written recognition context for the selected award.
+            </p>
+          </article>
+        </ng-template>
+      </aside>
     </div>
   </section>
+</div>
+
+<div
+  class="modal fade text-left"
+  id="awardCrudModal"
+  tabindex="-1"
+  aria-labelledby="awardCrudModalLabel"
+  aria-hidden="true"
+>
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content ops-modal-content">
+      <div class="ops-modal-header">
+        <div>
+          <span class="ops-eyebrow">Award editor</span>
+          <h5 class="modal-title ops-modal-title" id="awardCrudModalLabel">
+            {{ modalTitle }}
+          </h5>
+          <p class="ops-modal-copy">{{ modalSubtitle }}</p>
+        </div>
+        <button
+          type="button"
+          class="ops-modal-close"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+        >
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+
+      <div class="ops-modal-body">
+        <form [formGroup]="awardForm" (ngSubmit)="saveAward()">
+          <div class="ops-form-grid">
+            <section class="ops-form-section">
+              <span class="ops-panel-kicker">Recognition setup</span>
+              <h6>Core information</h6>
+
+              <div class="ops-form-field">
+                <label for="awardEmployeeId">Recipient</label>
+                <select id="awardEmployeeId" formControlName="employeeId">
+                  <option value="">Select an employee</option>
+                  <option *ngFor="let option of employees" [value]="option.id">
+                    {{ option.name }}
+                  </option>
+                </select>
+                <div class="ops-field-error" *ngIf="submitted && awardForm.get('employeeId').invalid">
+                  Recipient is required.
+                </div>
+              </div>
+
+              <div class="ops-form-field">
+                <label for="awardTypeId">Award type</label>
+                <select id="awardTypeId" formControlName="awardTypeId">
+                  <option value="">Select an award category</option>
+                  <option *ngFor="let option of awardTypes" [value]="option.id">
+                    {{ option.name }}
+                  </option>
+                </select>
+                <div class="ops-field-error" *ngIf="submitted && awardForm.get('awardTypeId').invalid">
+                  Award type is required.
+                </div>
+              </div>
+
+              <div class="ops-form-field">
+                <label for="awardDate">Award date</label>
+                <input id="awardDate" type="date" formControlName="awardDate" />
+                <div class="ops-field-error" *ngIf="submitted && awardForm.get('awardDate').invalid">
+                  Award date is required.
+                </div>
+              </div>
+
+              <div class="ops-form-field">
+                <label for="awardDescription">Description</label>
+                <textarea
+                  id="awardDescription"
+                  rows="5"
+                  formControlName="description"
+                  placeholder="Capture the achievement, contribution, or behavior behind this award."
+                ></textarea>
+              </div>
+            </section>
+
+            <aside class="ops-form-preview">
+              <span class="ops-panel-kicker">Live preview</span>
+              <h4>{{ draftEmployeeName || 'Recipient pending' }}</h4>
+              <p>
+                {{ draftAwardTypeName || 'Award type pending' }}
+                <span *ngIf="awardForm.value.awardDate"> • {{ awardForm.value.awardDate }}</span>
+              </p>
+
+              <div class="ops-progress-wrap">
+                <div class="ops-progress-top">
+                  <span>Readiness</span>
+                  <strong>{{ draftQuality.score }}%</strong>
+                </div>
+                <div class="ops-progress-track">
+                  <span [style.width.%]="draftQuality.score"></span>
+                </div>
+              </div>
+
+              <div class="ops-chip-row">
+                <span class="ops-chip">{{ draftQuality.label }}</span>
+                <span class="ops-chip">{{ draftAwardTypeName || 'Category pending' }}</span>
+              </div>
+            </aside>
+          </div>
+
+          <div class="ops-modal-actions">
+            <button
+              type="button"
+              class="btn btn-light"
+              data-bs-dismiss="modal"
+              id="awardCrudModalClose"
+            >
+              Cancel
+            </button>
+            <button type="submit" class="btn btn-primary" [disabled]="saving">
+              <i class="bi" [ngClass]="saving ? 'bi-arrow-repeat' : 'bi-check2-circle'"></i>
+              {{ saving ? 'Saving...' : modalMode === 'create' ? 'Create award' : 'Save changes' }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
 </div>

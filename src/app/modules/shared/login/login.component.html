@@ -1,76 +1,194 @@
-<div id="auth">
-  <div class="row h-100">
-    <div class="col-lg-5 col-12">
+<div id="auth" class="auth-shell">
+  <div class="auth-grid">
+    <section class="auth-panel auth-panel-form">
       <div id="auth-left">
-        <div class="auth-logo">
-          <a href="index.html"
-            ><img src="assets/images/logo-bg.png" alt="Logo"
-          /></a>
+        <div class="auth-brand">
+          <span class="auth-brand-mark">H</span>
+          <div>
+            <span class="auth-brand-name">Humant</span>
+            <span class="auth-brand-meta">Premium workforce workspace</span>
+          </div>
         </div>
-        <h1 class="auth-title">Log in.</h1>
-        <p class="auth-subtitle mb-5">
-          Log in with your data that you entered during registration.
-        </p>
 
-        <form #loginForm="ngForm" (ngSubmit)="doLogin(loginForm)">
-          <div class="form-group position-relative has-icon-left mb-4">
-            <input
-              type="text"
-              class="form-control form-control-xl"
-              placeholder="Username"
-              ngModel="{{ username }}"
-              value="admin"
-              name="username"
-            />
-            <div class="form-control-icon">
-              <i class="bi bi-person"></i>
+        <div class="auth-copy">
+          <span class="auth-eyebrow">Operations login</span>
+          <h1 class="auth-title">
+            Lead people operations from one refined control room.
+          </h1>
+          <p class="auth-subtitle">
+            Review headcount, payroll, recruitment, and policy activity in a
+            workspace designed to feel credible for paying clients.
+          </p>
+        </div>
+
+        <form #loginForm="ngForm" (ngSubmit)="doLogin(loginForm)" class="auth-form" novalidate>
+          <div *ngIf="invalidLogin" class="alert alert-danger auth-alert">
+            {{ errorMessage }}
+          </div>
+
+          <div class="auth-field">
+            <label for="username">Username</label>
+            <div class="form-group position-relative has-icon-left mb-4">
+              <input
+                id="username"
+                type="text"
+                class="form-control form-control-xl"
+                placeholder="Enter your username"
+                [(ngModel)]="username"
+                #usernameModel="ngModel"
+                name="username"
+                required
+              />
+              <div class="form-control-icon">
+                <i class="bi bi-person"></i>
+              </div>
+            </div>
+            <div class="auth-field-error" *ngIf="loginForm.submitted && usernameModel.invalid">
+              Username is required.
             </div>
           </div>
-          <div class="form-group position-relative has-icon-left mb-4">
-            <input
-              type="password"
-              class="form-control form-control-xl"
-              placeholder="Password"
-              ngModel="{{ password }}"
-              value="admin"
-              name="password"
-            />
-            <div class="form-control-icon">
-              <i class="bi bi-shield-lock"></i>
+
+          <div class="auth-field">
+            <label for="password">Password</label>
+            <div class="form-group position-relative has-icon-left mb-4">
+              <input
+                id="password"
+                type="password"
+                class="form-control form-control-xl"
+                placeholder="Enter your password"
+                [(ngModel)]="password"
+                #passwordModel="ngModel"
+                name="password"
+                required
+              />
+              <div class="form-control-icon">
+                <i class="bi bi-shield-lock"></i>
+              </div>
+            </div>
+            <div class="auth-field-error" *ngIf="loginForm.submitted && passwordModel.invalid">
+              Password is required.
             </div>
           </div>
-          <div class="form-check form-check-lg d-flex align-items-end">
-            <input
-              class="form-check-input me-2"
-              type="checkbox"
-              value=""
-              id="flexCheckDefault"
-            />
-            <label
-              class="form-check-label text-gray-600"
-              for="flexCheckDefault"
-            >
-              Keep me logged in
-            </label>
+
+          <div class="auth-form-meta">
+            <div class="form-check form-check-lg d-flex align-items-center">
+              <input
+                class="form-check-input me-2"
+                type="checkbox"
+                id="flexCheckDefault"
+                [(ngModel)]="rememberMe"
+                name="rememberMe"
+              />
+              <label class="form-check-label text-gray-600" for="flexCheckDefault">
+                Keep me logged in
+              </label>
+            </div>
+
+            <span class="auth-inline-note">Verified with backend Basic Auth</span>
           </div>
+
+          <div class="auth-demo-stack">
+            <span class="auth-demo-label">Quick access</span>
+            <div class="auth-demo-chips">
+              <button
+                type="button"
+                class="btn btn-light auth-demo-chip"
+                *ngFor="let account of demoAccounts"
+                (click)="useDemoAccount(account)"
+              >
+                {{ account.label }}
+                <small>{{ account.username }} / {{ account.password }}</small>
+              </button>
+            </div>
+          </div>
+
           <button
             type="submit"
-            class="btn btn-primary btn-block btn-lg shadow-lg mt-5"
+            class="btn btn-primary btn-block btn-lg auth-submit"
+            [disabled]="buttonLoginClicked || loginForm.invalid"
           >
-            Log in
+            {{ buttonLoginClicked ? 'Opening workspace...' : 'Enter workspace' }}
           </button>
+
+          <p class="auth-demo-hint">Available demo credentials: admin/admin, hr/hr123, manager/manager123, recruiter/recruit123, and emp/123.</p>
         </form>
-        <div class="text-center mt-5 text-lg fs-4">
-          <p class="text-gray-600">
-            Don't have an account?
-            <a href="#" class="font-bold">Sign up</a>.
-          </p>
-          <p><a class="font-bold" href="#">Forgot password?</a>.</p>
+
+        <div class="auth-trust-row">
+          <div class="auth-trust-card">
+            <strong>248</strong>
+            <span>Employees tracked</span>
+          </div>
+          <div class="auth-trust-card">
+            <strong>94%</strong>
+            <span>Payroll readiness</span>
+          </div>
+          <div class="auth-trust-card">
+            <strong>12</strong>
+            <span>Open roles</span>
+          </div>
         </div>
       </div>
-    </div>
-    <div class="col-lg-7 d-none d-lg-block">
-      <div id="auth-right"></div>
-    </div>
+    </section>
+
+    <aside class="auth-panel auth-panel-visual">
+      <div id="auth-right">
+        <span class="auth-showcase-kicker">Workspace preview</span>
+        <h2>Built to feel premium before your first custom module lands.</h2>
+        <p>
+          Warm neutrals, stronger typography, and clearer hierarchy make the
+          product immediately more credible for commercial delivery.
+        </p>
+
+        <div class="auth-metric-grid">
+          <div class="auth-metric-card">
+            <strong>32</strong>
+            <span>Teams coordinated</span>
+          </div>
+          <div class="auth-metric-card">
+            <strong>7</strong>
+            <span>Priority reviews</span>
+          </div>
+          <div class="auth-metric-card">
+            <strong>18%</strong>
+            <span>Hiring growth</span>
+          </div>
+          <div class="auth-metric-card">
+            <strong>4.8/5</strong>
+            <span>Client-ready polish</span>
+          </div>
+        </div>
+
+        <div class="auth-visual-card">
+          <div class="auth-visual-head">
+            <span>Priority queue</span>
+            <strong>Today</strong>
+          </div>
+
+          <div class="auth-visual-item">
+            <div>
+              <strong>Payroll sign-off</strong>
+              <p>Finance batch needs final HR approval.</p>
+            </div>
+            <span>09:30</span>
+          </div>
+
+          <div class="auth-visual-item">
+            <div>
+              <strong>Leadership cohort</strong>
+              <p>Training capacity reaches 84% enrollment.</p>
+            </div>
+            <span>11:00</span>
+          </div>
+
+          <div class="auth-visual-item">
+            <div>
+              <strong>Offer pipeline</strong>
+              <p>Three candidates moved to final review.</p>
+            </div>
+            <span>14:15</span>
+          </div>
+        </div>
+      </div>
+    </aside>
   </div>
 </div>

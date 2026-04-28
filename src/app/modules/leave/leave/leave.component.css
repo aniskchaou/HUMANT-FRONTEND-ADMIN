@@ -1,3 +1,6 @@
-button{
-  margin:4px;
+:host {
+  display: block;
+  --ops-accent: #2c5282;
+  --ops-accent-alt: #2a9d8f;
+  --ops-accent-soft: rgba(44, 82, 130, 0.12);
 }

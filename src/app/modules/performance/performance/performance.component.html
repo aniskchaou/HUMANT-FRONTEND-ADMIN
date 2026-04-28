@@ -1,0 +1,606 @@
+<div class="performance-shell">
+  <section class="performance-hero">
+    <div>
+      <p class="eyebrow">Talent &amp; Growth</p>
+      <h1>Performance Management</h1>
+      <p class="hero-copy">
+        {{ canManagePerformance ? 'Create goals and objectives, assign KPI targets, conduct reviews, capture ratings and feedback, and keep a clean performance history for every review cycle.' : 'Track your current goals, review outcomes, feedback history, and performance progress in one workspace.' }}
+      </p>
+    </div>
+
+    <div class="hero-controls">
+      <label class="hero-control">
+        <span>Review cycle</span>
+        <input
+          #cyclePicker
+          type="month"
+          [value]="selectedCycleMonth"
+          (change)="onCycleMonthChange(cyclePicker.value)"
+        />
+      </label>
+
+      <label class="hero-control" *ngIf="!isEmployeeWorkspace">
+        <span>Employee focus</span>
+        <select
+          #employeeFilter
+          [value]="selectedEmployeeFilter"
+          (change)="onEmployeeFilterChange(employeeFilter.value)"
+        >
+          <option value="all">All employees</option>
+          <option *ngFor="let employee of employees; trackBy: trackById" [value]="employee.id">
+            {{ employee.name }}
+          </option>
+        </select>
+      </label>
+
+      <div class="hero-control" *ngIf="isEmployeeWorkspace">
+        <span>Employee focus</span>
+        <strong>{{ currentEmployee ? currentEmployee.name : 'Your profile' }}</strong>
+      </div>
+
+      <button type="button" class="hero-refresh" (click)="refreshWorkspace()">
+        Refresh workspace
+      </button>
+    </div>
+  </section>
+
+  <section class="stats-grid">
+    <article class="stat-card tone-strong">
+      <span class="stat-label">Active goals</span>
+      <strong class="stat-value">{{ activeGoalsCount }}</strong>
+      <p>{{ cycleLabel }} still has {{ atRiskGoalsCount }} goals needing attention.</p>
+    </article>
+
+    <article class="stat-card tone-warning">
+      <span class="stat-label">Reviews completed</span>
+      <strong class="stat-value">{{ completedReviewsCount }}</strong>
+      <p>{{ filteredReviews.length }} review records match the current cycle filter.</p>
+    </article>
+
+    <article class="stat-card tone-medium">
+      <span class="stat-label">Average rating</span>
+      <strong class="stat-value">{{ averageRatingLabel }}</strong>
+      <p>Use review outcomes to calibrate coaching and promotion discussions.</p>
+    </article>
+
+    <article class="stat-card tone-critical">
+      <span class="stat-label">Feedback moments</span>
+      <strong class="stat-value">{{ feedbackMomentCount }}</strong>
+      <p>Continuous feedback stays visible beside formal reviews and goals.</p>
+    </article>
+  </section>
+
+  <section *ngIf="loadError" class="workspace-alert">
+    {{ loadError }}
+  </section>
+
+  <section *ngIf="loading" class="loading-grid">
+    <article *ngFor="let placeholder of loadingPlaceholders" class="loading-card"></article>
+  </section>
+
+  <ng-container *ngIf="!loading">
+    <section class="workspace-section">
+      <div class="section-head">
+        <div>
+          <p class="section-kicker">Plan</p>
+          <h2>Goals &amp; KPI assignments</h2>
+        </div>
+        <button *ngIf="canManagePerformance" type="button" class="section-action" (click)="startGoalCreate()">New goal</button>
+      </div>
+
+      <div class="workspace-grid two-column">
+        <article class="editor-card" *ngIf="canManagePerformance">
+          <h3>{{ goalEditorTitle }}</h3>
+          <p class="editor-copy">
+            Define the objective, KPI target, ownership, and due date for {{ cycleLabel }}.
+          </p>
+
+          <form [formGroup]="goalForm" (ngSubmit)="saveGoal()" class="editor-form">
+            <div class="form-grid">
+              <label>
+                <span>Employee</span>
+                <select formControlName="employeeId">
+                  <option value="">Select employee</option>
+                  <option *ngFor="let employee of employees; trackBy: trackById" [value]="employee.id">
+                    {{ employee.name }}
+                  </option>
+                </select>
+              </label>
+
+              <label>
+                <span>Due date</span>
+                <input type="date" formControlName="dueDate" />
+              </label>
+
+              <label class="span-2">
+                <span>Goal title</span>
+                <input type="text" formControlName="title" placeholder="Example: Raise client retention" />
+              </label>
+
+              <label class="span-2">
+                <span>Objective</span>
+                <textarea
+                  rows="4"
+                  formControlName="objective"
+                  placeholder="Describe the business outcome or capability the employee should improve."
+                ></textarea>
+              </label>
+
+              <label>
+                <span>KPI</span>
+                <input type="text" formControlName="kpiName" placeholder="Retention rate" />
+              </label>
+
+              <label>
+                <span>KPI unit</span>
+                <input type="text" formControlName="kpiUnit" placeholder="%, tickets, hours" />
+              </label>
+
+              <label>
+                <span>Target</span>
+                <input type="number" formControlName="kpiTarget" min="0" step="0.1" />
+              </label>
+
+              <label>
+                <span>Current</span>
+                <input type="number" formControlName="kpiCurrentValue" min="0" step="0.1" />
+              </label>
+
+              <label>
+                <span>Priority</span>
+                <select formControlName="priority">
+                  <option *ngFor="let option of goalPriorityOptions" [value]="option">{{ option }}</option>
+                </select>
+              </label>
+
+              <label>
+                <span>Status</span>
+                <select formControlName="status">
+                  <option *ngFor="let option of goalStatusOptions" [value]="option">{{ option }}</option>
+                </select>
+              </label>
+
+              <label class="span-2">
+                <span>Notes</span>
+                <textarea
+                  rows="3"
+                  formControlName="notes"
+                  placeholder="Add context the reviewer should know before the next check-in."
+                ></textarea>
+              </label>
+            </div>
+
+            <p *ngIf="goalSubmitted && goalForm.invalid" class="form-hint error-text">
+              Complete the required employee, goal, KPI, and due date fields before saving.
+            </p>
+
+            <div class="editor-actions">
+              <button type="button" class="ghost-button" (click)="startGoalCreate()">Reset</button>
+              <button type="submit" class="primary-button" [disabled]="savingGoal">
+                {{ savingGoal ? 'Saving...' : goalEditorMode === 'create' ? 'Save goal' : 'Update goal' }}
+              </button>
+            </div>
+          </form>
+        </article>
+
+        <article class="list-card-shell">
+          <div class="list-head">
+            <div>
+              <h3>Goal board</h3>
+              <p>{{ filteredGoals.length }} goals for {{ cycleLabel }}.</p>
+            </div>
+          </div>
+
+          <div *ngIf="!filteredGoals.length" class="empty-state">
+            No goals match the current cycle and employee filter yet.
+          </div>
+
+          <div class="stack-list">
+            <article
+              *ngFor="let goal of filteredGoals; trackBy: trackById"
+              class="record-card"
+              [ngClass]="'tone-' + goal.tone"
+            >
+              <div class="record-topline">
+                <span class="pill">{{ goal.status }}</span>
+                <span>{{ goal.reviewCycle }}</span>
+              </div>
+
+              <h4>{{ goal.title }}</h4>
+              <p>{{ goal.summary }}</p>
+
+              <div class="metric-grid">
+                <div>
+                  <span class="metric-label">Employee</span>
+                  <strong>{{ goal.employeeName }}</strong>
+                </div>
+                <div>
+                  <span class="metric-label">Priority</span>
+                  <strong>{{ goal.priority }}</strong>
+                </div>
+                <div>
+                  <span class="metric-label">KPI target</span>
+                  <strong>{{ goal.targetLabel }}</strong>
+                </div>
+                <div>
+                  <span class="metric-label">Current</span>
+                  <strong>{{ goal.currentLabel }}</strong>
+                </div>
+              </div>
+
+              <div class="progress-row">
+                <div class="progress-bar">
+                  <span [style.width.%]="goal.progressBarWidth"></span>
+                </div>
+                <strong>{{ goal.progress }}%</strong>
+              </div>
+
+              <div class="record-footer">
+                <span>Due {{ goal.dueDateLabel }}</span>
+                <div class="card-actions" *ngIf="canManagePerformance">
+                  <button type="button" class="ghost-button" (click)="editGoal(goal)">Edit</button>
+                  <button type="button" class="ghost-button" (click)="startReviewFromGoal(goal)">
+                    Review
+                  </button>
+                  <button type="button" class="ghost-button danger-button" (click)="deleteGoal(goal)">
+                    Delete
+                  </button>
+                </div>
+              </div>
+            </article>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="workspace-section">
+      <div class="section-head">
+        <div>
+          <p class="section-kicker">Evaluate</p>
+          <h2>Performance reviews &amp; ratings</h2>
+        </div>
+        <button *ngIf="canManagePerformance" type="button" class="section-action" (click)="startReviewCreate()">New review</button>
+      </div>
+
+      <div class="workspace-grid two-column">
+        <article class="editor-card" *ngIf="canManagePerformance">
+          <h3>{{ reviewEditorTitle }}</h3>
+          <p class="editor-copy">
+            Capture the review period, KPI outcome, rating, strengths, and follow-up areas.
+          </p>
+
+          <form [formGroup]="reviewForm" (ngSubmit)="saveReview()" class="editor-form">
+            <div class="form-grid">
+              <label>
+                <span>Employee</span>
+                <select formControlName="employeeId">
+                  <option value="">Select employee</option>
+                  <option *ngFor="let employee of employees; trackBy: trackById" [value]="employee.id">
+                    {{ employee.name }}
+                  </option>
+                </select>
+              </label>
+
+              <label>
+                <span>Reviewer</span>
+                <input type="text" formControlName="reviewerName" placeholder="Manager or panel lead" />
+              </label>
+
+              <label>
+                <span>Review date</span>
+                <input type="date" formControlName="reviewDate" />
+              </label>
+
+              <label>
+                <span>Status</span>
+                <select formControlName="status">
+                  <option *ngFor="let option of reviewStatusOptions" [value]="option">{{ option }}</option>
+                </select>
+              </label>
+
+              <label>
+                <span>Period start</span>
+                <input type="date" formControlName="reviewPeriodStart" />
+              </label>
+
+              <label>
+                <span>Period end</span>
+                <input type="date" formControlName="reviewPeriodEnd" />
+              </label>
+
+              <label class="span-2">
+                <span>Goal title</span>
+                <input type="text" formControlName="goalTitle" placeholder="Reference the goal being reviewed" />
+              </label>
+
+              <label class="span-2">
+                <span>Objective snapshot</span>
+                <textarea
+                  rows="3"
+                  formControlName="objective"
+                  placeholder="Describe what success looked like for this cycle."
+                ></textarea>
+              </label>
+
+              <label>
+                <span>KPI</span>
+                <input type="text" formControlName="kpiName" />
+              </label>
+
+              <label>
+                <span>Rating</span>
+                <select formControlName="rating">
+                  <option *ngFor="let rating of ratingOptions" [value]="rating">{{ rating }} / 5</option>
+                </select>
+              </label>
+
+              <label>
+                <span>KPI target</span>
+                <input type="number" formControlName="kpiTarget" min="0" step="0.1" />
+              </label>
+
+              <label>
+                <span>KPI actual</span>
+                <input type="number" formControlName="kpiActual" min="0" step="0.1" />
+              </label>
+
+              <label class="span-2">
+                <span>Feedback</span>
+                <textarea
+                  rows="4"
+                  formControlName="feedback"
+                  placeholder="Capture the rating rationale and coaching summary."
+                ></textarea>
+              </label>
+
+              <label>
+                <span>Strengths</span>
+                <textarea rows="3" formControlName="strengths"></textarea>
+              </label>
+
+              <label>
+                <span>Improvement areas</span>
+                <textarea rows="3" formControlName="improvementAreas"></textarea>
+              </label>
+            </div>
+
+            <p *ngIf="reviewSubmitted && reviewForm.invalid" class="form-hint error-text">
+              Complete the employee, reviewer, review window, rating, and feedback fields before saving.
+            </p>
+
+            <div class="editor-actions">
+              <button type="button" class="ghost-button" (click)="startReviewCreate()">Reset</button>
+              <button type="submit" class="primary-button" [disabled]="savingReview">
+                {{ savingReview ? 'Saving...' : reviewEditorMode === 'create' ? 'Save review' : 'Update review' }}
+              </button>
+            </div>
+          </form>
+        </article>
+
+        <article class="list-card-shell">
+          <div class="list-head">
+            <div>
+              <h3>Review records</h3>
+              <p>{{ filteredReviews.length }} reviews remain in scope for this cycle.</p>
+            </div>
+          </div>
+
+          <div *ngIf="!filteredReviews.length" class="empty-state">
+            No reviews match the current filter yet.
+          </div>
+
+          <div class="stack-list">
+            <article
+              *ngFor="let review of filteredReviews; trackBy: trackById"
+              class="record-card"
+              [ngClass]="'tone-' + review.tone"
+            >
+              <div class="record-topline">
+                <span class="pill">{{ review.ratingLabel }}</span>
+                <span>{{ review.reviewDateLabel }}</span>
+              </div>
+
+              <h4>{{ review.goalTitle }}</h4>
+              <p>{{ review.summary }}</p>
+
+              <div class="metric-grid">
+                <div>
+                  <span class="metric-label">Employee</span>
+                  <strong>{{ review.employeeName }}</strong>
+                </div>
+                <div>
+                  <span class="metric-label">Reviewer</span>
+                  <strong>{{ review.reviewerName }}</strong>
+                </div>
+                <div>
+                  <span class="metric-label">KPI target</span>
+                  <strong>{{ review.kpiTargetLabel }}</strong>
+                </div>
+                <div>
+                  <span class="metric-label">KPI actual</span>
+                  <strong>{{ review.kpiActualLabel }}</strong>
+                </div>
+              </div>
+
+              <div class="review-notes">
+                <p><strong>Review window:</strong> {{ review.reviewWindowLabel }}</p>
+                <p><strong>Feedback:</strong> {{ review.feedback }}</p>
+              </div>
+
+              <div class="record-footer">
+                <span>{{ review.status }}</span>
+                <div class="card-actions" *ngIf="canManagePerformance">
+                  <button type="button" class="ghost-button" (click)="editReview(review)">Edit</button>
+                  <button
+                    type="button"
+                    class="ghost-button danger-button"
+                    (click)="deleteReview(review)"
+                  >
+                    Delete
+                  </button>
+                </div>
+              </div>
+            </article>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="workspace-section">
+      <div class="section-head">
+        <div>
+          <p class="section-kicker">Coach</p>
+          <h2>Feedback stream</h2>
+        </div>
+        <button *ngIf="canManagePerformance" type="button" class="section-action" (click)="startFeedbackCreate()">New feedback</button>
+      </div>
+
+      <div class="workspace-grid two-column">
+        <article class="editor-card" *ngIf="canManagePerformance">
+          <h3>{{ feedbackEditorTitle }}</h3>
+          <p class="editor-copy">
+            Keep informal recognition and coaching visible between formal review cycles.
+          </p>
+
+          <form [formGroup]="feedbackForm" (ngSubmit)="saveFeedback()" class="editor-form">
+            <div class="form-grid">
+              <label>
+                <span>Employee</span>
+                <select formControlName="employeeId">
+                  <option value="">Select employee</option>
+                  <option *ngFor="let employee of employees; trackBy: trackById" [value]="employee.id">
+                    {{ employee.name }}
+                  </option>
+                </select>
+              </label>
+
+              <label>
+                <span>Given by</span>
+                <input type="text" formControlName="givenBy" />
+              </label>
+
+              <label>
+                <span>Timestamp</span>
+                <input type="datetime-local" formControlName="givenAt" />
+              </label>
+
+              <label>
+                <span>Type</span>
+                <select formControlName="type">
+                  <option *ngFor="let option of feedbackTypeOptions" [value]="option.value">
+                    {{ option.label }}
+                  </option>
+                </select>
+              </label>
+
+              <label class="span-2">
+                <span>Comment</span>
+                <textarea
+                  rows="4"
+                  formControlName="comment"
+                  placeholder="Add the recognition or coaching note you want to keep in the history."
+                ></textarea>
+              </label>
+            </div>
+
+            <p *ngIf="feedbackSubmitted && feedbackForm.invalid" class="form-hint error-text">
+              Complete the employee, author, timestamp, type, and comment fields before saving.
+            </p>
+
+            <div class="editor-actions">
+              <button type="button" class="ghost-button" (click)="startFeedbackCreate()">Reset</button>
+              <button type="submit" class="primary-button" [disabled]="savingFeedback">
+                {{ savingFeedback ? 'Saving...' : feedbackEditorMode === 'create' ? 'Save feedback' : 'Update feedback' }}
+              </button>
+            </div>
+          </form>
+        </article>
+
+        <article class="list-card-shell">
+          <div class="list-head">
+            <div>
+              <h3>Feedback timeline</h3>
+              <p>{{ filteredFeedback.length }} entries support continuous coaching in this view.</p>
+            </div>
+          </div>
+
+          <div *ngIf="!filteredFeedback.length" class="empty-state">
+            No feedback entries match the current filter yet.
+          </div>
+
+          <div class="stack-list">
+            <article
+              *ngFor="let item of filteredFeedback; trackBy: trackById"
+              class="record-card"
+              [ngClass]="'tone-' + item.tone"
+            >
+              <div class="record-topline">
+                <span class="pill">{{ item.typeLabel }}</span>
+                <span>{{ item.givenAtLabel }}</span>
+              </div>
+
+              <h4>{{ item.employeeName }}</h4>
+              <p>{{ item.comment }}</p>
+
+              <div class="record-footer">
+                <span>By {{ item.givenBy }}</span>
+                <div class="card-actions" *ngIf="canManagePerformance">
+                  <button type="button" class="ghost-button" (click)="editFeedback(item)">Edit</button>
+                  <button
+                    type="button"
+                    class="ghost-button danger-button"
+                    (click)="deleteFeedback(item)"
+                  >
+                    Delete
+                  </button>
+                </div>
+              </div>
+            </article>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="workspace-section history-section">
+      <div class="section-head">
+        <div>
+          <p class="section-kicker">Track</p>
+          <h2>Performance history</h2>
+        </div>
+      </div>
+
+      <div *ngIf="!historyItems.length" class="empty-state">
+        No goals, reviews, or feedback entries are available for the current filter.
+      </div>
+
+      <div *ngIf="historyItems.length" class="history-table-wrap">
+        <table class="history-table">
+          <thead>
+            <tr>
+              <th>Type</th>
+              <th>Employee</th>
+              <th>Title</th>
+              <th>Cycle</th>
+              <th>Date</th>
+              <th>Status</th>
+              <th>Signal</th>
+              <th>Detail</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let item of historyItems; trackBy: trackById" [ngClass]="'tone-' + item.tone">
+              <td>{{ item.kindLabel }}</td>
+              <td>{{ item.employeeName }}</td>
+              <td>{{ item.title }}</td>
+              <td>{{ item.cycle }}</td>
+              <td>{{ item.dateLabel }}</td>
+              <td>{{ item.statusLabel }}</td>
+              <td>{{ item.ratingLabel }}</td>
+              <td>{{ item.detail }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </ng-container>
+</div>

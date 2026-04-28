@@ -1,0 +1,374 @@
+<section class="onboarding-shell">
+  <header class="onboarding-hero">
+    <div>
+      <p class="eyebrow">New Hire Operations</p>
+      <h1>Onboarding workspace</h1>
+      <p class="hero-copy">
+        Assign onboarding checklists, upload signed offer letters and employee documents, and keep every new hire's first-week progress visible.
+      </p>
+    </div>
+    <div class="hero-actions">
+      <button type="button" class="btn btn-outline-secondary" (click)="refreshWorkspace()">
+        Refresh workspace
+      </button>
+    </div>
+  </header>
+
+  <section class="metric-grid">
+    <article class="metric-card tone-strong">
+      <span class="metric-label">Tracked employees</span>
+      <strong>{{ totalTrackedEmployees }}</strong>
+      <small>Employees with active onboarding tasks or documents</small>
+    </article>
+    <article class="metric-card tone-warning">
+      <span class="metric-label">Assigned tasks</span>
+      <strong>{{ totalAssignedTasks }}</strong>
+      <small>{{ totalCompletedTasks }} completed across all onboarding plans</small>
+    </article>
+    <article class="metric-card tone-medium">
+      <span class="metric-label">Completion rate</span>
+      <strong>{{ overallCompletionRate }}%</strong>
+      <small>Checklist completion across the onboarding pipeline</small>
+    </article>
+    <article class="metric-card tone-critical">
+      <span class="metric-label">Uploaded documents</span>
+      <strong>{{ totalUploadedDocuments }}</strong>
+      <small>Offer letters, IDs, certificates, and contract records</small>
+    </article>
+  </section>
+
+  <section class="progress-grid" *ngIf="progressCards.length">
+    <article
+      class="progress-card"
+      *ngFor="let progress of progressCards; trackBy: trackByEmployeeId"
+      [ngClass]="'tone-' + progress.tone"
+    >
+      <div class="progress-card-header">
+        <div>
+          <h2>{{ progress.employeeName }}</h2>
+          <p>{{ progress.completedTasks }} of {{ progress.totalTasks }} tasks completed</p>
+        </div>
+        <span class="offer-chip" [ngClass]="progress.offerLetterUploaded ? 'ready' : 'pending'">
+          {{ progress.offerLetterUploaded ? 'Offer letter uploaded' : 'Offer letter pending' }}
+        </span>
+      </div>
+      <div class="progress-bar-track">
+        <span class="progress-bar-fill" [style.width.%]="progress.completionRate"></span>
+      </div>
+      <div class="progress-meta">
+        <span>{{ progress.completionRate }}% complete</span>
+        <span>{{ progress.documentCount }} documents</span>
+        <span>{{ progress.nextDueLabel }}</span>
+      </div>
+    </article>
+  </section>
+
+  <p class="workspace-error" *ngIf="loadError">{{ loadError }}</p>
+
+  <section class="editor-grid">
+    <article class="editor-card">
+      <div class="card-header-block">
+        <p class="card-eyebrow">Checklist Assignment</p>
+        <h2>Assign onboarding tasks</h2>
+        <p>
+          Build a custom onboarding checklist or assign the starter sequence for offer review, document collection, and first-week readiness.
+        </p>
+      </div>
+
+      <form [formGroup]="checklistForm" (ngSubmit)="saveChecklist()" class="editor-form">
+        <label>
+          <span>Employee</span>
+          <select formControlName="employeeId">
+            <option value="">Select employee</option>
+            <option *ngFor="let employee of employees; trackBy: trackByEmployeeId" [value]="employee.id">
+              {{ employee.name }}
+            </option>
+          </select>
+        </label>
+
+        <div class="form-columns">
+          <label>
+            <span>Task name</span>
+            <input type="text" formControlName="taskName" placeholder="Collect signed handbook acknowledgement" />
+          </label>
+          <label>
+            <span>Task category</span>
+            <select formControlName="taskCategory">
+              <option *ngFor="let category of checklistCategories" [value]="category">
+                {{ toDisplayLabel(category) }}
+              </option>
+            </select>
+          </label>
+        </div>
+
+        <label>
+          <span>Task description</span>
+          <textarea
+            rows="3"
+            formControlName="taskDescription"
+            placeholder="Explain what the new hire or the HR team needs to complete for this step."
+          ></textarea>
+        </label>
+
+        <div class="form-columns form-columns-compact">
+          <label>
+            <span>Due date</span>
+            <input type="date" formControlName="dueDate" />
+          </label>
+          <label>
+            <span>Required document</span>
+            <select formControlName="requiredDocumentCategory">
+              <option value="">No document required</option>
+              <option *ngFor="let category of documentCategories" [value]="category">
+                {{ toDisplayLabel(category) }}
+              </option>
+            </select>
+          </label>
+        </div>
+
+        <label>
+          <span>Notes</span>
+          <textarea
+            rows="2"
+            formControlName="notes"
+            placeholder="Capture handoff notes, dependencies, or onboarding context."
+          ></textarea>
+        </label>
+
+        <p class="form-error" *ngIf="checklistSubmitted && checklistForm.invalid">
+          Select an employee and enter a task name before saving.
+        </p>
+
+        <div class="form-actions">
+          <button type="button" class="btn btn-outline-secondary" (click)="assignStarterChecklist()" [disabled]="checklistSaving">
+            Assign starter checklist
+          </button>
+          <button type="submit" class="btn btn-primary" [disabled]="checklistSaving">
+            {{ checklistSaveLabel }}
+          </button>
+        </div>
+      </form>
+    </article>
+
+    <article class="editor-card" *ngIf="canManageDocuments; else readOnlyDocumentsPanel">
+      <div class="card-header-block">
+        <p class="card-eyebrow">Document Upload</p>
+        <h2>Upload offer letters and onboarding documents</h2>
+        <p>
+          Store the signed offer letter, identity files, contracts, and certificates without leaving the onboarding view.
+        </p>
+      </div>
+
+      <form [formGroup]="documentForm" (ngSubmit)="uploadDocument()" class="editor-form">
+        <label>
+          <span>Employee</span>
+          <select formControlName="employeeId">
+            <option value="">Select employee</option>
+            <option *ngFor="let employee of employees; trackBy: trackByEmployeeId" [value]="employee.id">
+              {{ employee.name }}
+            </option>
+          </select>
+        </label>
+
+        <div class="form-columns">
+          <label>
+            <span>Document name</span>
+            <input type="text" formControlName="documentName" placeholder="Signed Offer Letter" />
+          </label>
+          <label>
+            <span>Document category</span>
+            <select formControlName="documentCategory">
+              <option *ngFor="let category of documentCategories" [value]="category">
+                {{ toDisplayLabel(category) }}
+              </option>
+            </select>
+          </label>
+        </div>
+
+        <div class="form-columns form-columns-compact">
+          <label>
+            <span>Access level</span>
+            <select formControlName="accessLevel">
+              <option *ngFor="let accessLevel of accessOptions" [value]="accessLevel">
+                {{ accessLevel === 'EMPLOYEE_AND_ADMIN' ? 'Employee + Admin' : 'Admin only' }}
+              </option>
+            </select>
+          </label>
+          <label class="file-picker">
+            <span>File</span>
+            <input type="file" (change)="onFileSelected($event)" />
+            <small>{{ selectedFileName || 'Choose the file to upload.' }}</small>
+          </label>
+        </div>
+
+        <label>
+          <span>Notes</span>
+          <textarea
+            rows="2"
+            formControlName="notes"
+            placeholder="Add a short document note or handoff comment."
+          ></textarea>
+        </label>
+
+        <p class="form-error" *ngIf="documentSubmitted && (documentForm.invalid || !selectedFile)">
+          Select an employee, provide a document name, and attach the file before uploading.
+        </p>
+
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary" [disabled]="documentSaving">
+            {{ documentSaveLabel }}
+          </button>
+        </div>
+      </form>
+    </article>
+
+    <ng-template #readOnlyDocumentsPanel>
+      <article class="editor-card muted-card">
+        <div class="card-header-block">
+          <p class="card-eyebrow">Document Access</p>
+          <h2>Read-only document visibility</h2>
+          <p>
+            Managers can review onboarding documents here, but only Admin and HR accounts can upload or replace them.
+          </p>
+        </div>
+      </article>
+    </ng-template>
+  </section>
+
+  <section class="filter-card">
+    <div class="filter-field filter-field-wide">
+      <span>Search tasks</span>
+      <input
+        type="search"
+        [ngModel]="searchTerm"
+        (ngModelChange)="onSearchTermChange($event)"
+        placeholder="Search by employee, task, category, or note"
+      />
+    </div>
+    <div class="filter-field">
+      <span>Employee</span>
+      <select [ngModel]="selectedEmployee" (ngModelChange)="onEmployeeFilterChange($event)">
+        <option value="all">All employees</option>
+        <option *ngFor="let employee of employees; trackBy: trackByEmployeeId" [value]="employee.id">
+          {{ employee.name }}
+        </option>
+      </select>
+    </div>
+    <div class="filter-field">
+      <span>Status</span>
+      <select [ngModel]="selectedStatus" (ngModelChange)="onStatusFilterChange($event)">
+        <option value="all">All tasks</option>
+        <option value="open">Open tasks</option>
+        <option value="completed">Completed tasks</option>
+      </select>
+    </div>
+    <div class="filter-field">
+      <span>Document category</span>
+      <select [ngModel]="selectedDocumentCategory" (ngModelChange)="onDocumentCategoryFilterChange($event)">
+        <option value="all">All documents</option>
+        <option *ngFor="let category of documentCategories" [value]="category">
+          {{ toDisplayLabel(category) }}
+        </option>
+      </select>
+    </div>
+  </section>
+
+  <section class="workspace-grid">
+    <article class="list-card">
+      <div class="card-header-block">
+        <p class="card-eyebrow">Task Tracking</p>
+        <h2>Checklist progress</h2>
+        <p>Mark each onboarding task complete as documents arrive and first-week steps are finished.</p>
+      </div>
+
+      <div class="loading-state" *ngIf="loading">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+
+      <div class="empty-state" *ngIf="!loading && !filteredChecklists.length">
+        <h3>No onboarding tasks match the current filters.</h3>
+        <p>Assign the starter checklist or add the first onboarding task to begin tracking progress.</p>
+      </div>
+
+      <div class="task-list" *ngIf="!loading && filteredChecklists.length">
+        <article
+          class="task-row"
+          *ngFor="let item of filteredChecklists; trackBy: trackByChecklistId"
+          [ngClass]="['tone-' + item.tone, item.completed ? 'is-complete' : '', item.overdue ? 'is-overdue' : '']"
+        >
+          <div class="task-main">
+            <div class="task-tags">
+              <span class="task-chip">{{ item.taskCategoryLabel }}</span>
+              <span class="task-chip task-chip-document" *ngIf="item.requiredDocumentCategory">
+                {{ item.requiredDocumentLabel }}
+              </span>
+              <span class="task-chip task-chip-success" *ngIf="item.completed">Completed</span>
+              <span class="task-chip task-chip-danger" *ngIf="item.overdue">Overdue</span>
+            </div>
+            <h3>{{ item.taskName }}</h3>
+            <p>{{ item.taskDescription || 'No additional task description provided.' }}</p>
+            <div class="task-meta">
+              <span>{{ item.employeeName }}</span>
+              <span>{{ item.dueDateLabel }}</span>
+              <span>Assigned by {{ item.assignedBy }}</span>
+              <span>{{ item.assignedAtLabel }}</span>
+            </div>
+            <p class="task-notes" *ngIf="item.notes">{{ item.notes }}</p>
+          </div>
+          <div class="task-actions">
+            <button type="button" class="btn btn-sm btn-outline-secondary" (click)="toggleChecklistCompletion(item)">
+              {{ item.completed ? 'Mark open' : 'Mark complete' }}
+            </button>
+            <small *ngIf="item.completed">{{ item.completedAtLabel }}</small>
+          </div>
+        </article>
+      </div>
+    </article>
+
+    <article class="list-card">
+      <div class="card-header-block">
+        <p class="card-eyebrow">Document Library</p>
+        <h2>Offer letters and onboarding files</h2>
+        <p>Download current onboarding documents without leaving the checklist workspace.</p>
+      </div>
+
+      <div class="loading-state" *ngIf="loading">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+
+      <div class="empty-state" *ngIf="!loading && !filteredDocuments.length">
+        <h3>No documents match the current filters.</h3>
+        <p>Upload the signed offer letter or another onboarding file to start the document trail.</p>
+      </div>
+
+      <div class="document-list" *ngIf="!loading && filteredDocuments.length">
+        <article class="document-row" *ngFor="let item of filteredDocuments; trackBy: trackByDocumentId">
+          <div class="document-main">
+            <div class="task-tags">
+              <span class="task-chip">{{ item.documentCategoryLabel }}</span>
+              <span class="task-chip task-chip-document">v{{ item.versionNumber }}</span>
+              <span class="task-chip task-chip-success" *ngIf="item.activeVersion">Current version</span>
+            </div>
+            <h3>{{ item.documentName }}</h3>
+            <p>{{ item.originalFileName }}</p>
+            <div class="task-meta">
+              <span>{{ item.employeeName }}</span>
+              <span>{{ item.uploadedAtLabel }}</span>
+              <span>{{ item.accessLabel }}</span>
+            </div>
+            <p class="task-notes" *ngIf="item.notes">{{ item.notes }}</p>
+          </div>
+          <div class="task-actions">
+            <button type="button" class="btn btn-sm btn-outline-secondary" (click)="downloadDocument(item)">
+              Download
+            </button>
+          </div>
+        </article>
+      </div>
+    </article>
+  </section>
+</section>

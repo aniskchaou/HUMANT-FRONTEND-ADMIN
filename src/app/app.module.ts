@@ -1,4 +1,5 @@
 import { BrowserModule } from '@angular/platform-browser';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { NgModule } from '@angular/core';
 
 import { AppComponent } from './app.component';
@@ -100,6 +101,7 @@ import { TransfertListComponent } from './modules/transfert/transfert-list/trans
 import { TerminationListComponent } from './modules/termination/termination-list/termination-list.component';
 
 import { LoanComponent } from './modules/loan/loan.component';
+import { ExpenseComponent } from './modules/expense/expense/expense.component';
 
 import { ContractComponent } from './modules/contract/contract/contract.component';
 import { PayslipComponent } from './modules/payslip/payslip/payslip.component';
@@ -116,16 +118,19 @@ import { LeaveTypeComponent } from './modules/leave-type/leave-type.component';
 import { AnnouncementComponent } from './modules/announcement/announcement/announcement.component';
 import { EducationLevelComponent } from './modules/education-level/education-level/education-level.component';
 import { JobApplicationComponent } from './modules/job-application/job-application.component';
+import { AuthguardService } from './main/security/authguard-service.service';
 
 import { HolidayComponent } from './modules/holiday/holiday/holiday.component';
 import { UserComponent } from './modules/user/user/user.component';
 import { WarningComponent } from './modules/warning/warning.component';
+import { DocumentComponent } from './modules/document/document/document.component';
+import { OnboardingComponent } from './modules/onboarding/onboarding/onboarding.component';
+import { PerformanceComponent } from './modules/performance/performance/performance.component';
+import { CommunicationComponent } from './modules/communication/communication/communication.component';
 import { TrainingTypeComponent } from './modules/training-type/training-type/training-type.component';
 
 import { NoticeListComponent } from './modules/notice/notice-list/notice-list.component';
 
-import { CityComponent } from './modules/city/city/city.component';
-import { CountryComponent } from './modules/country/country/country.component';
 import { HttpClientModule } from '@angular/common/http';
 import { AddAnnouncementComponent } from './modules/announcement/add-announcement/add-announcement.component';
 import { AnnouncementModalComponent } from './modules/announcement/announcement-modal/announcement-modal.component';
@@ -138,8 +143,6 @@ import { AddContractTypeComponent } from './modules/contract-type/add-contract-t
 import { AddJobComponent } from './modules/job/add-job/add-job.component';
 import { AddEducationLevelComponent } from './modules/education-level/add-education-level/add-education-level.component';
 import { AddUserComponent } from './modules/user/add-user/add-user.component';
-import { AddCityComponent } from './modules/city/add-city/add-city.component';
-import { AddCountryComponent } from './modules/country/add-country/add-country.component';
 import { AddAwardTypeComponent } from './modules/award-type/add-award-type/add-award-type.component';
 import { JobModalComponent } from './modules/job/job-modal/job-modal.component';
 import { LaunchPlanModalComponent } from './modules/launchplan/launch-plan-modal/launch-plan-modal.component';
@@ -157,18 +160,19 @@ import { EditAnnouncementComponent } from './modules/announcement/edit-announcem
 import { EditTrainingTypeComponent } from './modules/training-type/edit-training-type/edit-training-type.component';
 import { EditEducationLevelComponent } from './modules/education-level/edit-education-level/edit-education-level.component';
 import { EditContractTypeComponent } from './modules/contract-type/edit-contract-type/edit-contract-type.component';
-import { CountryModalComponent } from './modules/country/country-modal/country-modal.component';
-import { CityModalComponent } from './modules/city/city-modal/city-modal.component';
-import { EditCityComponent } from './modules/city/edit-city/edit-city.component';
 import { NgxChartsModule } from '@swimlane/ngx-charts';
+import { AttendanceComponent } from './modules/attendance/attendance/attendance.component';
+import { DocumentationComponent } from './modules/documentation/documentation/documentation.component';
+import { DocumentationProductComponent } from './modules/documentation/documentation-product/documentation-product.component';
+import { DocumentationInstallationComponent } from './modules/documentation/documentation-installation/documentation-installation.component';
+import { DocumentationModulesComponent } from './modules/documentation/documentation-modules/documentation-modules.component';
 
-const routes: Routes = [
-  { path: 'country', component: CountryComponent, pathMatch: 'full' },
-  { path: 'city', component: CityComponent, pathMatch: 'full' },
+const baseRoutes: Routes = [
   { path: 'advance', component: AdvanceComponent, pathMatch: 'full' },
   { path: 'award', component: AwardComponent, pathMatch: 'full' },
   { path: 'award-type', component: AwardTypeComponent, pathMatch: 'full' },
   { path: 'announcement', component: AnnouncementComponent, pathMatch: 'full' },
+  { path: 'communication', component: CommunicationComponent, pathMatch: 'full' },
   { path: 'complain', component: ComplainComponent, pathMatch: 'full' },
   { path: 'contract', component: ContractComponent, pathMatch: 'full' },
   {
@@ -189,10 +193,31 @@ const routes: Routes = [
     component: EducationLevelComponent,
     pathMatch: 'full',
   },
+  { path: 'document', component: DocumentComponent, pathMatch: 'full' },
   { path: 'event', component: EventComponent, pathMatch: 'full' },
   {
     path: 'job',
     component: JobComponent,
+    pathMatch: 'full',
+  },
+  {
+    path: 'candidate',
+    loadChildren: () => import('./modules/candidate/candidate.module').then(m => m.CandidateModule),
+    pathMatch: 'full',
+  },
+  {
+    path: 'interview',
+    loadChildren: () => import('./modules/interview/interview.module').then(m => m.InterviewModule),
+    pathMatch: 'full',
+  },
+  {
+    path: 'offer-letter',
+    loadChildren: () => import('./modules/offer-letter/offer-letter.module').then(m => m.OfferLetterModule),
+    pathMatch: 'full',
+  },
+  {
+    path: 'pipeline',
+    loadChildren: () => import('./modules/pipeline/pipeline.module').then(m => m.PipelineModule),
     pathMatch: 'full',
   },
   {
@@ -212,8 +237,16 @@ const routes: Routes = [
     component: LoanComponent,
     pathMatch: 'full',
   },
+  {
+    path: 'expense',
+    component: ExpenseComponent,
+    pathMatch: 'full',
+  },
+  { path: 'attendance', component: AttendanceComponent, pathMatch: 'full' },
   { path: 'notice', component: NoticeComponent, pathMatch: 'full' },
+  { path: 'onboarding', component: OnboardingComponent, pathMatch: 'full' },
   { path: 'pay-slip', component: PayslipComponent, pathMatch: 'full' },
+  { path: 'performance', component: PerformanceComponent, pathMatch: 'full' },
   { path: 'resignation', component: ResignComponent, pathMatch: 'full' },
   { path: 'resign', component: ResignComponent, pathMatch: 'full' },
   { path: 'salary', component: SalaryComponent, pathMatch: 'full' },
@@ -231,19 +264,49 @@ const routes: Routes = [
   },
   { path: 'transfert', component: TransfertComponent, pathMatch: 'full' },
   { path: 'dashboard', component: DashboardComponent, pathMatch: 'full' },
+  {
+    path: 'documentation',
+    component: DocumentationComponent,
+    pathMatch: 'full',
+  },
+  {
+    path: 'documentation/product',
+    component: DocumentationProductComponent,
+    pathMatch: 'full',
+  },
+  {
+    path: 'documentation/installation',
+    component: DocumentationInstallationComponent,
+    pathMatch: 'full',
+  },
+  {
+    path: 'documentation/modules',
+    component: DocumentationModulesComponent,
+    pathMatch: 'full',
+  },
   { path: 'login', component: LoginComponent, pathMatch: 'full' },
   { path: 'profile', component: ProfileComponent, pathMatch: 'full' },
-  { path: 'editprofile', component: EditprofileComponent, pathMatch: 'full' },
+  { path: 'editprofile', component: ProfileComponent, pathMatch: 'full' },
   { path: 'warning', component: WarningComponent, pathMatch: 'full' },
   { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
   { path: '**', redirectTo: 'dashboard', pathMatch: 'full' },
 ];
+
+const routes: Routes = baseRoutes.map((route) =>
+  route.component && route.path !== 'login'
+    ? { ...route, canActivate: [AuthguardService] }
+    : route
+);
 
 @NgModule({
   declarations: [
     AppComponent,
     NavigationComponent,
     DashboardComponent,
+    DocumentationComponent,
+    DocumentationProductComponent,
+    DocumentationInstallationComponent,
+    DocumentationModulesComponent,
     EmployeeComponent,
     AwardComponent,
     TransfertComponent,
@@ -259,6 +322,7 @@ const routes: Routes = [
     DepartementComponent,
     DesignationComponent,
     ConfigurationComponent,
+    AttendanceComponent,
     LoginComponent,
     ProfileComponent,
     EditprofileComponent,
@@ -344,14 +408,19 @@ const routes: Routes = [
     EditTrainingTypeComponent,
     EditEducationLevelComponent,
     LoanComponent,
+    ExpenseComponent,
     UserComponent,
+    DocumentComponent,
+    OnboardingComponent,
     ContractComponent,
     PayslipComponent,
     LaunchplanComponent,
+    CommunicationComponent,
     AwardTypeModalComponent,
     EditAwardTypeComponent,
     LterminationTypeComponent,
     WarningComponent,
+    PerformanceComponent,
     EditContractTypeComponent,
     LeaveTypeComponent,
     AddEventComponent,
@@ -367,18 +436,14 @@ const routes: Routes = [
     AddTrainingTypeComponent,
     AnnouncementModalComponent,
     AwardTypeComponent,
-    CountryComponent,
     AddLaunchPlanComponent,
     AddContractTypeComponent,
     AddJobComponent,
     AddEducationLevelComponent,
     AddUserComponent,
-    AddCityComponent,
-    AddCountryComponent,
     AddAwardTypeComponent,
     JobModalComponent,
     LaunchPlanModalComponent,
-    CityComponent,
     AddAnnouncementComponent,
     AnnouncementListComponent,
     AwardTypeListComponent,
@@ -387,18 +452,15 @@ const routes: Routes = [
     EducationLevelListComponent,
     EventListComponent,
     AddAwardTypeComponent,
-    CountryModalComponent,
-    CityModalComponent,
-    EditCityComponent,
   ],
   imports: [
     HttpClientModule,
     DataTablesModule,
     BrowserModule,
+    BrowserAnimationsModule,
     FormsModule,
     ReactiveFormsModule,
     NgxChartsModule,
-    BrowserModule,
     RouterModule.forRoot(routes),
   ],
   providers: [{ provide: APP_BASE_HREF, useValue: '' }],

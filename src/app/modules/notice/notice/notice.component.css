@@ -1,0 +1,6 @@
+:host {
+	display: block;
+	--ops-accent: #7a3e65;
+	--ops-accent-alt: #a44a3f;
+	--ops-accent-soft: rgba(122, 62, 101, 0.12);
+}

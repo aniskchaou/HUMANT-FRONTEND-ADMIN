@@ -1,0 +1,106 @@
+<div class="container mt-4">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>Interview Management</h2>
+    <button class="btn btn-primary" (click)="openCreate()">+ Schedule Interview</button>
+  </div>
+
+  <div *ngIf="error" class="alert alert-danger">{{ error }}</div>
+  <div *ngIf="successMsg" class="alert alert-success">{{ successMsg }}</div>
+
+  <!-- Add / Edit Form -->
+  <div *ngIf="showForm" class="card mb-4">
+    <div class="card-header">{{ editingId ? 'Edit Interview' : 'Schedule Interview' }}</div>
+    <div class="card-body">
+      <form [formGroup]="form" (ngSubmit)="save()">
+        <div class="row">
+          <div class="col-md-3">
+            <label>Candidate *</label>
+            <select class="form-control" formControlName="candidateId">
+              <option value="">-- Select --</option>
+              <option *ngFor="let c of candidates" [value]="c.id">
+                {{ c.firstName }} {{ c.lastName }}
+              </option>
+            </select>
+          </div>
+          <div class="col-md-3">
+            <label>Date & Time *</label>
+            <input class="form-control" formControlName="scheduledAt" type="datetime-local" />
+          </div>
+          <div class="col-md-3">
+            <label>Interviewer *</label>
+            <input class="form-control" formControlName="interviewerName" placeholder="Name" />
+          </div>
+          <div class="col-md-3">
+            <label>Location</label>
+            <input class="form-control" formControlName="location" placeholder="Room / Online" />
+          </div>
+        </div>
+        <div class="row mt-2">
+          <div class="col-md-3">
+            <label>Status *</label>
+            <select class="form-control" formControlName="status">
+              <option *ngFor="let s of statuses" [value]="s">{{ s }}</option>
+            </select>
+          </div>
+        </div>
+        <div class="mt-3">
+          <button class="btn btn-success me-2" type="submit" [disabled]="form.invalid || saving">
+            {{ saving ? 'Saving...' : 'Save' }}
+          </button>
+          <button class="btn btn-secondary" type="button" (click)="cancel()">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Feedback Modal -->
+  <div *ngIf="feedbackId !== null" class="card mb-4 border-info">
+    <div class="card-header bg-info text-white">Record Feedback</div>
+    <div class="card-body">
+      <textarea class="form-control" rows="4" [(ngModel)]="feedbackText" placeholder="Enter interview feedback..."></textarea>
+      <div class="mt-2">
+        <button class="btn btn-info me-2" (click)="saveFeedback()" [disabled]="savingFeedback">
+          {{ savingFeedback ? 'Saving...' : 'Save Feedback' }}
+        </button>
+        <button class="btn btn-secondary" (click)="cancelFeedback()">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Table -->
+  <div *ngIf="loading" class="text-center p-4">Loading...</div>
+  <table *ngIf="!loading" class="table table-bordered table-hover">
+    <thead class="thead-light">
+      <tr>
+        <th>Candidate</th>
+        <th>Scheduled At</th>
+        <th>Interviewer</th>
+        <th>Location</th>
+        <th>Status</th>
+        <th>Feedback</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let i of interviews">
+        <td>{{ candidateName(i) }}</td>
+        <td>{{ i.scheduledAt | date:'medium' }}</td>
+        <td>{{ i.interviewerName }}</td>
+        <td>{{ i.location || '—' }}</td>
+        <td><span class="badge badge-secondary">{{ i.status }}</span></td>
+        <td>
+          <span *ngIf="i.feedback" title="{{ i.feedback }}">{{ i.feedback | slice:0:40 }}{{ i.feedback?.length > 40 ? '…' : '' }}</span>
+          <span *ngIf="!i.feedback" class="text-muted">—</span>
+        </td>
+        <td>
+          <button class="btn btn-sm btn-warning me-1" (click)="openEdit(i)">Edit</button>
+          <button class="btn btn-sm btn-info me-1" (click)="openFeedback(i)">Feedback</button>
+          <button class="btn btn-sm btn-danger" (click)="delete(i.id)">Delete</button>
+        </td>
+      </tr>
+      <tr *ngIf="interviews.length === 0">
+        <td colspan="7" class="text-center text-muted">No interviews scheduled.</td>
+      </tr>
+    </tbody>
+  </table>
+</div>

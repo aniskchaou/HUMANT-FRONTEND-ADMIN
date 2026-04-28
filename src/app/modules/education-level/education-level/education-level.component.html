@@ -1,161 +1,406 @@
-<div class="page-heading">
-  <section class="section">
-    <div class="card">
-      <div class="card-header">
-        <h2>Educations Levels</h2>
-      </div>
-      <div class="card-body">
-        <div class="dataTable-container">
+<div class="page-heading ops-page">
+  <section class="ops-shell">
+    <article class="card ops-hero">
+      <div class="ops-hero-copy">
+        <span class="ops-eyebrow">Talent profile</span>
+        <h2>Keep education standards structured and easier to review.</h2>
+        <p>
+          Track program depth, certificate labels, and academic origins so the
+          qualification catalog stays useful for recruiting and employee records.
+        </p>
+
+        <div class="ops-hero-actions">
           <button
             type="button"
-            class="btn btn-success btn-sm"
+            class="btn btn-primary"
             data-bs-toggle="modal"
-            data-bs-target="#add"
+            data-bs-target="#educationLevelCrudModal"
+            (click)="openCreateModal()"
           >
-            <i class="fas fa-plus-square"></i> Create
+            <i class="bi bi-plus-square-fill"></i>
+            Create education level
           </button>
-          <table
-            class="table table-bordered"
-            id="table"
-            width="100%"
-            cellspacing="0"
+          <button
+            type="button"
+            class="btn btn-light"
+            (click)="refreshEducationLevels()"
+            [disabled]="loading"
           >
-            <thead>
-              <tr>
-                <th>Name</th>
-                <th>Years</th>
-                <th>Speciality</th>
-                <th>Level</th>
-                <th>School</th>
-                <th></th>
-              </tr>
-            </thead>
-            <tfoot>
-              <tr>
-                <th>Name</th>
-                <th>Years</th>
-                <th>Speciality</th>
-                <th>Level</th>
-                <th>School</th>
-                <th></th>
-              </tr>
-            </tfoot>
-            <tbody>
-              <tr *ngFor="let c of educationLevel$">
-                <td>{{ c.name }}</td>
-                <td>{{ c.years }}</td>
-                <td>{{ c.fieldofStudy }}</td>
-                <td>{{ c.certificateLevel }}</td>
-                <td>{{ c.school }}</td>
-                <td>
-                  <button
-                    type="button"
-                    data-bs-toggle="modal"
-                    (click)="edit(c.id)"
-                    data-bs-target="#edit"
-                    class="btn btn-warning btn-sm"
-                  >
-                    <i class="fas fa-edit"></i>
-                  </button>
-                  <button
-                    type="button"
-                    class="btn btn-danger btn-sm"
-                    (click)="delete(c.id)"
-                  >
-                    <i class="fas fa-trash-alt"></i>
-                  </button>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+            <i class="bi bi-arrow-repeat"></i>
+            Refresh
+          </button>
+        </div>
 
-          <div
-            class="modal fade text-left"
-            id="edit"
-            tabindex="-1"
-            aria-labelledby="myModalLabel1"
-            style="display: none"
-            aria-hidden="true"
-          >
-            <div
-              class="modal-dialog modal-dialog-scrollable modal-lg"
-              role="document"
-            >
-              <div class="modal-content">
-                <div class="modal-header">
-                  <h5 class="modal-title" id="myModalLabel1">Edit</h5>
-                  <button
-                    type="button"
-                    class="close rounded-pill"
-                    data-bs-dismiss="modal"
-                    aria-label="Close"
-                  >
-                    <i data-feather="x"></i>
-                  </button>
-                </div>
-                <div class="modal-body">
-                  <app-edit-education-level
-                    [id]="id"
-                    (closeModalEvent)="closeModalEdit()"
-                  ></app-edit-education-level>
-                </div>
-                <div class="modal-footer">
-                  <button
-                    type="button"
-                    class="btn closeEdit"
-                    data-bs-dismiss="modal"
-                  >
-                    <i class="bx bx-x d-block d-sm-none"></i>
-                    <span class="d-none d-sm-block">Close</span>
-                  </button>
-                </div>
-              </div>
-            </div>
+        <div class="ops-hero-notice" *ngIf="loadError">{{ loadError }}</div>
+      </div>
+
+      <div class="ops-hero-panel">
+        <span class="ops-panel-kicker">Credential quality</span>
+        <h3>Education catalog completeness across records</h3>
+
+        <div class="ops-metric-grid">
+          <div class="ops-metric-card">
+            <span>Total records</span>
+            <strong>{{ totalEducationLevelsCount }}</strong>
+            <p>Education level entries currently available in the backend.</p>
           </div>
-          <div
-            class="modal fade text-left"
-            id="add"
-            tabindex="-1"
-            aria-labelledby="myModalLabel1"
-            style="display: none"
-            aria-hidden="true"
-          >
-            <div
-              class="modal-dialog modal-dialog-scrollable modal-lg"
-              role="document"
-            >
-              <div class="modal-content">
-                <div class="modal-header">
-                  <h5 class="modal-title" id="myModalLabel1">Create</h5>
-                  <button
-                    type="button"
-                    class="close rounded-pill"
-                    data-bs-dismiss="modal"
-                    aria-label="Close"
-                  >
-                    <i data-feather="x"></i>
-                  </button>
-                </div>
-                <div class="modal-body">
-                  <app-add-education-level
-                    (closeModalEvent)="closeModalAdd()"
-                  ></app-add-education-level>
-                </div>
-                <div class="modal-footer">
-                  <button
-                    type="button"
-                    class="btn closeAdd"
-                    data-bs-dismiss="modal"
-                  >
-                    <i class="bx bx-x d-block d-sm-none"></i>
-                    <span class="d-none d-sm-block">Close</span>
-                  </button>
-                </div>
-              </div>
-            </div>
+          <div class="ops-metric-card">
+            <span>Complete profiles</span>
+            <strong>{{ completeProfilesCount }}</strong>
+            <p>Entries with certificate, field, school, and duration captured.</p>
           </div>
         </div>
+
+        <div class="ops-progress-wrap">
+          <div class="ops-progress-top">
+            <span>Catalog completion</span>
+            <strong>{{ completionCoverage }}%</strong>
+          </div>
+          <div class="ops-progress-track">
+            <span [style.width.%]="completionCoverage"></span>
+          </div>
+          <p>
+            {{ schoolLinkedCount }} record{{ schoolLinkedCount === 1 ? '' : 's' }} already identify a school or institution.
+          </p>
+        </div>
       </div>
+    </article>
+
+    <div class="ops-stat-grid">
+      <article class="card ops-stat-card tone-primary">
+        <span>Education levels</span>
+        <strong>{{ totalEducationLevelsCount }}</strong>
+        <p>Total qualification records maintained in the workspace.</p>
+      </article>
+
+      <article class="card ops-stat-card tone-secondary">
+        <span>Complete records</span>
+        <strong>{{ completeProfilesCount }}</strong>
+        <p>Profiles that are ready to be reused in talent workflows.</p>
+      </article>
+
+      <article class="card ops-stat-card tone-warning">
+        <span>Institution linked</span>
+        <strong>{{ schoolLinkedCount }}</strong>
+        <p>Records that already include a school or training provider.</p>
+      </article>
+
+      <article class="card ops-stat-card tone-danger">
+        <span>Compact programs</span>
+        <strong>{{ compactProgramsCount }}</strong>
+        <p>Credentials with a duration of two years or less.</p>
+      </article>
+    </div>
+
+    <article class="card ops-toolbar-card">
+      <div class="ops-toolbar">
+        <label class="ops-search-field">
+          <i class="bi bi-search"></i>
+          <input
+            type="text"
+            [ngModel]="searchTerm"
+            (ngModelChange)="onSearchTermChange($event)"
+            placeholder="Search credentials, fields, or schools"
+          />
+        </label>
+
+        <div class="ops-toolbar-controls">
+          <label>
+            <span>Filter</span>
+            <select
+              [ngModel]="activeFilter"
+              (ngModelChange)="onFilterChange($event)"
+            >
+              <option value="all">All records</option>
+              <option value="complete">Complete only</option>
+              <option value="missing-school">Missing school</option>
+              <option value="needs-detail">Needs detail</option>
+            </select>
+          </label>
+
+          <label>
+            <span>Sort</span>
+            <select
+              [ngModel]="activeSort"
+              (ngModelChange)="onSortChange($event)"
+            >
+              <option value="quality">Readiness</option>
+              <option value="name-asc">Name A-Z</option>
+              <option value="duration-desc">Longest duration</option>
+            </select>
+          </label>
+        </div>
+      </div>
+
+      <div class="ops-toolbar-footer">
+        <span>{{ filteredResultsLabel }}</span>
+        <span>
+          {{ featuredEducationLevel ? featuredEducationLevel.name : 'No education level selected' }}
+        </span>
+      </div>
+    </article>
+
+    <div class="ops-layout">
+      <div class="ops-main">
+        <div class="ops-loading-grid" *ngIf="loading; else educationReady">
+          <div class="ops-skeleton-card" *ngFor="let item of loadingPlaceholders"></div>
+        </div>
+
+        <ng-template #educationReady>
+          <div class="ops-grid" *ngIf="filteredEducationLevels.length; else educationEmpty">
+            <article
+              class="card ops-card"
+              *ngFor="let item of filteredEducationLevels; trackBy: trackByEducationLevelId"
+              [class.is-active]="featuredEducationLevel ? featuredEducationLevel.id === item.id : false"
+              (click)="selectEducationLevel(item)"
+              tabindex="0"
+              role="button"
+            >
+              <div class="ops-card-head">
+                <div>
+                  <span class="ops-panel-kicker">Credential</span>
+                  <h3>{{ item.name }}</h3>
+                </div>
+                <span class="ops-status" [ngClass]="'tone-' + item.qualityTone">
+                  {{ item.qualityLabel }}
+                </span>
+              </div>
+
+              <p>{{ item.summary }}</p>
+
+              <div class="ops-progress-wrap">
+                <div class="ops-progress-top">
+                  <span>Record quality</span>
+                  <strong>{{ item.qualityScore }}%</strong>
+                </div>
+                <div class="ops-progress-track">
+                  <span [style.width.%]="item.qualityScore"></span>
+                </div>
+              </div>
+
+              <div class="ops-chip-row">
+                <span class="ops-chip">{{ item.yearsLabel }}</span>
+                <span class="ops-chip">{{ item.certificateLevel ? item.certificateLevel : 'Certificate pending' }}</span>
+              </div>
+
+              <div class="ops-card-actions">
+                <button
+                  type="button"
+                  class="btn btn-light btn-sm"
+                  data-bs-toggle="modal"
+                  data-bs-target="#educationLevelCrudModal"
+                  (click)="openEditModal(item); $event.stopPropagation()"
+                >
+                  <i class="bi bi-pencil-square"></i>
+                  Edit
+                </button>
+                <button
+                  type="button"
+                  class="btn btn-light btn-sm"
+                  (click)="deleteEducationLevel(item); $event.stopPropagation()"
+                  [disabled]="deletingId === item.id"
+                >
+                  <i class="bi bi-trash3"></i>
+                  {{ deletingId === item.id ? 'Deleting...' : 'Delete' }}
+                </button>
+              </div>
+            </article>
+          </div>
+        </ng-template>
+
+        <ng-template #educationEmpty>
+          <article class="card ops-empty-card">
+            <span class="ops-empty-kicker">No matching education levels</span>
+            <h3>The current filters do not match any credential records.</h3>
+            <p>
+              Reset the search or create a new education level to rebuild the qualification catalog.
+            </p>
+            <button
+              type="button"
+              class="btn btn-primary"
+              data-bs-toggle="modal"
+              data-bs-target="#educationLevelCrudModal"
+              (click)="openCreateModal()"
+            >
+              <i class="bi bi-plus-square-fill"></i>
+              Create education level
+            </button>
+          </article>
+        </ng-template>
+      </div>
+
+      <aside class="ops-side">
+        <article class="card ops-panel-card" *ngIf="featuredEducationLevel; else emptyEducationPanel">
+          <div class="ops-panel-head">
+            <div>
+              <span>Selected credential</span>
+              <h3>{{ featuredEducationLevel.name }}</h3>
+            </div>
+            <span class="ops-status" [ngClass]="'tone-' + featuredEducationLevel.qualityTone">
+              {{ featuredEducationLevel.qualityLabel }}
+            </span>
+          </div>
+
+          <p>{{ featuredEducationLevel.summary }}</p>
+
+          <div class="ops-fact-grid">
+            <div>
+              <span class="ops-detail-label">Duration</span>
+              <strong>{{ featuredEducationLevel.yearsLabel }}</strong>
+            </div>
+            <div>
+              <span class="ops-detail-label">School</span>
+              <strong>{{ featuredEducationLevel.school ? featuredEducationLevel.school : 'Pending' }}</strong>
+            </div>
+          </div>
+
+          <div class="ops-panel-note accent">
+            <span class="ops-detail-label">Next action</span>
+            <p>
+              {{ featuredEducationLevel.complete
+                ? 'This credential record is ready to be reused in recruiting and employee development workflows.'
+                : 'Fill the missing certificate, field, or school details so the qualification remains trustworthy.' }}
+            </p>
+          </div>
+
+          <button
+            type="button"
+            class="btn btn-primary"
+            data-bs-toggle="modal"
+            data-bs-target="#educationLevelCrudModal"
+            (click)="openEditModal(featuredEducationLevel)"
+          >
+            <i class="bi bi-pencil-square"></i>
+            Edit selected record
+          </button>
+        </article>
+
+        <ng-template #emptyEducationPanel>
+          <article class="card ops-panel-card">
+            <span class="ops-empty-kicker">Credential preview</span>
+            <h3>Select a record to inspect it here.</h3>
+            <p>
+              The side panel highlights the selected qualification and the next data-improvement step.
+            </p>
+          </article>
+        </ng-template>
+      </aside>
     </div>
   </section>
+</div>
+
+<div
+  class="modal fade text-left"
+  id="educationLevelCrudModal"
+  tabindex="-1"
+  aria-labelledby="educationLevelCrudModalLabel"
+  aria-hidden="true"
+>
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content ops-modal-content">
+      <div class="ops-modal-header">
+        <div>
+          <span class="ops-eyebrow">Education level editor</span>
+          <h5 class="modal-title ops-modal-title" id="educationLevelCrudModalLabel">
+            {{ modalTitle }}
+          </h5>
+          <p class="ops-modal-copy">{{ modalSubtitle }}</p>
+        </div>
+        <button
+          type="button"
+          class="ops-modal-close"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+        >
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+
+      <div class="ops-modal-body">
+        <form [formGroup]="educationLevelForm" (ngSubmit)="saveEducationLevel()">
+          <div class="ops-form-grid">
+            <section class="ops-form-section">
+              <span class="ops-panel-kicker">Credential details</span>
+              <h6>Core information</h6>
+
+              <div class="ops-form-field">
+                <label for="educationLevelName">Record name</label>
+                <input id="educationLevelName" type="text" formControlName="name" />
+                <div class="ops-field-error" *ngIf="submitted && educationLevelForm.get('name').invalid">
+                  Education level name is required.
+                </div>
+              </div>
+
+              <div class="ops-form-field">
+                <label for="educationLevelYears">Duration in years</label>
+                <input id="educationLevelYears" type="text" formControlName="years" />
+              </div>
+
+              <div class="ops-form-field">
+                <label for="educationLevelCertificate">Certificate level</label>
+                <input
+                  id="educationLevelCertificate"
+                  type="text"
+                  formControlName="certificateLevel"
+                />
+              </div>
+
+              <div class="ops-form-field">
+                <label for="educationLevelField">Field of study</label>
+                <input id="educationLevelField" type="text" formControlName="fieldofStudy" />
+              </div>
+
+              <div class="ops-form-field">
+                <label for="educationLevelSchool">School or institution</label>
+                <input id="educationLevelSchool" type="text" formControlName="school" />
+              </div>
+            </section>
+
+            <aside class="ops-form-preview">
+              <span class="ops-panel-kicker">Live preview</span>
+              <h4>
+                {{ educationLevelForm.value.name ? educationLevelForm.value.name : 'Untitled education level' }}
+              </h4>
+              <p>
+                {{ draftSummary }}
+              </p>
+
+              <div class="ops-progress-wrap">
+                <div class="ops-progress-top">
+                  <span>Readiness</span>
+                  <strong>{{ draftQuality.score }}%</strong>
+                </div>
+                <div class="ops-progress-track">
+                  <span [style.width.%]="draftQuality.score"></span>
+                </div>
+              </div>
+
+              <div class="ops-chip-row">
+                <span class="ops-chip">
+                  {{ educationLevelForm.value.years ? educationLevelForm.value.years + ' years' : 'Duration pending' }}
+                </span>
+                <span class="ops-status" [ngClass]="'tone-' + draftQuality.tone">
+                  {{ draftQuality.label }}
+                </span>
+              </div>
+            </aside>
+          </div>
+
+          <div class="modal-footer">
+            <button
+              id="educationLevelCrudModalClose"
+              type="button"
+              class="btn btn-light"
+              data-bs-dismiss="modal"
+            >
+              Close
+            </button>
+            <button type="submit" class="btn btn-primary" [disabled]="saving">
+              {{ saving ? 'Saving...' : modalMode === 'create' ? 'Create record' : 'Save changes' }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
 </div>

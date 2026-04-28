@@ -1,113 +1,672 @@
-<div class="page-heading">
-  <section class="section">
-    <div class="card">
-      <div class="card-header">
-        <h2>Salaries</h2>
-      </div>
-      <div class="card-body">
-        <div class="dataTable-container">
-          <button
-            type="button"
-            class="btn btn-success btn-sm"
-            data-bs-toggle="modal"
-            data-bs-target="#add"
-          >
-            <i class="fas fa-plus-square"></i> Create
+<div class="page-heading ops-page payroll-page">
+  <section class="ops-shell payroll-shell">
+    <article class="card payroll-hero">
+      <div class="payroll-hero-copy">
+        <span class="payroll-kicker">Payroll Workspace</span>
+        <h2>Define salary structures, manage bonuses, deductions, and taxes, then generate payroll and payslips by cycle.</h2>
+        <p>
+          This routed workspace keeps compensation setup, payroll adjustments, monthly calculation, generated payslips, and payroll history aligned around one selected cycle.
+        </p>
+
+        <div class="payroll-hero-controls">
+          <label class="payroll-field month-field">
+            <span>Payroll month</span>
+            <input type="month" [ngModel]="selectedCycleMonth" (ngModelChange)="onCycleMonthChange($event)" />
+          </label>
+
+          <label class="payroll-toggle">
+            <input type="checkbox" [(ngModel)]="replaceExistingRecords" />
+            <span>Replace existing payroll and payslip records for this cycle</span>
+          </label>
+        </div>
+
+        <div class="payroll-hero-actions">
+          <button type="button" class="btn btn-primary" (click)="runPayroll()" [disabled]="runningPayroll || !previewRows.length">
+            <i class="bi" [ngClass]="runningPayroll ? 'bi-arrow-repeat' : 'bi-calculator-fill'"></i>
+            {{ runningPayroll ? 'Running payroll...' : 'Run payroll and generate payslips' }}
           </button>
-          <table
-            class="table table-bordered"
-            id="table"
-            width="100%"
-            cellspacing="0"
-          >
-            <thead>
-              <tr>
-                <th>Salary Name</th>
-                <th>Conveyance Allowance</th>
-                <th>Medical Allowance</th>
-                <th>Basic Salary</th>
-                <th>Total Salary</th>
-                <th></th>
-              </tr>
-            </thead>
-            <tfoot>
-              <tr>
-                <th>Salary Name</th>
-                <th>Conveyance Allowance</th>
-                <th>Medical Allowance</th>
-                <th>Basic Salary</th>
-                <th>Total Salary</th>
-                <th></th>
-              </tr>
-            </tfoot>
-            <tbody>
-              <tr *ngFor="let c of salaries$">
-                <td>{{ c.salaryName }}</td>
-                <td>{{ c.conveyanceAllowance }}</td>
-                <td>{{ c.medicalAllowance }}</td>
-                <td>{{ c.basicSalary }}</td>
-                <td>{{ c.totalSalary }}</td>
-                <td>
-                  <!-- <button
-                    type="button"
-                    data-toggle="modal"
-                    (click)="edit(c.id)"
-                    data-target="#edit"
-                    class="btn btn-warning btn-sm"
-                  >
-                    <i class="fas fa-edit"></i>
-                  </button> -->
-                  <button
-                    type="button"
-                    class="btn btn-danger btn-sm"
-                    (click)="delete(c.id)"
-                  >
-                    <i class="fas fa-trash-alt"></i>
-                  </button>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+          <button type="button" class="btn btn-light" (click)="refreshWorkspace()" [disabled]="loading">
+            <i class="bi bi-arrow-repeat"></i>
+            Refresh workspace
+          </button>
+        </div>
+
+        <div class="payroll-hero-notice" *ngIf="loadError">{{ loadError }}</div>
+      </div>
+
+      <div class="payroll-hero-panel">
+        <span class="payroll-panel-kicker">Selected cycle</span>
+        <h3>{{ cycleLabel }}</h3>
+
+        <div class="payroll-hero-metrics">
+          <article>
+            <span>Projected gross</span>
+            <strong>{{ currentCycleGrossTotal | number:'1.0-0' }}</strong>
+            <p>Structured gross compensation before monthly adjustments are applied.</p>
+          </article>
+          <article>
+            <span>Projected net</span>
+            <strong>{{ currentCycleNetTotal | number:'1.0-0' }}</strong>
+            <p>Net payout after current bonuses, deductions, and taxes for the selected cycle.</p>
+          </article>
         </div>
       </div>
+    </article>
+
+    <div class="payroll-stat-grid">
+      <article class="card payroll-stat-card tone-primary">
+        <span>Salary structures</span>
+        <strong>{{ totalStructuresCount }}</strong>
+        <p>Reusable compensation packages currently defined for payroll assignment.</p>
+      </article>
+      <article class="card payroll-stat-card tone-secondary">
+        <span>Assigned employees</span>
+        <strong>{{ assignedEmployeeCount }}</strong>
+        <p>Employees already attached to a salary structure and ready for payroll calculation.</p>
+      </article>
+      <article class="card payroll-stat-card tone-warning">
+        <span>Taxes this cycle</span>
+        <strong>{{ currentCycleTaxTotal | number:'1.0-0' }}</strong>
+        <p>Tax exposure currently flowing into the selected payroll month.</p>
+      </article>
+      <article class="card payroll-stat-card tone-danger">
+        <span>Payslips generated</span>
+        <strong>{{ generatedPaySlipCount }}</strong>
+        <p>Pay slips already generated for {{ cycleLabel }}.</p>
+      </article>
     </div>
-    <div
-      class="modal fade text-left"
-      id="add"
-      tabindex="-1"
-      aria-labelledby="myModalLabel1"
-      style="display: none"
-      aria-hidden="true"
-    >
-      <div
-        class="modal-dialog modal-dialog-scrollable modal-lg"
-        role="document"
-      >
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title" id="myModalLabel1">Create</h5>
-            <button
-              type="button"
-              class="close rounded-pill"
-              data-bs-dismiss="modal"
-              aria-label="Close"
-            >
-              <i data-feather="x"></i>
+
+    <div class="payroll-layout">
+      <div class="payroll-main">
+        <article class="card payroll-section">
+          <div class="payroll-section-head">
+            <div>
+              <span class="payroll-panel-kicker">Salary structure</span>
+              <h3>Define payroll baselines</h3>
+              <p>Set the monthly package employees draw from before bonuses, deductions, and taxes are applied.</p>
+            </div>
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#salaryCrudModal" (click)="openCreateSalaryModal()">
+              <i class="bi bi-plus-square-fill"></i>
+              Add salary structure
             </button>
           </div>
-          <div class="modal-body">
-            <app-add-salary
-              (closeModalEvent)="closeModalAdd()"
-            ></app-add-salary>
+
+          <div class="payroll-loading-grid" *ngIf="loading; else salaryStructuresReady">
+            <div class="payroll-skeleton" *ngFor="let placeholder of loadingPlaceholders"></div>
           </div>
-          <div class="modal-footer">
-            <button type="button" class="btn closeAdd" data-bs-dismiss="modal">
-              <i class="bx bx-x d-block d-sm-none"></i>
-              <span class="d-none d-sm-block">Close</span>
-            </button>
+
+          <ng-template #salaryStructuresReady>
+            <div class="payroll-structure-grid" *ngIf="salaries.length; else noSalaryStructures">
+              <article class="payroll-structure-card" *ngFor="let salary of salaries; trackBy: trackByNumericId">
+                <div class="payroll-card-head">
+                  <div>
+                    <span class="payroll-mini-kicker">Structure</span>
+                    <h4>{{ salary.name }}</h4>
+                  </div>
+                  <span class="payroll-pill" [ngClass]="'tone-' + salary.qualityTone">{{ salary.qualityLabel }}</span>
+                </div>
+
+                <p>{{ salary.summary }}</p>
+
+                <div class="payroll-chip-row">
+                  <span class="payroll-chip">Base {{ salary.basicSalary | number:'1.0-0' }}</span>
+                  <span class="payroll-chip">Allowances {{ salary.allowanceTotal | number:'1.0-0' }}</span>
+                  <span class="payroll-chip">Assigned {{ countEmployeesForSalary(salary.id) }}</span>
+                </div>
+
+                <div class="payroll-metric-pair">
+                  <div>
+                    <span>Total package</span>
+                    <strong>{{ salary.totalSalary | number:'1.0-0' }}</strong>
+                  </div>
+                  <div>
+                    <span>Medical + conveyance</span>
+                    <strong>{{ salary.allowanceTotal | number:'1.0-0' }}</strong>
+                  </div>
+                </div>
+
+                <div class="payroll-card-actions">
+                  <button type="button" class="btn btn-light btn-sm" data-bs-toggle="modal" data-bs-target="#salaryCrudModal" (click)="openEditSalaryModal(salary)">
+                    <i class="bi bi-pencil-square"></i>
+                    Edit
+                  </button>
+                  <button type="button" class="btn btn-light btn-sm" (click)="deleteSalary(salary)" [disabled]="deletingSalaryId === salary.id">
+                    <i class="bi bi-trash3"></i>
+                    {{ deletingSalaryId === salary.id ? 'Deleting...' : 'Delete' }}
+                  </button>
+                </div>
+              </article>
+            </div>
+          </ng-template>
+
+          <ng-template #noSalaryStructures>
+            <article class="payroll-empty-card">
+              <span class="payroll-mini-kicker">No salary structures</span>
+              <h4>Payroll needs a structure library before it can calculate employee pay.</h4>
+              <p>Create the first salary structure to establish payroll baselines for assigned employees.</p>
+            </article>
+          </ng-template>
+        </article>
+
+        <article class="card payroll-section">
+          <div class="payroll-section-head">
+            <div>
+              <span class="payroll-panel-kicker">Adjustments</span>
+              <h3>Manage bonuses, deductions, and taxes</h3>
+              <p>Monthly adjustments feed directly into the automated payroll calculation for the selected cycle.</p>
+            </div>
+            <div class="payroll-inline-actions">
+              <button type="button" class="btn btn-light btn-sm" data-bs-toggle="modal" data-bs-target="#adjustmentCrudModal" (click)="openCreateAdjustmentModal('bonus')">
+                <i class="bi bi-plus-circle"></i>
+                Bonus
+              </button>
+              <button type="button" class="btn btn-light btn-sm" data-bs-toggle="modal" data-bs-target="#adjustmentCrudModal" (click)="openCreateAdjustmentModal('deduction')">
+                <i class="bi bi-plus-circle"></i>
+                Deduction
+              </button>
+              <button type="button" class="btn btn-light btn-sm" data-bs-toggle="modal" data-bs-target="#adjustmentCrudModal" (click)="openCreateAdjustmentModal('tax')">
+                <i class="bi bi-plus-circle"></i>
+                Tax
+              </button>
+            </div>
           </div>
-        </div>
+
+          <div class="payroll-adjustment-grid">
+            <section class="payroll-adjustment-column">
+              <div class="payroll-column-head">
+                <div>
+                  <span class="payroll-mini-kicker">Bonus</span>
+                  <h4>{{ bonusAdjustments.length }}</h4>
+                </div>
+                <strong>{{ getCurrentCycleAdjustmentTotal('bonus') | number:'1.0-0' }}</strong>
+              </div>
+
+              <div class="payroll-adjustment-list" *ngIf="bonusAdjustments.length; else emptyBonusState">
+                <article class="payroll-adjustment-item" *ngFor="let adjustment of bonusAdjustments; trackBy: trackByNumericId">
+                  <div>
+                    <h5>{{ adjustment.employeeName }}</h5>
+                    <p>{{ adjustment.label }} · {{ adjustment.dateLabel }}</p>
+                  </div>
+                  <div class="payroll-adjustment-actions">
+                    <strong>{{ adjustment.amount | number:'1.0-0' }}</strong>
+                    <button type="button" class="btn btn-link btn-sm" data-bs-toggle="modal" data-bs-target="#adjustmentCrudModal" (click)="openEditAdjustmentModal(adjustment)">Edit</button>
+                    <button type="button" class="btn btn-link btn-sm" (click)="deleteAdjustment(adjustment)" [disabled]="deletingAdjustmentId === adjustment.id">Delete</button>
+                  </div>
+                </article>
+              </div>
+            </section>
+
+            <section class="payroll-adjustment-column">
+              <div class="payroll-column-head">
+                <div>
+                  <span class="payroll-mini-kicker">Deduction</span>
+                  <h4>{{ deductionAdjustments.length }}</h4>
+                </div>
+                <strong>{{ getCurrentCycleAdjustmentTotal('deduction') | number:'1.0-0' }}</strong>
+              </div>
+
+              <div class="payroll-adjustment-list" *ngIf="deductionAdjustments.length; else emptyDeductionState">
+                <article class="payroll-adjustment-item" *ngFor="let adjustment of deductionAdjustments; trackBy: trackByNumericId">
+                  <div>
+                    <h5>{{ adjustment.employeeName }}</h5>
+                    <p>{{ adjustment.label }} · {{ adjustment.dateLabel }}</p>
+                  </div>
+                  <div class="payroll-adjustment-actions">
+                    <strong>{{ adjustment.amount | number:'1.0-0' }}</strong>
+                    <button type="button" class="btn btn-link btn-sm" data-bs-toggle="modal" data-bs-target="#adjustmentCrudModal" (click)="openEditAdjustmentModal(adjustment)">Edit</button>
+                    <button type="button" class="btn btn-link btn-sm" (click)="deleteAdjustment(adjustment)" [disabled]="deletingAdjustmentId === adjustment.id">Delete</button>
+                  </div>
+                </article>
+              </div>
+            </section>
+
+            <section class="payroll-adjustment-column">
+              <div class="payroll-column-head">
+                <div>
+                  <span class="payroll-mini-kicker">Tax</span>
+                  <h4>{{ taxAdjustments.length }}</h4>
+                </div>
+                <strong>{{ getCurrentCycleAdjustmentTotal('tax') | number:'1.0-0' }}</strong>
+              </div>
+
+              <div class="payroll-adjustment-list" *ngIf="taxAdjustments.length; else emptyTaxState">
+                <article class="payroll-adjustment-item" *ngFor="let adjustment of taxAdjustments; trackBy: trackByNumericId">
+                  <div>
+                    <h5>{{ adjustment.employeeName }}</h5>
+                    <p>{{ adjustment.label }} · {{ adjustment.dateLabel }}</p>
+                  </div>
+                  <div class="payroll-adjustment-actions">
+                    <strong>{{ adjustment.amount | number:'1.0-0' }}</strong>
+                    <button type="button" class="btn btn-link btn-sm" data-bs-toggle="modal" data-bs-target="#adjustmentCrudModal" (click)="openEditAdjustmentModal(adjustment)">Edit</button>
+                    <button type="button" class="btn btn-link btn-sm" (click)="deleteAdjustment(adjustment)" [disabled]="deletingAdjustmentId === adjustment.id">Delete</button>
+                  </div>
+                </article>
+              </div>
+            </section>
+          </div>
+
+          <ng-template #emptyBonusState>
+            <article class="payroll-empty-tile">
+              <h5>No bonuses yet</h5>
+              <p>Add employee bonuses to include them in the automated payroll run.</p>
+            </article>
+          </ng-template>
+
+          <ng-template #emptyDeductionState>
+            <article class="payroll-empty-tile">
+              <h5>No deductions yet</h5>
+              <p>Deductions will appear here once they are recorded against employees.</p>
+            </article>
+          </ng-template>
+
+          <ng-template #emptyTaxState>
+            <article class="payroll-empty-tile">
+              <h5>No taxes yet</h5>
+              <p>Tax entries can be managed here and will flow into payroll and payslips.</p>
+            </article>
+          </ng-template>
+        </article>
+
+        <article class="card payroll-section">
+          <div class="payroll-section-head">
+            <div>
+              <span class="payroll-panel-kicker">Auto calculation</span>
+              <h3>Payroll preview for {{ cycleLabel }}</h3>
+              <p>Preview monthly gross, bonus, deduction, tax, and projected net pay before running payroll.</p>
+            </div>
+            <div class="payroll-preview-count">
+              <strong>{{ readyEmployeeCount }}</strong>
+              <span>employees with salary assignment</span>
+            </div>
+          </div>
+
+          <div class="payroll-table-wrap" *ngIf="previewRows.length; else emptyPreviewState">
+            <table class="payroll-table">
+              <thead>
+                <tr>
+                  <th>Employee</th>
+                  <th>Structure</th>
+                  <th>Gross</th>
+                  <th>Bonus</th>
+                  <th>Deductions</th>
+                  <th>Taxes</th>
+                  <th>Net</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr
+                  *ngFor="let row of previewRows; trackBy: trackByNumericId"
+                  [class.is-active]="featuredPreview && featuredPreview.employeeId === row.employeeId"
+                  (click)="selectPreview(row)"
+                >
+                  <td>
+                    <strong>{{ row.employeeName }}</strong>
+                    <span>{{ row.summary }}</span>
+                  </td>
+                  <td>{{ row.salaryStructureName }}</td>
+                  <td>{{ row.grossSalary | number:'1.0-0' }}</td>
+                  <td>{{ row.bonus | number:'1.0-0' }}</td>
+                  <td>{{ row.deductions | number:'1.0-0' }}</td>
+                  <td>{{ row.taxes | number:'1.0-0' }}</td>
+                  <td>{{ row.netSalary | number:'1.0-0' }}</td>
+                  <td>
+                    <span class="payroll-pill" [ngClass]="'tone-' + row.statusTone">{{ row.statusLabel }}</span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <ng-template #emptyPreviewState>
+            <article class="payroll-empty-card">
+              <span class="payroll-mini-kicker">No payroll preview</span>
+              <h4>Create salary structures and assign them to employees to build a payroll projection.</h4>
+              <p>Employees without salary assignments will stay blocked from automated payroll until their package is defined.</p>
+            </article>
+          </ng-template>
+        </article>
+
+        <article class="card payroll-section">
+          <div class="payroll-section-head">
+            <div>
+              <span class="payroll-panel-kicker">Generated payslips</span>
+              <h3>Payslips for {{ cycleLabel }}</h3>
+              <p>Once payroll runs, generated payslips appear here with the salary structure and adjustment breakdown used.</p>
+            </div>
+            <div class="payroll-preview-count">
+              <strong>{{ currentCyclePaySlips.length }}</strong>
+              <span>payslips in cycle</span>
+            </div>
+          </div>
+
+          <div class="payroll-timeline" *ngIf="currentCyclePaySlips.length; else emptyPaySlipState">
+            <article class="payroll-timeline-item" *ngFor="let paySlip of currentCyclePaySlips; trackBy: trackByNumericId">
+              <div>
+                <span class="payroll-mini-kicker">{{ paySlip.issueDateLabel }}</span>
+                <h4>{{ paySlip.employeeName }}</h4>
+                <p>{{ paySlip.salaryStructureName }}</p>
+              </div>
+              <div class="payroll-timeline-metrics">
+                <span>Gross {{ paySlip.grossSalary | number:'1.0-0' }}</span>
+                <span>Bonus {{ paySlip.bonus | number:'1.0-0' }}</span>
+                <span>Deductions {{ paySlip.deductions | number:'1.0-0' }}</span>
+                <span>Tax {{ paySlip.taxes | number:'1.0-0' }}</span>
+                <strong>Net {{ paySlip.netSalary | number:'1.0-0' }}</strong>
+              </div>
+            </article>
+          </div>
+
+          <ng-template #emptyPaySlipState>
+            <article class="payroll-empty-card slim">
+              <h4>No payslips have been generated for {{ cycleLabel }} yet.</h4>
+              <p>Run payroll for the cycle to generate employee payslips automatically.</p>
+            </article>
+          </ng-template>
+        </article>
+
+        <article class="card payroll-section">
+          <div class="payroll-section-head">
+            <div>
+              <span class="payroll-panel-kicker">Payroll history</span>
+              <h3>Issued payroll records</h3>
+              <p>Review historical payroll runs and the monthly breakdown that produced each employee payout.</p>
+            </div>
+            <div class="payroll-preview-count">
+              <strong>{{ payrollHistory.length }}</strong>
+              <span>records tracked</span>
+            </div>
+          </div>
+
+          <div class="payroll-table-wrap" *ngIf="payrollHistory.length; else emptyHistoryState">
+            <table class="payroll-table compact">
+              <thead>
+                <tr>
+                  <th>Cycle</th>
+                  <th>Employee</th>
+                  <th>Gross</th>
+                  <th>Bonus</th>
+                  <th>Deductions</th>
+                  <th>Taxes</th>
+                  <th>Net</th>
+                  <th>Generated</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let record of payrollHistory; trackBy: trackByNumericId">
+                  <td>
+                    <strong>{{ formatCycleLabel(record.cycleMonth) }}</strong>
+                    <span>{{ record.payrollDateLabel }}</span>
+                  </td>
+                  <td>
+                    <strong>{{ record.employeeName }}</strong>
+                    <span>{{ record.salaryStructureName }}</span>
+                  </td>
+                  <td>{{ record.grossSalary | number:'1.0-0' }}</td>
+                  <td>{{ record.bonus | number:'1.0-0' }}</td>
+                  <td>{{ record.deductions | number:'1.0-0' }}</td>
+                  <td>{{ record.taxes | number:'1.0-0' }}</td>
+                  <td>{{ record.netSalary | number:'1.0-0' }}</td>
+                  <td>{{ record.notes || 'Generated payroll record' }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <ng-template #emptyHistoryState>
+            <article class="payroll-empty-card slim">
+              <h4>No payroll history is available yet.</h4>
+              <p>The history table will populate after the first payroll run is generated.</p>
+            </article>
+          </ng-template>
+        </article>
       </div>
+
+      <aside class="payroll-side">
+        <article class="card payroll-side-card" *ngIf="featuredPreview; else emptyPreviewPanel">
+          <div class="payroll-card-head">
+            <div>
+              <span class="payroll-mini-kicker">Selected employee</span>
+              <h3>{{ featuredPreview.employeeName }}</h3>
+            </div>
+            <span class="payroll-pill" [ngClass]="'tone-' + featuredPreview.statusTone">{{ featuredPreview.statusLabel }}</span>
+          </div>
+
+          <p>{{ featuredPreview.summary }}</p>
+
+          <div class="payroll-fact-grid">
+            <div>
+              <span>Structure</span>
+              <strong>{{ featuredPreview.salaryStructureName }}</strong>
+            </div>
+            <div>
+              <span>Gross salary</span>
+              <strong>{{ featuredPreview.grossSalary | number:'1.0-0' }}</strong>
+            </div>
+            <div>
+              <span>Allowance total</span>
+              <strong>{{ featuredPreview.allowanceTotal | number:'1.0-0' }}</strong>
+            </div>
+            <div>
+              <span>Projected net</span>
+              <strong>{{ featuredPreview.netSalary | number:'1.0-0' }}</strong>
+            </div>
+          </div>
+
+          <div class="payroll-note-card">
+            <h4>Recommendation</h4>
+            <p>{{ featuredPreviewRecommendation }}</p>
+          </div>
+
+          <div class="payroll-chip-row">
+            <span class="payroll-chip">Bonus {{ featuredPreview.bonus | number:'1.0-0' }}</span>
+            <span class="payroll-chip">Deduction {{ featuredPreview.deductions | number:'1.0-0' }}</span>
+            <span class="payroll-chip">Tax {{ featuredPreview.taxes | number:'1.0-0' }}</span>
+          </div>
+        </article>
+
+        <ng-template #emptyPreviewPanel>
+          <article class="card payroll-side-card">
+            <span class="payroll-mini-kicker">Employee preview</span>
+            <h3>Select an employee in the payroll preview.</h3>
+            <p>The side panel highlights structure coverage, monthly adjustments, and payroll readiness for the selected cycle.</p>
+          </article>
+        </ng-template>
+
+        <article class="card payroll-side-card">
+          <div class="payroll-card-head">
+            <div>
+              <span class="payroll-mini-kicker">Last payroll run</span>
+              <h3>{{ lastRunResult ? formatCycleLabel(lastRunResult.cycleMonth) : 'No run yet' }}</h3>
+            </div>
+          </div>
+
+          <ng-container *ngIf="lastRunResult; else noRunState">
+            <div class="payroll-fact-grid compact">
+              <div>
+                <span>Payroll records</span>
+                <strong>{{ lastRunResult.createdPayrollCount + lastRunResult.updatedPayrollCount }}</strong>
+              </div>
+              <div>
+                <span>Payslips</span>
+                <strong>{{ lastRunResult.createdPaySlipCount + lastRunResult.updatedPaySlipCount }}</strong>
+              </div>
+              <div>
+                <span>Gross pay</span>
+                <strong>{{ lastRunResult.totalGrossPay | number:'1.0-0' }}</strong>
+              </div>
+              <div>
+                <span>Net pay</span>
+                <strong>{{ lastRunResult.totalNetPay | number:'1.0-0' }}</strong>
+              </div>
+            </div>
+
+            <div class="payroll-note-card soft" *ngIf="lastRunResult.warnings.length">
+              <h4>Warnings</h4>
+              <p *ngFor="let warning of lastRunResult.warnings">{{ warning }}</p>
+            </div>
+          </ng-container>
+
+          <ng-template #noRunState>
+            <p>The last successful payroll run summary will appear here once a cycle has been generated.</p>
+          </ng-template>
+        </article>
+      </aside>
     </div>
   </section>
+</div>
+
+<div class="modal fade text-left" id="salaryCrudModal" tabindex="-1" aria-labelledby="salaryCrudModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content payroll-modal-content">
+      <div class="payroll-modal-header">
+        <div>
+          <span class="payroll-kicker">Salary structure</span>
+          <h5 class="modal-title payroll-modal-title" id="salaryCrudModalLabel">{{ salaryModalTitle }}</h5>
+          <p class="payroll-modal-copy">{{ salaryModalCopy }}</p>
+        </div>
+        <button type="button" class="payroll-modal-close" data-bs-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+
+      <div class="payroll-modal-body">
+        <form [formGroup]="salaryForm" (ngSubmit)="saveSalary()">
+          <div class="payroll-form-grid">
+            <section class="payroll-form-section">
+              <span class="payroll-panel-kicker">Structure setup</span>
+              <h6>Core salary fields</h6>
+
+              <div class="payroll-form-field">
+                <label for="salaryName">Structure name</label>
+                <input id="salaryName" type="text" formControlName="name" placeholder="Example: Standard package" />
+                <div class="payroll-field-error" *ngIf="salarySubmitted && salaryForm.get('name').invalid">Structure name is required.</div>
+              </div>
+
+              <div class="payroll-form-split">
+                <div class="payroll-form-field">
+                  <label for="salaryBasic">Basic salary</label>
+                  <input id="salaryBasic" type="number" min="0" formControlName="basicSalary" placeholder="Example: 3000" />
+                  <div class="payroll-field-error" *ngIf="salarySubmitted && salaryForm.get('basicSalary').invalid">Basic salary is required.</div>
+                </div>
+
+                <div class="payroll-form-field">
+                  <label for="salaryTotal">Total salary</label>
+                  <input id="salaryTotal" type="number" min="0" formControlName="totalSalary" placeholder="Auto-calculated if left blank" />
+                </div>
+              </div>
+
+              <div class="payroll-form-split">
+                <div class="payroll-form-field">
+                  <label for="salaryMedical">Medical allowance</label>
+                  <input id="salaryMedical" type="number" min="0" formControlName="medicalAllowance" placeholder="Example: 200" />
+                </div>
+
+                <div class="payroll-form-field">
+                  <label for="salaryConveyance">Conveyance allowance</label>
+                  <input id="salaryConveyance" type="number" min="0" formControlName="conveyanceAllowance" placeholder="Example: 300" />
+                </div>
+              </div>
+            </section>
+
+            <aside class="payroll-form-preview">
+              <span class="payroll-panel-kicker">Live preview</span>
+              <h4>{{ draftSalaryName }}</h4>
+              <p>Total package {{ draftSalaryTotal | number:'1.0-0' }} with {{ draftSalaryAllowanceTotal | number:'1.0-0' }} in combined allowances.</p>
+
+              <div class="payroll-chip-row">
+                <span class="payroll-chip">Base {{ draftSalaryBasic | number:'1.0-0' }}</span>
+                <span class="payroll-chip">Allowance {{ draftSalaryAllowanceTotal | number:'1.0-0' }}</span>
+                <span class="payroll-chip">Total {{ draftSalaryTotal | number:'1.0-0' }}</span>
+              </div>
+            </aside>
+          </div>
+
+          <div class="payroll-modal-actions">
+            <button type="button" class="btn btn-light" data-bs-dismiss="modal" id="salaryCrudModalClose">Cancel</button>
+            <button type="submit" class="btn btn-primary" [disabled]="savingSalary">
+              <i class="bi" [ngClass]="savingSalary ? 'bi-arrow-repeat' : 'bi-check2-circle'"></i>
+              {{ savingSalary ? 'Saving...' : salaryModalMode === 'create' ? 'Create structure' : 'Save changes' }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade text-left" id="adjustmentCrudModal" tabindex="-1" aria-labelledby="adjustmentCrudModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content payroll-modal-content">
+      <div class="payroll-modal-header">
+        <div>
+          <span class="payroll-kicker">Adjustment</span>
+          <h5 class="modal-title payroll-modal-title" id="adjustmentCrudModalLabel">{{ adjustmentModalTitle }}</h5>
+          <p class="payroll-modal-copy">{{ adjustmentModalCopy }}</p>
+        </div>
+        <button type="button" class="payroll-modal-close" data-bs-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+
+      <div class="payroll-modal-body">
+        <form [formGroup]="adjustmentForm" (ngSubmit)="saveAdjustment()">
+          <div class="payroll-form-grid narrow">
+            <section class="payroll-form-section">
+              <span class="payroll-panel-kicker">Adjustment details</span>
+              <h6>Monthly {{ getAdjustmentKindLabel(activeAdjustmentKind) | lowercase }} entry</h6>
+
+              <div class="payroll-form-field">
+                <label for="adjustmentEmployee">Employee</label>
+                <select id="adjustmentEmployee" formControlName="employeeId">
+                  <option value="">Select employee</option>
+                  <option *ngFor="let employee of employees; trackBy: trackByNumericId" [value]="employee.id">{{ employee.name }}</option>
+                </select>
+                <div class="payroll-field-error" *ngIf="adjustmentSubmitted && adjustmentForm.get('employeeId').invalid">Employee is required.</div>
+              </div>
+
+              <div class="payroll-form-field">
+                <label for="adjustmentLabel">Label</label>
+                <input id="adjustmentLabel" type="text" formControlName="label" [placeholder]="'Example: ' + getAdjustmentKindLabel(activeAdjustmentKind) + ' label'" />
+                <div class="payroll-field-error" *ngIf="adjustmentSubmitted && adjustmentForm.get('label').invalid">Label is required.</div>
+              </div>
+
+              <div class="payroll-form-split">
+                <div class="payroll-form-field">
+                  <label for="adjustmentAmount">Amount</label>
+                  <input id="adjustmentAmount" type="number" min="0" formControlName="amount" placeholder="Example: 250" />
+                  <div class="payroll-field-error" *ngIf="adjustmentSubmitted && adjustmentForm.get('amount').invalid">Amount is required.</div>
+                </div>
+
+                <div class="payroll-form-field">
+                  <label for="adjustmentDate">Date</label>
+                  <input id="adjustmentDate" type="date" formControlName="date" />
+                  <div class="payroll-field-error" *ngIf="adjustmentSubmitted && adjustmentForm.get('date').invalid">Date is required.</div>
+                </div>
+              </div>
+            </section>
+
+            <aside class="payroll-form-preview">
+              <span class="payroll-panel-kicker">Live preview</span>
+              <h4>{{ draftAdjustmentEmployeeName }}</h4>
+              <p>{{ getAdjustmentKindLabel(activeAdjustmentKind) }} amount {{ draftAdjustmentAmount | number:'1.0-0' }} dated {{ draftAdjustmentDateLabel }}.</p>
+
+              <div class="payroll-chip-row">
+                <span class="payroll-chip">{{ getAdjustmentKindLabel(activeAdjustmentKind) }}</span>
+                <span class="payroll-chip">{{ draftAdjustmentAmount | number:'1.0-0' }}</span>
+              </div>
+            </aside>
+          </div>
+
+          <div class="payroll-modal-actions">
+            <button type="button" class="btn btn-light" data-bs-dismiss="modal" id="adjustmentCrudModalClose">Cancel</button>
+            <button type="submit" class="btn btn-primary" [disabled]="savingAdjustment">
+              <i class="bi" [ngClass]="savingAdjustment ? 'bi-arrow-repeat' : 'bi-check2-circle'"></i>
+              {{ savingAdjustment ? 'Saving...' : adjustmentModalMode === 'create' ? 'Add adjustment' : 'Save changes' }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
 </div>

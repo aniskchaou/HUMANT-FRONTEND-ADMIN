@@ -1,0 +1,108 @@
+<div class="page-heading mb-3 d-flex justify-content-between align-items-center gap-2 flex-wrap">
+  <div>
+    <h3>Documentation: Product Overview</h3>
+    <p class="text-muted mb-0">Business and technical blueprint for HUMANT HRMS.</p>
+  </div>
+  <a routerLink="/documentation" class="btn btn-outline-primary">Back to Documentation</a>
+</div>
+
+<div class="card shadow-sm mb-3">
+  <div class="card-body">
+    <h5>What is HUMANT?</h5>
+    <p>
+      HUMANT is a Human Resource Management System designed to centralize employee lifecycle,
+      recruitment, payroll workflows, attendance, leave, communication, and compliance records
+      in a single operational workspace.
+    </p>
+    <p class="mb-0">
+      The platform is intended for organizations that require traceable workflows,
+      role-aware access, and measurable service quality across people operations.
+    </p>
+  </div>
+</div>
+
+<div class="row g-3 mb-3">
+  <div class="col-lg-6">
+    <div class="card h-100 shadow-sm">
+      <div class="card-body">
+        <h5>Business Scope</h5>
+        <ul class="mb-0">
+          <li>Employee lifecycle management from onboarding to exit</li>
+          <li>Recruitment cycle from job creation to offer management</li>
+          <li>Compensation workflows including salary, payslip, loan, and expenses</li>
+          <li>Operational governance through warning, complaint, and termination records</li>
+          <li>People growth through training, performance, awards, and events</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-6">
+    <div class="card h-100 shadow-sm">
+      <div class="card-body">
+        <h5>Target Outcomes</h5>
+        <ul class="mb-0">
+          <li>Reduce manual handoff errors between HR and Payroll teams</li>
+          <li>Improve processing times for leave, hiring, and approvals</li>
+          <li>Ensure repeatable policy execution with transparent audit trails</li>
+          <li>Provide managers and leadership better operational visibility</li>
+          <li>Increase consistency through master-data-driven workflows</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="card shadow-sm mb-3">
+  <div class="card-body">
+    <h5>Reference Architecture</h5>
+    <div class="row g-3">
+      <div class="col-md-4">
+        <h6>Frontend Layer</h6>
+        <p class="text-muted mb-0">
+          Angular web workspace with module-driven navigation, forms, lists,
+          and dashboards for operational teams.
+        </p>
+      </div>
+      <div class="col-md-4">
+        <h6>Application Layer</h6>
+        <p class="text-muted mb-0">
+          Spring Boot services exposing secured APIs, enforcing business rules,
+          and coordinating transactional updates.
+        </p>
+      </div>
+      <div class="col-md-4">
+        <h6>Data Layer</h6>
+        <p class="text-muted mb-0">
+          PostgreSQL persistence model with startup initialization support and
+          schema evolution through controlled release changes.
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="card shadow-sm">
+  <div class="card-body">
+    <h5>Technology and Governance Notes</h5>
+    <div class="row g-3">
+      <div class="col-lg-6">
+        <h6>Core Stack</h6>
+        <ul class="mb-0">
+          <li>Frontend: Angular 11, Bootstrap, RxJS</li>
+          <li>Backend: Spring Boot 2.5, Spring Data JPA, Spring Security</li>
+          <li>Runtime: Java 11, Node.js</li>
+          <li>Data: PostgreSQL (primary), MySQL legacy compatibility</li>
+        </ul>
+      </div>
+      <div class="col-lg-6">
+        <h6>Control Model</h6>
+        <ul class="mb-0">
+          <li>Role-based route visibility and guarded access flow</li>
+          <li>Sensitive area protections for salary and document domains</li>
+          <li>Recommended maker-checker pattern for financial approvals</li>
+          <li>Audit-oriented history retention for lifecycle-critical actions</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>

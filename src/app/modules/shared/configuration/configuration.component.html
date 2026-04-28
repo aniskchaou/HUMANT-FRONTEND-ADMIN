@@ -1,61 +1,1048 @@
+<div class="page-heading ops-page">
+    <section class="ops-shell">
+        <article class="card ops-hero">
+            <div class="ops-hero-copy">
+                <span class="ops-eyebrow">Automation control</span>
+                <h2>Give HR one place to calculate balances, generate payroll, govern approvals, and tune policy-driven automation.</h2>
+                <p>
+                    This workspace now uses persisted backend configuration, live reminder feeds, calculated leave balances, and editable automation definitions instead of a browser-only settings form.
+                </p>
 
+                <div class="ops-hero-actions wrap-actions">
+                    <button type="button" class="btn btn-primary" (click)="saveConfiguration()" [disabled]="saving || loading">
+                        <i class="bi" [ngClass]="saving ? 'bi-arrow-repeat' : 'bi-check2-circle'"></i>
+                        {{ saving ? 'Saving...' : 'Save configuration' }}
+                    </button>
+                    <button type="button" class="btn btn-light" (click)="refreshWorkspace()" [disabled]="loading">
+                        <i class="bi bi-arrow-repeat"></i>
+                        Refresh workspace
+                    </button>
+                    <button type="button" class="btn btn-light" (click)="runPayroll()" [disabled]="payrollRunning || loading">
+                        <i class="bi" [ngClass]="payrollRunning ? 'bi-arrow-repeat' : 'bi-cash-stack'"></i>
+                        {{ payrollRunning ? 'Running payroll...' : 'Run payroll now' }}
+                    </button>
+                </div>
 
-
-<div class="module">
-    <div class="module-head">
-        <h3>Paramètres</h3>
-    </div>
-    <div class="module-body">
-
-        <div class="form-group">
-            <label for="cc-payment" class="control-label mb-1">Nom entreprise</label>
-            <input id="cc-payment" name="cc-payment" type="text" class="form-control" aria-required="true"
-                aria-invalid="false" value="" />
-        </div>
-
-        <div class="form-group">
-            <label for="cc-payment" class="control-label mb-1">Email entreprise</label>
-            <input id="cc-payment" name="cc-payment" type="text" class="form-control" aria-required="true"
-                aria-invalid="false" value="" />
-        </div>
-
-
-        <div class="form-group">
-            <label for="cc-payment" class="control-label mb-1">Adresse entreprise</label>
-            <input id="cc-payment" name="cc-payment" type="text" class="form-control" aria-required="true"
-                aria-invalid="false" value="" />
-        </div>
-
-        <div class=" form-group">
-            <div class="col col-md-3"><label for="select" class=" form-control-label">Langue</label></div>
-            <div class="col-12 col-md-9">
-                <select name="select" id="select" class="form-control">
-                    <option value="0">Please select</option>
-                    <option value="1">Francais</option>
-                    <option value="2">English</option>
-
-                </select>
+                <div class="ops-panel-alert" *ngIf="loadError">{{ loadError }}</div>
             </div>
-        </div>
 
-        <div class=" form-group">
-            <div class="col col-md-3"><label for="select" class=" form-control-label">Devise</label></div>
-            <div class="col-12 col-md-9">
-                <select name="select" id="select" class="form-control">
-                    <option value="0">Please select</option>
-                    <option value="1">Euro</option>
-                    <option value="2">Dollar</option>
+            <div class="ops-hero-panel ops-brand-panel">
+                <div class="ops-brand-mark">{{ configurationInitials }}</div>
+                <span class="ops-panel-kicker">Workspace identity</span>
+                <h3>{{ configurationForm.value.companyName || 'Workspace pending' }}</h3>
+                <p>{{ configurationForm.value.companyAddress || 'Add a company address to complete the workspace identity.' }}</p>
 
-                </select>
+                <div class="ops-pill-row compact">
+                    <span class="ops-pill">{{ readinessLabel }}</span>
+                    <span class="ops-pill">{{ remindersCount }} reminders</span>
+                    <span class="ops-pill">{{ atRiskLeaveBalancesCount }} at-risk balances</span>
+                </div>
             </div>
+        </article>
+
+        <div class="ops-stat-grid">
+            <article class="card ops-stat-card tone-primary">
+                <span>Setup progress</span>
+                <strong>{{ readinessScore }}%</strong>
+                <p>Coverage across configuration, automation toggles, and governance fields.</p>
+            </article>
+            <article class="card ops-stat-card tone-warning">
+                <span>Smart reminders</span>
+                <strong>{{ remindersCount }}</strong>
+                <p>{{ urgentRemindersCount }} require immediate follow-up across contracts and visas.</p>
+            </article>
+            <article class="card ops-stat-card tone-danger">
+                <span>Leave watchlist</span>
+                <strong>{{ atRiskLeaveBalancesCount }}</strong>
+                <p>Calculated leave balances flagged as watch or critical.</p>
+            </article>
+            <article class="card ops-stat-card tone-secondary">
+                <span>Automation assets</span>
+                <strong>{{ automationAssetCount }}</strong>
+                <p>Active custom fields, approval flows, and workflow rules currently configured.</p>
+            </article>
         </div>
 
-        <button id="payment-button" type="submit" class="btn btn-info">
-            <i class="fa fa-save fa-lg"></i>&nbsp;
-            <span id="payment-button-amount">Enregister</span>
+        <div class="ops-layout singleton-layout">
+            <div class="ops-main ops-stack-layout">
+                <article class="card ops-panel-card">
+                    <div class="ops-panel-head">
+                        <div>
+                            <span>Settings editor</span>
+                            <h3>Workspace configuration</h3>
+                        </div>
+                        <span class="ops-status tone-strong">{{ readinessLabel }}</span>
+                    </div>
 
-        </button>
+                    <form [formGroup]="configurationForm" (ngSubmit)="saveConfiguration()" class="ops-form-stack">
+                        <div class="ops-form-grid three-column-grid">
+                            <section class="ops-form-section">
+                                <span class="ops-panel-kicker">Company identity</span>
+                                <h6>Administrative profile</h6>
 
+                                <div class="ops-form-field">
+                                    <label for="companyName">Company name</label>
+                                    <input id="companyName" type="text" formControlName="companyName" placeholder="Enter company name" />
+                                    <div class="ops-field-error" *ngIf="submitted && configurationForm.get('companyName').invalid">Company name is required.</div>
+                                </div>
 
-    </div>
+                                <div class="ops-form-field">
+                                    <label for="companyEmail">Company email</label>
+                                    <input id="companyEmail" type="email" formControlName="companyEmail" placeholder="ops@example.com" />
+                                    <div class="ops-field-error" *ngIf="submitted && configurationForm.get('companyEmail').invalid">A valid company email is required.</div>
+                                </div>
+
+                                <div class="ops-form-field">
+                                    <label for="companyAddress">Company address</label>
+                                    <textarea id="companyAddress" rows="3" formControlName="companyAddress" placeholder="Enter company address"></textarea>
+                                    <div class="ops-field-error" *ngIf="submitted && configurationForm.get('companyAddress').invalid">Company address is required.</div>
+                                </div>
+
+                                <div class="ops-form-field" *ngIf="companies.length">
+                                    <label for="defaultCompanyId">Default company</label>
+                                    <select id="defaultCompanyId" formControlName="defaultCompanyId">
+                                        <option value="">Use workspace identity</option>
+                                        <option *ngFor="let company of companies" [value]="company.id">{{ company.name }}</option>
+                                    </select>
+                                </div>
+
+                                <div class="ops-form-field">
+                                    <label for="payslipSignature">Payslip signature</label>
+                                    <input id="payslipSignature" type="text" formControlName="payslipSignature" placeholder="Signer or team responsible" />
+                                </div>
+                            </section>
+
+                            <section class="ops-form-section">
+                                <span class="ops-panel-kicker">Operating model</span>
+                                <h6>Payroll and notifications</h6>
+
+                                <div class="ops-form-field">
+                                    <label for="language">Language</label>
+                                    <select id="language" formControlName="language">
+                                        <option value="">Select language</option>
+                                        <option value="English">English</option>
+                                        <option value="French">French</option>
+                                        <option value="Arabic">Arabic</option>
+                                    </select>
+                                </div>
+
+                                <div class="ops-form-field">
+                                    <label for="currency">Currency</label>
+                                    <select id="currency" formControlName="currency">
+                                        <option value="">Select currency</option>
+                                        <option value="USD">USD</option>
+                                        <option value="EUR">EUR</option>
+                                        <option value="MAD">MAD</option>
+                                    </select>
+                                </div>
+
+                                <div class="ops-form-field">
+                                    <label for="timezone">Timezone</label>
+                                    <select id="timezone" formControlName="timezone">
+                                        <option value="">Select timezone</option>
+                                        <option value="UTC">UTC</option>
+                                        <option value="Europe/Paris">Europe/Paris</option>
+                                        <option value="Africa/Casablanca">Africa/Casablanca</option>
+                                        <option value="America/New_York">America/New_York</option>
+                                    </select>
+                                </div>
+
+                                <div class="ops-form-field">
+                                    <label for="payrollCutoffDay">Payroll cutoff day</label>
+                                    <select id="payrollCutoffDay" formControlName="payrollCutoffDay">
+                                        <option value="">Select day</option>
+                                        <option *ngFor="let day of [20,21,22,23,24,25,26,27,28]" [value]="day">{{ day }}</option>
+                                    </select>
+                                </div>
+
+                                <div class="ops-form-field">
+                                    <label for="notificationMode">Notification mode</label>
+                                    <select id="notificationMode" formControlName="notificationMode">
+                                        <option value="">Select notification mode</option>
+                                        <option value="In-app alerts only">In-app alerts only</option>
+                                        <option value="Email and in-app alerts">Email and in-app alerts</option>
+                                        <option value="Digest summary only">Digest summary only</option>
+                                    </select>
+                                </div>
+
+                                <div class="ops-form-field">
+                                    <label for="reminderWindowDays">Reminder window in days</label>
+                                    <input id="reminderWindowDays" type="number" min="1" max="120" formControlName="reminderWindowDays" placeholder="30" />
+                                </div>
+                            </section>
+
+                            <section class="ops-form-section">
+                                <span class="ops-panel-kicker">Workflow automation</span>
+                                <h6>Approvals and triggers</h6>
+
+                                <div class="ops-form-field">
+                                    <label for="approvalMode">Approval mode</label>
+                                    <select id="approvalMode" formControlName="approvalMode">
+                                        <option value="">Select approval mode</option>
+                                        <option value="Single-step approval">Single-step approval</option>
+                                        <option value="Two-step review">Two-step review</option>
+                                        <option value="Manager and HR approval">Manager and HR approval</option>
+                                        <option value="Rule-based escalation">Rule-based escalation</option>
+                                    </select>
+                                </div>
+
+                                <div class="ops-form-field">
+                                    <label for="approvalStages">Default approval path</label>
+                                    <textarea id="approvalStages" rows="3" formControlName="approvalStages" placeholder="Manager review -> HR approval"></textarea>
+                                </div>
+
+                                <div class="ops-toggle-grid">
+                                    <label class="ops-toggle-card">
+                                        <div class="ops-toggle-head">
+                                            <div class="ops-toggle-copy">
+                                                <h6>Auto leave balance</h6>
+                                                <p>Continuously calculate remaining leave based on live leave records and leave-type allocations.</p>
+                                            </div>
+                                            <input type="checkbox" formControlName="autoLeaveBalanceEnabled" />
+                                        </div>
+                                    </label>
+
+                                    <label class="ops-toggle-card">
+                                        <div class="ops-toggle-head">
+                                            <div class="ops-toggle-copy">
+                                                <h6>Auto payroll</h6>
+                                                <p>Keep the payroll engine armed for the current cycle and trigger it from this workspace.</p>
+                                            </div>
+                                            <input type="checkbox" formControlName="autoPayrollEnabled" />
+                                        </div>
+                                    </label>
+
+                                    <label class="ops-toggle-card">
+                                        <div class="ops-toggle-head">
+                                            <div class="ops-toggle-copy">
+                                                <h6>Custom approval flows</h6>
+                                                <p>Allow HR to define workflow-specific approval chains for leave, payroll, expenses, and exits.</p>
+                                            </div>
+                                            <input type="checkbox" formControlName="customApprovalFlowsEnabled" />
+                                        </div>
+                                    </label>
+
+                                    <label class="ops-toggle-card">
+                                        <div class="ops-toggle-head">
+                                            <div class="ops-toggle-copy">
+                                                <h6>Rule-based triggers</h6>
+                                                <p>Turn on automation definitions that react to updates, approval events, and expiry windows.</p>
+                                            </div>
+                                            <input type="checkbox" formControlName="ruleBasedTriggersEnabled" />
+                                        </div>
+                                    </label>
+                                </div>
+                            </section>
+
+                            <section class="ops-form-section">
+                                <span class="ops-panel-kicker">Authentication</span>
+                                <h6>Password and session controls</h6>
+
+                                <div class="ops-form-field">
+                                    <label for="passwordMinLength">Minimum password length</label>
+                                    <input id="passwordMinLength" type="number" min="3" max="64" formControlName="passwordMinLength" placeholder="8" />
+                                </div>
+
+                                <div class="ops-form-field">
+                                    <label for="sessionTimeoutMinutes">Session timeout in minutes</label>
+                                    <input id="sessionTimeoutMinutes" type="number" min="15" max="1440" formControlName="sessionTimeoutMinutes" placeholder="480" />
+                                </div>
+
+                                <label class="ops-toggle-card compact-toggle">
+                                    <div class="ops-toggle-head">
+                                        <div class="ops-toggle-copy">
+                                            <h6>Allow remember me</h6>
+                                            <p>Persist login sessions across browser restarts when enabled.</p>
+                                        </div>
+                                        <input type="checkbox" formControlName="allowRememberMe" />
+                                    </div>
+                                </label>
+                            </section>
+                        </div>
+
+                        <div class="ops-modal-actions inline-actions">
+                            <button type="button" class="btn btn-light" (click)="resetConfiguration()">Reset defaults</button>
+                            <button type="submit" class="btn btn-primary" [disabled]="saving">
+                                <i class="bi" [ngClass]="saving ? 'bi-arrow-repeat' : 'bi-check2-circle'"></i>
+                                {{ saving ? 'Saving...' : 'Save configuration' }}
+                            </button>
+                        </div>
+                    </form>
+                </article>
+
+                <div class="ops-resource-grid">
+                    <article class="card ops-panel-card">
+                        <div class="ops-panel-head">
+                            <div>
+                                <span>Auto payroll generation</span>
+                                <h3>Run the payroll engine</h3>
+                            </div>
+                            <span class="ops-status tone-medium">{{ configurationForm.value.payrollCutoffDay || '--' }}</span>
+                        </div>
+
+                        <form [formGroup]="payrollRunForm" (ngSubmit)="runPayroll()" class="ops-inline-form">
+                            <div class="ops-form-grid two-column-grid compact-grid">
+                                <div class="ops-form-field">
+                                    <label for="cycleMonth">Cycle month</label>
+                                    <input id="cycleMonth" type="month" formControlName="cycleMonth" />
+                                </div>
+
+                                <div class="ops-toggle-stack">
+                                    <label class="ops-inline-check">
+                                        <input type="checkbox" formControlName="generatePayslips" />
+                                        <span>Generate pay slips</span>
+                                    </label>
+                                    <label class="ops-inline-check">
+                                        <input type="checkbox" formControlName="overwriteExisting" />
+                                        <span>Overwrite existing cycle data</span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="ops-modal-actions inline-actions align-start">
+                                <button type="submit" class="btn btn-primary" [disabled]="payrollRunning">
+                                    <i class="bi" [ngClass]="payrollRunning ? 'bi-arrow-repeat' : 'bi-cash-stack'"></i>
+                                    {{ payrollRunning ? 'Running payroll...' : 'Generate payroll' }}
+                                </button>
+                            </div>
+                        </form>
+
+                        <div class="ops-note-card" *ngIf="payrollRunResult as result">
+                            <h4>Latest payroll run</h4>
+                            <div class="ops-fact-grid">
+                                <div>
+                                    <span class="ops-detail-label">Cycle</span>
+                                    <strong>{{ result.cycleMonth || 'Pending' }}</strong>
+                                </div>
+                                <div>
+                                    <span class="ops-detail-label">Processed</span>
+                                    <strong>{{ result.employeesProcessed }}</strong>
+                                </div>
+                                <div>
+                                    <span class="ops-detail-label">Gross pay</span>
+                                    <strong>{{ result.totalGrossPay | number:'1.0-2' }}</strong>
+                                </div>
+                                <div>
+                                    <span class="ops-detail-label">Net pay</span>
+                                    <strong>{{ result.totalNetPay | number:'1.0-2' }}</strong>
+                                </div>
+                            </div>
+
+                            <div class="ops-pill-row compact" *ngIf="result.warnings.length">
+                                <span class="ops-pill warning-pill" *ngFor="let warning of result.warnings">{{ warning }}</span>
+                            </div>
+                        </div>
+                    </article>
+
+                    <article class="card ops-panel-card">
+                        <div class="ops-panel-head">
+                            <div>
+                                <span>Smart reminders</span>
+                                <h3>Expiring contracts and visas</h3>
+                            </div>
+                            <span class="ops-status tone-warning">{{ remindersCount }}</span>
+                        </div>
+
+                        <div class="ops-list-stack" *ngIf="topReminders.length; else emptyReminderState">
+                            <article class="ops-mini-card" *ngFor="let reminder of topReminders; trackBy: trackById">
+                                <div class="ops-mini-head">
+                                    <div>
+                                        <span class="ops-panel-kicker">{{ reminder.reminderType }}</span>
+                                        <h4>{{ reminder.employeeName }}</h4>
+                                    </div>
+                                    <span class="ops-badge" [ngClass]="severityClass(reminder.severity)">{{ reminder.severity }}</span>
+                                </div>
+                                <p class="ops-mini-copy">{{ reminder.subject || reminder.title }}</p>
+                                <div class="ops-pill-row compact">
+                                    <span class="ops-pill">Due {{ reminder.dueDate || 'Pending' }}</span>
+                                    <span class="ops-pill">{{ reminder.daysRemaining }} days remaining</span>
+                                </div>
+                            </article>
+                        </div>
+
+                        <ng-template #emptyReminderState>
+                            <div class="ops-empty-inline">
+                                <h4>No reminder items are currently inside the configured window.</h4>
+                                <p>Increase the reminder window or add upcoming contract and visa dates to populate this queue.</p>
+                            </div>
+                        </ng-template>
+                    </article>
+                </div>
+
+                <article class="card ops-panel-card">
+                    <div class="ops-panel-head">
+                        <div>
+                            <span>Auto leave balance calculation</span>
+                            <h3>Leave balance board</h3>
+                        </div>
+                        <span class="ops-status tone-danger">{{ atRiskLeaveBalancesCount }}</span>
+                    </div>
+
+                    <div class="ops-table-wrap" *ngIf="topLeaveBalances.length; else emptyLeaveBalanceState">
+                        <table class="ops-compact-table">
+                            <thead>
+                                <tr>
+                                    <th>Employee</th>
+                                    <th>Leave type</th>
+                                    <th>Allocated</th>
+                                    <th>Used</th>
+                                    <th>Remaining</th>
+                                    <th>Usage</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr *ngFor="let balance of topLeaveBalances; trackBy: trackById">
+                                    <td>{{ balance.employeeName }}</td>
+                                    <td>{{ balance.leaveTypeName }}</td>
+                                    <td>{{ balance.allocatedDays }}</td>
+                                    <td>{{ balance.usedDays }}</td>
+                                    <td>{{ balance.remainingDays }}</td>
+                                    <td>{{ balance.usagePercent }}%</td>
+                                    <td><span class="ops-badge" [ngClass]="statusClass(balance.status)">{{ balance.status }}</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <ng-template #emptyLeaveBalanceState>
+                        <div class="ops-empty-inline">
+                            <h4>No leave balance calculations are available yet.</h4>
+                            <p>Create leave types with day allocations and add leave records so the balance engine has data to calculate.</p>
+                        </div>
+                    </ng-template>
+                </article>
+
+                <div class="ops-resource-grid">
+                    <article class="card ops-panel-card">
+                        <div class="ops-panel-head">
+                            <div>
+                                <span>Configurable system</span>
+                                <h3>Custom fields</h3>
+                            </div>
+                            <span class="ops-status tone-medium">{{ customFields.length }}</span>
+                        </div>
+
+                        <form [formGroup]="customFieldForm" (ngSubmit)="saveCustomField()" class="ops-inline-form">
+                            <div class="ops-form-grid two-column-grid compact-grid">
+                                <div class="ops-form-field">
+                                    <label for="fieldLabel">Label</label>
+                                    <input id="fieldLabel" type="text" formControlName="label" placeholder="Probation cycle" />
+                                </div>
+                                <div class="ops-form-field">
+                                    <label for="fieldKey">Field key</label>
+                                    <input id="fieldKey" type="text" formControlName="fieldKey" placeholder="probation_cycle" />
+                                </div>
+                                <div class="ops-form-field">
+                                    <label for="fieldTargetModule">Target module</label>
+                                    <select id="fieldTargetModule" formControlName="targetModule">
+                                        <option value="">Select module</option>
+                                        <option *ngFor="let item of moduleOptions" [value]="item">{{ item }}</option>
+                                    </select>
+                                </div>
+                                <div class="ops-form-field">
+                                    <label for="fieldType">Field type</label>
+                                    <select id="fieldType" formControlName="fieldType">
+                                        <option value="">Select field type</option>
+                                        <option *ngFor="let item of fieldTypeOptions" [value]="item">{{ item }}</option>
+                                    </select>
+                                </div>
+                                <div class="ops-form-field two-column-span">
+                                    <label for="placeholderText">Placeholder or help text</label>
+                                    <input id="placeholderText" type="text" formControlName="placeholderText" placeholder="Displayed in HR forms" />
+                                </div>
+                                <div class="ops-form-field two-column-span">
+                                    <label for="optionsCsv">Options</label>
+                                    <input id="optionsCsv" type="text" formControlName="optionsCsv" placeholder="Option A, Option B, Option C" />
+                                </div>
+                            </div>
+
+                            <div class="ops-inline-check-grid">
+                                <label class="ops-inline-check"><input type="checkbox" formControlName="required" /> <span>Required</span></label>
+                                <label class="ops-inline-check"><input type="checkbox" formControlName="active" /> <span>Active</span></label>
+                            </div>
+
+                            <div class="ops-modal-actions inline-actions align-start">
+                                <button type="button" class="btn btn-light" (click)="resetCustomFieldEditor()">Reset</button>
+                                <button type="submit" class="btn btn-primary">{{ customFieldSubmitLabel }}</button>
+                            </div>
+                        </form>
+
+                        <div class="ops-list-stack" *ngIf="customFields.length">
+                            <article class="ops-mini-card" *ngFor="let field of customFields; trackBy: trackById">
+                                <div class="ops-mini-head">
+                                    <div>
+                                        <span class="ops-panel-kicker">{{ field.targetModule || 'Module pending' }}</span>
+                                        <h4>{{ field.label }}</h4>
+                                    </div>
+                                    <span class="ops-badge" [ngClass]="field.active ? 'status-healthy' : 'status-watch'">{{ field.active ? 'Active' : 'Inactive' }}</span>
+                                </div>
+                                <p class="ops-mini-copy">{{ field.fieldKey }} • {{ field.fieldType }} • {{ field.required ? 'Required' : 'Optional' }}</p>
+                                <div class="ops-mini-actions">
+                                    <button type="button" class="btn btn-light btn-sm" (click)="editCustomField(field)">Edit</button>
+                                    <button type="button" class="btn btn-light btn-sm" (click)="deleteCustomField(field)">Delete</button>
+                                </div>
+                            </article>
+                        </div>
+                    </article>
+
+                    <article class="card ops-panel-card">
+                        <div class="ops-panel-head">
+                            <div>
+                                <span>Workflow automation</span>
+                                <h3>Approval flows</h3>
+                            </div>
+                            <span class="ops-status tone-medium">{{ approvalFlows.length }}</span>
+                        </div>
+
+                        <form [formGroup]="approvalFlowForm" (ngSubmit)="saveApprovalFlow()" class="ops-inline-form">
+                            <div class="ops-form-grid two-column-grid compact-grid">
+                                <div class="ops-form-field">
+                                    <label for="approvalFlowName">Flow name</label>
+                                    <input id="approvalFlowName" type="text" formControlName="name" placeholder="Leave approval" />
+                                </div>
+                                <div class="ops-form-field">
+                                    <label for="approvalFlowTarget">Target module</label>
+                                    <select id="approvalFlowTarget" formControlName="targetModule">
+                                        <option value="">Select module</option>
+                                        <option *ngFor="let item of approvalModuleOptions" [value]="item">{{ item }}</option>
+                                    </select>
+                                </div>
+                                <div class="ops-form-field two-column-span">
+                                    <label for="approvalStagesEditor">Stage sequence</label>
+                                    <input id="approvalStagesEditor" type="text" formControlName="stageSequence" placeholder="Manager review -> HR approval -> Finance sign-off" />
+                                </div>
+                                <div class="ops-form-field two-column-span">
+                                    <label for="approvalFlowDescription">Description</label>
+                                    <textarea id="approvalFlowDescription" rows="3" formControlName="description" placeholder="Explain when this flow applies."></textarea>
+                                </div>
+                            </div>
+
+                            <label class="ops-inline-check"><input type="checkbox" formControlName="active" /> <span>Active flow</span></label>
+
+                            <div class="ops-modal-actions inline-actions align-start">
+                                <button type="button" class="btn btn-light" (click)="resetApprovalFlowEditor()">Reset</button>
+                                <button type="submit" class="btn btn-primary">{{ approvalFlowSubmitLabel }}</button>
+                            </div>
+                        </form>
+
+                        <div class="ops-list-stack" *ngIf="approvalFlows.length">
+                            <article class="ops-mini-card" *ngFor="let flow of approvalFlows; trackBy: trackById">
+                                <div class="ops-mini-head">
+                                    <div>
+                                        <span class="ops-panel-kicker">{{ flow.targetModule || 'Module pending' }}</span>
+                                        <h4>{{ flow.name }}</h4>
+                                    </div>
+                                    <span class="ops-badge" [ngClass]="flow.active ? 'status-healthy' : 'status-watch'">{{ flow.active ? 'Active' : 'Inactive' }}</span>
+                                </div>
+                                <p class="ops-mini-copy">{{ flow.stageSequence }}</p>
+                                <div class="ops-mini-actions">
+                                    <button type="button" class="btn btn-light btn-sm" (click)="editApprovalFlow(flow)">Edit</button>
+                                    <button type="button" class="btn btn-light btn-sm" (click)="deleteApprovalFlow(flow)">Delete</button>
+                                </div>
+                            </article>
+                        </div>
+                    </article>
+                </div>
+
+                <div class="ops-resource-grid">
+                    <article class="card ops-panel-card">
+                        <div class="ops-panel-head">
+                            <div>
+                                <span>Workflow automation</span>
+                                <h3>Rule-based triggers</h3>
+                            </div>
+                            <span class="ops-status tone-medium">{{ workflowRules.length }}</span>
+                        </div>
+
+                        <form [formGroup]="workflowRuleForm" (ngSubmit)="saveWorkflowRule()" class="ops-inline-form">
+                            <div class="ops-form-grid two-column-grid compact-grid">
+                                <div class="ops-form-field">
+                                    <label for="workflowRuleName">Rule name</label>
+                                    <input id="workflowRuleName" type="text" formControlName="name" placeholder="Contract expiry alert" />
+                                </div>
+                                <div class="ops-form-field">
+                                    <label for="workflowRuleModule">Target module</label>
+                                    <select id="workflowRuleModule" formControlName="targetModule">
+                                        <option value="">Select module</option>
+                                        <option *ngFor="let item of moduleOptions" [value]="item">{{ item }}</option>
+                                    </select>
+                                </div>
+                                <div class="ops-form-field">
+                                    <label for="workflowRuleTrigger">Trigger event</label>
+                                    <select id="workflowRuleTrigger" formControlName="triggerEvent">
+                                        <option value="">Select trigger</option>
+                                        <option *ngFor="let item of triggerEventOptions" [value]="item">{{ item }}</option>
+                                    </select>
+                                </div>
+                                <div class="ops-form-field">
+                                    <label for="workflowRuleAction">Action</label>
+                                    <input id="workflowRuleAction" type="text" formControlName="actionExpression" placeholder="Notify HR and manager" />
+                                </div>
+                                <div class="ops-form-field two-column-span">
+                                    <label for="workflowRuleCondition">Condition</label>
+                                    <input id="workflowRuleCondition" type="text" formControlName="conditionExpression" placeholder="daysRemaining <= 7" />
+                                </div>
+                                <div class="ops-form-field two-column-span">
+                                    <label for="workflowRuleDescription">Description</label>
+                                    <textarea id="workflowRuleDescription" rows="3" formControlName="description" placeholder="Explain how this trigger should be used."></textarea>
+                                </div>
+                            </div>
+
+                            <label class="ops-inline-check"><input type="checkbox" formControlName="active" /> <span>Active rule</span></label>
+
+                            <div class="ops-modal-actions inline-actions align-start">
+                                <button type="button" class="btn btn-light" (click)="resetWorkflowRuleEditor()">Reset</button>
+                                <button type="submit" class="btn btn-primary">{{ workflowRuleSubmitLabel }}</button>
+                            </div>
+                        </form>
+
+                        <div class="ops-list-stack" *ngIf="workflowRules.length">
+                            <article class="ops-mini-card" *ngFor="let rule of workflowRules; trackBy: trackById">
+                                <div class="ops-mini-head">
+                                    <div>
+                                        <span class="ops-panel-kicker">{{ rule.targetModule || 'Module pending' }}</span>
+                                        <h4>{{ rule.name }}</h4>
+                                    </div>
+                                    <span class="ops-badge" [ngClass]="rule.active ? 'status-healthy' : 'status-watch'">{{ rule.active ? 'Active' : 'Inactive' }}</span>
+                                </div>
+                                <p class="ops-mini-copy">{{ rule.triggerEvent }} • {{ rule.actionExpression }}</p>
+                                <div class="ops-mini-actions">
+                                    <button type="button" class="btn btn-light btn-sm" (click)="editWorkflowRule(rule)">Edit</button>
+                                    <button type="button" class="btn btn-light btn-sm" (click)="deleteWorkflowRule(rule)">Delete</button>
+                                </div>
+                            </article>
+                        </div>
+                    </article>
+
+                    <article class="card ops-panel-card">
+                        <div class="ops-panel-head">
+                            <div>
+                                <span>Configurable system</span>
+                                <h3>Leave types</h3>
+                            </div>
+                            <span class="ops-status tone-medium">{{ leaveTypes.length }}</span>
+                        </div>
+
+                        <form [formGroup]="leaveTypeForm" (ngSubmit)="saveLeaveType()" class="ops-inline-form">
+                            <div class="ops-form-grid two-column-grid compact-grid">
+                                <div class="ops-form-field">
+                                    <label for="leaveTypeName">Leave type</label>
+                                    <input id="leaveTypeName" type="text" formControlName="name" placeholder="Annual leave" />
+                                </div>
+                                <div class="ops-form-field">
+                                    <label for="leaveTypeDays">Allocated days</label>
+                                    <input id="leaveTypeDays" type="number" min="0" formControlName="days" placeholder="18" />
+                                </div>
+                            </div>
+
+                            <div class="ops-modal-actions inline-actions align-start">
+                                <button type="button" class="btn btn-light" (click)="resetLeaveTypeEditor()">Reset</button>
+                                <button type="submit" class="btn btn-primary">{{ leaveTypeSubmitLabel }}</button>
+                            </div>
+                        </form>
+
+                        <div class="ops-list-stack" *ngIf="leaveTypes.length">
+                            <article class="ops-mini-card" *ngFor="let leaveType of leaveTypes; trackBy: trackById">
+                                <div class="ops-mini-head">
+                                    <div>
+                                        <span class="ops-panel-kicker">Leave type</span>
+                                        <h4>{{ leaveType.name }}</h4>
+                                    </div>
+                                    <span class="ops-badge status-healthy">{{ leaveType.days }} days</span>
+                                </div>
+                                <div class="ops-mini-actions">
+                                    <button type="button" class="btn btn-light btn-sm" (click)="editLeaveType(leaveType)">Edit</button>
+                                    <button type="button" class="btn btn-light btn-sm" (click)="deleteLeaveType(leaveType)">Delete</button>
+                                </div>
+                            </article>
+                        </div>
+                    </article>
+                </div>
+
+                <article class="card ops-panel-card">
+                    <div class="ops-panel-head">
+                        <div>
+                            <span>Configurable system</span>
+                            <h3>Policies</h3>
+                        </div>
+                        <span class="ops-status tone-medium">{{ policies.length }}</span>
+                    </div>
+
+                    <form [formGroup]="policyForm" (ngSubmit)="savePolicy()" class="ops-inline-form">
+                        <div class="ops-form-grid two-column-grid compact-grid">
+                            <div class="ops-form-field">
+                                <label for="policyTitle">Title</label>
+                                <input id="policyTitle" type="text" formControlName="title" placeholder="Leave policy" />
+                            </div>
+                            <div class="ops-form-field">
+                                <label for="policyDocumentPath">Document path</label>
+                                <input id="policyDocumentPath" type="text" formControlName="documentPath" placeholder="/files/policies/leave-policy.pdf" />
+                            </div>
+                            <div class="ops-form-field">
+                                <label for="policyEffectiveDate">Effective date</label>
+                                <input id="policyEffectiveDate" type="date" formControlName="effectiveDate" />
+                            </div>
+                            <div class="ops-form-field">
+                                <label for="policyExpiryDate">Expiry date</label>
+                                <input id="policyExpiryDate" type="date" formControlName="expiryDate" />
+                            </div>
+                            <div class="ops-form-field two-column-span">
+                                <label for="policyDescription">Description</label>
+                                <textarea id="policyDescription" rows="4" formControlName="description" placeholder="Summarize what the policy controls and who it affects."></textarea>
+                            </div>
+                        </div>
+
+                        <div class="ops-modal-actions inline-actions align-start">
+                            <button type="button" class="btn btn-light" (click)="resetPolicyEditor()">Reset</button>
+                            <button type="submit" class="btn btn-primary">{{ policySubmitLabel }}</button>
+                        </div>
+                    </form>
+
+                    <div class="ops-list-stack" *ngIf="policies.length">
+                        <article class="ops-mini-card" *ngFor="let policy of policies; trackBy: trackById">
+                            <div class="ops-mini-head">
+                                <div>
+                                    <span class="ops-panel-kicker">Policy</span>
+                                    <h4>{{ policy.title }}</h4>
+                                </div>
+                                <span class="ops-badge status-healthy">{{ policy.effectiveDate || 'Pending date' }}</span>
+                            </div>
+                            <p class="ops-mini-copy">{{ policy.description || 'No description provided yet.' }}</p>
+                            <div class="ops-pill-row compact">
+                                <span class="ops-pill" *ngIf="policy.expiryDate">Expires {{ policy.expiryDate }}</span>
+                                <span class="ops-pill" *ngIf="policy.documentPath">{{ policy.documentPath }}</span>
+                            </div>
+                            <div class="ops-mini-actions">
+                                <button type="button" class="btn btn-light btn-sm" (click)="editPolicy(policy)">Edit</button>
+                                <button type="button" class="btn btn-light btn-sm" (click)="deletePolicy(policy)">Delete</button>
+                            </div>
+                        </article>
+                    </div>
+                </article>
+
+                <article class="card ops-panel-card">
+                    <div class="ops-panel-head">
+                        <div>
+                            <span>Visual customization</span>
+                            <h3>Theme and graphical options</h3>
+                        </div>
+                        <span class="ops-status tone-medium">Live preview</span>
+                    </div>
+
+                    <form [formGroup]="themeForm" (ngSubmit)="saveThemePreferences()" class="ops-inline-form">
+                        <div class="theme-preset-grid">
+                            <button
+                                type="button"
+                                class="theme-preset-card"
+                                *ngFor="let preset of themePresets; trackBy: trackByThemePreset"
+                                [class.active]="activeThemePresetId === preset.id"
+                                (click)="applyThemePreset(preset)"
+                            >
+                                <span class="theme-preset-title">{{ preset.label }}</span>
+                                <span class="theme-preset-summary">{{ preset.summary }}</span>
+                                <span class="theme-preset-swatches">
+                                    <span class="theme-preset-swatch" [style.background]="preset.preferences.primaryColor"></span>
+                                    <span class="theme-preset-swatch" [style.background]="preset.preferences.accentColor"></span>
+                                </span>
+                            </button>
+                        </div>
+
+                        <div class="ops-form-grid two-column-grid compact-grid">
+                            <div class="ops-form-field">
+                                <label for="themePrimaryColor">Primary color</label>
+                                <input id="themePrimaryColor" type="color" formControlName="primaryColor" />
+                            </div>
+
+                            <div class="ops-form-field">
+                                <label for="themeAccentColor">Accent color</label>
+                                <input id="themeAccentColor" type="color" formControlName="accentColor" />
+                            </div>
+
+                            <div class="ops-form-field">
+                                <label for="themeSurfaceStyle">Surface style</label>
+                                <select id="themeSurfaceStyle" formControlName="surfaceStyle">
+                                    <option *ngFor="let option of themeSurfaceOptions" [value]="option">{{ option }}</option>
+                                </select>
+                            </div>
+
+                            <div class="ops-form-field">
+                                <label for="themeDensity">Density</label>
+                                <select id="themeDensity" formControlName="density">
+                                    <option *ngFor="let option of themeDensityOptions" [value]="option">{{ option }}</option>
+                                </select>
+                            </div>
+
+                            <div class="ops-form-field two-column-span">
+                                <label for="themeGraphStyle">Chart style</label>
+                                <select id="themeGraphStyle" formControlName="graphStyle">
+                                    <option *ngFor="let option of themeGraphStyleOptions" [value]="option">{{ option }}</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="ops-inline-check-grid permissions-grid">
+                            <label class="ops-inline-check"><input type="checkbox" formControlName="highContrast" /> <span>High contrast mode</span></label>
+                            <label class="ops-inline-check"><input type="checkbox" formControlName="reducedMotion" /> <span>Reduced motion</span></label>
+                        </div>
+
+                        <div class="theme-preview-row">
+                            <span class="ops-pill" [style.background]="themePreviewPreferences.primaryColor" [style.color]="'#ffffff'">Primary preview</span>
+                            <span class="ops-pill" [style.background]="themePreviewPreferences.accentColor" [style.color]="'#ffffff'">Accent preview</span>
+                            <span class="ops-pill">{{ themePreviewPreferences.surfaceStyle }}</span>
+                            <span class="ops-pill">{{ themePreviewPreferences.density }}</span>
+                            <span class="ops-pill">{{ themePreviewPreferences.graphStyle }} charts</span>
+                        </div>
+
+                        <div class="ops-modal-actions inline-actions align-start">
+                            <button type="button" class="btn btn-light" (click)="resetThemePreferences()">Reset theme</button>
+                            <button type="submit" class="btn btn-primary">Save theme options</button>
+                        </div>
+                    </form>
+                </article>
+
+                <div class="ops-resource-grid" *ngIf="isAdminUser">
+                    <article class="card ops-panel-card">
+                        <div class="ops-panel-head">
+                            <div>
+                                <span>Multi-company</span>
+                                <h3>Company directory</h3>
+                            </div>
+                            <span class="ops-status tone-medium">{{ companyCount }}</span>
+                        </div>
+
+                        <form [formGroup]="companyForm" (ngSubmit)="saveCompany()" class="ops-inline-form">
+                            <div class="ops-form-grid two-column-grid compact-grid">
+                                <div class="ops-form-field">
+                                    <label for="companyCodeEditor">Code</label>
+                                    <input id="companyCodeEditor" type="text" formControlName="code" placeholder="group-hq" />
+                                </div>
+                                <div class="ops-form-field">
+                                    <label for="companyNameEditor">Name</label>
+                                    <input id="companyNameEditor" type="text" formControlName="name" placeholder="Humant Group HQ" />
+                                </div>
+                                <div class="ops-form-field">
+                                    <label for="companyEmailEditor">Email</label>
+                                    <input id="companyEmailEditor" type="email" formControlName="email" placeholder="ops@group.example" />
+                                </div>
+                                <div class="ops-form-field">
+                                    <label for="companyCurrencyEditor">Currency</label>
+                                    <input id="companyCurrencyEditor" type="text" formControlName="currency" placeholder="USD" />
+                                </div>
+                                <div class="ops-form-field two-column-span">
+                                    <label for="companyAddressEditor">Address</label>
+                                    <textarea id="companyAddressEditor" rows="3" formControlName="address" placeholder="Company address"></textarea>
+                                </div>
+                            </div>
+
+                            <div class="ops-inline-check-grid">
+                                <label class="ops-inline-check"><input type="checkbox" formControlName="active" /> <span>Active company</span></label>
+                                <label class="ops-inline-check"><input type="checkbox" formControlName="defaultCompany" /> <span>Default company</span></label>
+                            </div>
+
+                            <div class="ops-modal-actions inline-actions align-start">
+                                <button type="button" class="btn btn-light" (click)="resetCompanyEditor()">Reset</button>
+                                <button type="submit" class="btn btn-primary">{{ companySubmitLabel }}</button>
+                            </div>
+                        </form>
+
+                        <div class="ops-list-stack" *ngIf="companies.length">
+                            <article class="ops-mini-card" *ngFor="let company of companies; trackBy: trackById">
+                                <div class="ops-mini-head">
+                                    <div>
+                                        <span class="ops-panel-kicker">{{ company.code || 'company' }}</span>
+                                        <h4>{{ company.name }}</h4>
+                                    </div>
+                                    <span class="ops-badge" [ngClass]="company.active ? 'status-healthy' : 'status-watch'">{{ company.active ? 'Active' : 'Inactive' }}</span>
+                                </div>
+                                <div class="ops-pill-row compact">
+                                    <span class="ops-pill" *ngIf="company.defaultCompany">Default</span>
+                                    <span class="ops-pill">{{ company.currency }}</span>
+                                    <span class="ops-pill">{{ company.timezone }}</span>
+                                </div>
+                                <div class="ops-mini-actions">
+                                    <button type="button" class="btn btn-light btn-sm" (click)="editCompany(company)">Edit</button>
+                                </div>
+                            </article>
+                        </div>
+                    </article>
+
+                    <article class="card ops-panel-card">
+                        <div class="ops-panel-head">
+                            <div>
+                                <span>Access control</span>
+                                <h3>Role policies</h3>
+                            </div>
+                            <span class="ops-status tone-medium">{{ accessPolicies.length }}</span>
+                        </div>
+
+                        <form [formGroup]="accessPolicyForm" (ngSubmit)="saveAccessPolicy()" class="ops-inline-form">
+                            <div class="ops-form-grid two-column-grid compact-grid">
+                                <div class="ops-form-field">
+                                    <label for="accessPolicyRole">Role</label>
+                                    <select id="accessPolicyRole" formControlName="roleName" (ngModelChange)="resetAccessPolicyEditor()">
+                                        <option *ngFor="let roleName of accessPolicyRoles" [value]="roleName">{{ roleName }}</option>
+                                    </select>
+                                </div>
+                                <div class="ops-form-field">
+                                    <label for="accessPolicyLandingRoute">Default route</label>
+                                    <select id="accessPolicyLandingRoute" formControlName="defaultLandingRoute">
+                                        <option *ngFor="let route of adminLandingRouteOptions" [value]="route">{{ route }}</option>
+                                    </select>
+                                </div>
+                                <div class="ops-form-field two-column-span">
+                                    <label for="allowedRoutePrefixes">Allowed route prefixes</label>
+                                    <textarea id="allowedRoutePrefixes" rows="4" formControlName="allowedRoutePrefixes" placeholder="/dashboard,/job,/communication"></textarea>
+                                </div>
+                            </div>
+
+                            <div class="ops-panel-head compact-head">
+                                <div>
+                                    <span>Module access</span>
+                                    <h3>Grant or revoke modules</h3>
+                                </div>
+                                <span class="ops-status tone-medium">{{ selectedAccessRoutePrefixes.length }}</span>
+                            </div>
+
+                            <div class="ops-inline-check-grid permissions-grid">
+                                <label class="ops-inline-check" *ngFor="let module of accessModuleOptions; trackBy: trackByModulePrefix">
+                                    <input
+                                        type="checkbox"
+                                        [checked]="isAccessPrefixEnabled(module.prefix)"
+                                        (change)="onAccessPrefixToggle(module.prefix, $event.target.checked)"
+                                    />
+                                    <span>{{ module.label }}</span>
+                                </label>
+                            </div>
+
+                            <div class="ops-modal-actions inline-actions align-start">
+                                <button type="button" class="btn btn-light" (click)="grantAllModuleAccess()">Grant all modules</button>
+                                <button type="button" class="btn btn-light" (click)="revokeAllModuleAccess()">Revoke all modules</button>
+                            </div>
+
+                            <div class="ops-inline-check-grid permissions-grid">
+                                <label class="ops-inline-check"><input type="checkbox" formControlName="canViewSensitiveData" /> <span>View sensitive data</span></label>
+                                <label class="ops-inline-check"><input type="checkbox" formControlName="canManageUsers" /> <span>Manage users</span></label>
+                                <label class="ops-inline-check"><input type="checkbox" formControlName="canManageConfiguration" /> <span>Manage configuration</span></label>
+                                <label class="ops-inline-check"><input type="checkbox" formControlName="canManageCompanies" /> <span>Manage companies</span></label>
+                                <label class="ops-inline-check"><input type="checkbox" formControlName="canViewAuditLogs" /> <span>View audit logs</span></label>
+                            </div>
+
+                            <div class="ops-modal-actions inline-actions align-start">
+                                <button type="button" class="btn btn-light" (click)="resetAccessPolicyEditor()">Reload policy</button>
+                                <button type="submit" class="btn btn-primary">Save policy</button>
+                            </div>
+                        </form>
+
+                        <div class="ops-list-stack" *ngIf="accessPolicies.length">
+                            <article class="ops-mini-card" *ngFor="let policy of accessPolicies; trackBy: trackById">
+                                <div class="ops-mini-head">
+                                    <div>
+                                        <span class="ops-panel-kicker">Role policy</span>
+                                        <h4>{{ policy.roleName }}</h4>
+                                    </div>
+                                    <span class="ops-badge">{{ policy.defaultLandingRoute }}</span>
+                                </div>
+                                <p class="ops-mini-copy">{{ policy.allowedRoutePrefixes }}</p>
+                                <div class="ops-pill-row compact">
+                                    <span class="ops-pill" *ngIf="policy.canViewSensitiveData">Sensitive data</span>
+                                    <span class="ops-pill" *ngIf="policy.canManageUsers">User admin</span>
+                                    <span class="ops-pill" *ngIf="policy.canManageConfiguration">Configuration</span>
+                                    <span class="ops-pill" *ngIf="policy.canManageCompanies">Companies</span>
+                                    <span class="ops-pill" *ngIf="policy.canViewAuditLogs">Audit</span>
+                                </div>
+                                <div class="ops-mini-actions">
+                                    <button type="button" class="btn btn-light btn-sm" (click)="editAccessPolicy(policy)">Edit</button>
+                                </div>
+                            </article>
+                        </div>
+                    </article>
+                </div>
+
+                <article class="card ops-panel-card" *ngIf="isAdminUser">
+                    <div class="ops-panel-head">
+                        <div>
+                            <span>Audit &amp; monitoring</span>
+                            <h3>Recent system activity</h3>
+                        </div>
+                        <span class="ops-status tone-medium">{{ auditLogs.length }}</span>
+                    </div>
+
+                    <div class="ops-list-stack" *ngIf="auditLogs.length; else emptyAuditState">
+                        <article class="ops-mini-card" *ngFor="let log of auditLogs; trackBy: trackById">
+                            <div class="ops-mini-head">
+                                <div>
+                                    <span class="ops-panel-kicker">{{ log.actionType }}</span>
+                                    <h4>{{ log.summary || (log.targetType + ' ' + log.targetId) }}</h4>
+                                </div>
+                                <span class="ops-badge">{{ log.actorUsername }}</span>
+                            </div>
+                            <p class="ops-mini-copy">{{ log.details || log.requestPath }}</p>
+                            <div class="ops-pill-row compact">
+                                <span class="ops-pill">{{ log.actorRole }}</span>
+                                <span class="ops-pill">{{ log.targetType }}</span>
+                                <span class="ops-pill" *ngIf="log.companyCode">{{ log.companyCode }}</span>
+                                <span class="ops-pill">{{ formatSavedAt(log.createdAt) }}</span>
+                            </div>
+                        </article>
+                    </div>
+
+                    <ng-template #emptyAuditState>
+                        <div class="ops-empty-inline">
+                            <h4>No audit log entries are available yet.</h4>
+                            <p>Admin changes and successful session activity will appear here as the system is used.</p>
+                        </div>
+                    </ng-template>
+                </article>
+            </div>
+
+            <aside class="ops-side">
+                <div class="ops-sidebar-stack">
+                    <article class="card ops-panel-card">
+                        <div class="ops-panel-head">
+                            <div>
+                                <span>Workspace preview</span>
+                                <h3>{{ configurationForm.value.companyName || 'Workspace pending' }}</h3>
+                            </div>
+                            <span class="ops-status tone-medium">{{ readinessScore }}%</span>
+                        </div>
+
+                        <p>{{ configurationForm.value.companyEmail || 'Add a company email to complete the administrative identity.' }}</p>
+
+                        <div class="ops-summary-list">
+                            <div class="ops-summary-item">
+                                <span class="ops-detail-label">Locale</span>
+                                <strong>{{ languageCurrencySummary || 'Pending' }}</strong>
+                            </div>
+                            <div class="ops-summary-item">
+                                <span class="ops-detail-label">Payroll cadence</span>
+                                <strong>{{ operatingSummary }}</strong>
+                            </div>
+                            <div class="ops-summary-item">
+                                <span class="ops-detail-label">Approval path</span>
+                                <strong>{{ configurationForm.value.approvalStages || 'Pending' }}</strong>
+                            </div>
+                            <div class="ops-summary-item">
+                                <span class="ops-detail-label">Last saved</span>
+                                <strong>{{ formatSavedAt(lastSavedAt) }}</strong>
+                            </div>
+                        </div>
+                    </article>
+
+                    <article class="card ops-panel-card">
+                        <span class="ops-panel-kicker">Automation posture</span>
+                        <h3>What HR can control here</h3>
+
+                        <div class="ops-note-list">
+                            <div class="ops-note-item">Persist workspace-level settings and automation toggles.</div>
+                            <div class="ops-note-item">Run payroll generation for a selected cycle.</div>
+                            <div class="ops-note-item">Review smart reminders for expiring contracts and visas.</div>
+                            <div class="ops-note-item">Maintain custom fields, approval flows, trigger rules, policies, and leave types.</div>
+                            <div class="ops-note-item" *ngIf="isAdminUser">Admin can also manage companies, role policies, auth controls, and audit history from this screen.</div>
+                        </div>
+                    </article>
+                </div>
+            </aside>
+        </div>
+    </section>
 </div>

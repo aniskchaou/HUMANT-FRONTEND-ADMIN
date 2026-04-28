@@ -1,14 +1,395 @@
-<div class="page-heading">
-  <section class="section">
-    <div class="card">
-      <div class="card-header">
-        <h2>Désignations</h2>
+<div class="page-heading ops-page">
+  <section class="ops-shell">
+    <article class="card ops-hero">
+      <div class="ops-hero-copy">
+        <span class="ops-eyebrow">Role structure</span>
+        <h2>Build a designation library that stays aligned to the org chart.</h2>
+        <p>
+          Standardize titles, connect them to the right departments, and make the
+          role catalog easier to reuse across contracts and employee records.
+        </p>
+
+        <div class="ops-hero-actions">
+          <button
+            type="button"
+            class="btn btn-primary"
+            data-bs-toggle="modal"
+            data-bs-target="#designationCrudModal"
+            (click)="openCreateModal()"
+          >
+            <i class="bi bi-plus-square-fill"></i>
+            Create designation
+          </button>
+          <button
+            type="button"
+            class="btn btn-light"
+            (click)="refreshDesignations()"
+            [disabled]="loading"
+          >
+            <i class="bi bi-arrow-repeat"></i>
+            Refresh
+          </button>
+        </div>
+
+        <div class="ops-hero-notice" *ngIf="loadError">{{ loadError }}</div>
       </div>
-      <div class="card-body">
-        <div class="dataTable-container">
-          <app-designation-list></app-designation-list>
+
+      <div class="ops-hero-panel">
+        <span class="ops-panel-kicker">Library health</span>
+        <h3>Designation alignment across departments</h3>
+
+        <div class="ops-metric-grid">
+          <div class="ops-metric-card">
+            <span>Total titles</span>
+            <strong>{{ totalDesignationsCount }}</strong>
+            <p>Designation records currently available in the workspace.</p>
+          </div>
+          <div class="ops-metric-card">
+            <span>Aligned titles</span>
+            <strong>{{ alignedDesignationsCount }}</strong>
+            <p>Titles that already point to a specific department.</p>
+          </div>
+        </div>
+
+        <div class="ops-progress-wrap">
+          <div class="ops-progress-top">
+            <span>Alignment coverage</span>
+            <strong>{{ alignmentCoverage }}%</strong>
+          </div>
+          <div class="ops-progress-track">
+            <span [style.width.%]="alignmentCoverage"></span>
+          </div>
+          <p>
+            {{ representedDepartementsCount }} department{{ representedDepartementsCount === 1 ? '' : 's' }} are represented in the title library.
+          </p>
         </div>
       </div>
+    </article>
+
+    <div class="ops-stat-grid">
+      <article class="card ops-stat-card tone-primary">
+        <span>Designation records</span>
+        <strong>{{ totalDesignationsCount }}</strong>
+        <p>Total titles currently managed in the admin app.</p>
+      </article>
+
+      <article class="card ops-stat-card tone-secondary">
+        <span>Aligned designations</span>
+        <strong>{{ alignedDesignationsCount }}</strong>
+        <p>Titles already attached to a department for org clarity.</p>
+      </article>
+
+      <article class="card ops-stat-card tone-warning">
+        <span>Unassigned titles</span>
+        <strong>{{ unassignedDesignationsCount }}</strong>
+        <p>Titles that still need a department before wider reuse.</p>
+      </article>
+
+      <article class="card ops-stat-card tone-danger">
+        <span>Departments covered</span>
+        <strong>{{ representedDepartementsCount }}</strong>
+        <p>Distinct teams represented in the current designation catalog.</p>
+      </article>
+    </div>
+
+    <article class="card ops-toolbar-card">
+      <div class="ops-toolbar">
+        <label class="ops-search-field">
+          <i class="bi bi-search"></i>
+          <input
+            type="text"
+            [ngModel]="searchTerm"
+            (ngModelChange)="onSearchTermChange($event)"
+            placeholder="Search titles or departments"
+          />
+        </label>
+
+        <div class="ops-toolbar-controls">
+          <label>
+            <span>Filter</span>
+            <select
+              [ngModel]="activeFilter"
+              (ngModelChange)="onFilterChange($event)"
+            >
+              <option value="all">All designations</option>
+              <option value="aligned">Aligned only</option>
+              <option value="unassigned">Needs department</option>
+            </select>
+          </label>
+
+          <label>
+            <span>Sort</span>
+            <select
+              [ngModel]="activeSort"
+              (ngModelChange)="onSortChange($event)"
+            >
+              <option value="quality">Readiness</option>
+              <option value="name-asc">Name A-Z</option>
+              <option value="departement-asc">Department A-Z</option>
+            </select>
+          </label>
+        </div>
+      </div>
+
+      <div class="ops-toolbar-footer">
+        <span>{{ filteredResultsLabel }}</span>
+        <span>
+          {{ featuredDesignation ? featuredDesignation.name : 'No designation selected' }}
+        </span>
+      </div>
+    </article>
+
+    <div class="ops-layout">
+      <div class="ops-main">
+        <div class="ops-loading-grid" *ngIf="loading; else designationReady">
+          <div
+            class="ops-skeleton-card"
+            *ngFor="let item of loadingPlaceholders"
+          ></div>
+        </div>
+
+        <ng-template #designationReady>
+          <div class="ops-grid" *ngIf="filteredDesignations.length; else designationEmpty">
+            <article
+              class="card ops-card"
+              *ngFor="let item of filteredDesignations; trackBy: trackByDesignationId"
+              [class.is-active]="featuredDesignation ? featuredDesignation.id === item.id : false"
+              (click)="selectDesignation(item)"
+              tabindex="0"
+              role="button"
+            >
+              <div class="ops-card-head">
+                <div>
+                  <span class="ops-panel-kicker">Designation</span>
+                  <h3>{{ item.name }}</h3>
+                </div>
+                <span class="ops-status" [ngClass]="'tone-' + item.qualityTone">
+                  {{ item.qualityLabel }}
+                </span>
+              </div>
+
+              <p>{{ item.summary }}</p>
+
+              <div class="ops-progress-wrap">
+                <div class="ops-progress-top">
+                  <span>Catalog readiness</span>
+                  <strong>{{ item.qualityScore }}%</strong>
+                </div>
+                <div class="ops-progress-track">
+                  <span [style.width.%]="item.qualityScore"></span>
+                </div>
+              </div>
+
+              <div class="ops-chip-row">
+                <span class="ops-chip">
+                  {{ item.departementName ? item.departementName : 'Department pending' }}
+                </span>
+              </div>
+
+              <div class="ops-card-actions">
+                <button
+                  type="button"
+                  class="btn btn-light btn-sm"
+                  data-bs-toggle="modal"
+                  data-bs-target="#designationCrudModal"
+                  (click)="openEditModal(item); $event.stopPropagation()"
+                >
+                  <i class="bi bi-pencil-square"></i>
+                  Edit
+                </button>
+                <button
+                  type="button"
+                  class="btn btn-light btn-sm"
+                  (click)="deleteDesignation(item); $event.stopPropagation()"
+                  [disabled]="deletingId === item.id"
+                >
+                  <i class="bi bi-trash3"></i>
+                  {{ deletingId === item.id ? 'Deleting...' : 'Delete' }}
+                </button>
+              </div>
+            </article>
+          </div>
+        </ng-template>
+
+        <ng-template #designationEmpty>
+          <article class="card ops-empty-card">
+            <span class="ops-empty-kicker">No matching designations</span>
+            <h3>The current filters do not match any designation.</h3>
+            <p>
+              Reset the search or create a designation to start rebuilding the title library.
+            </p>
+            <button
+              type="button"
+              class="btn btn-primary"
+              data-bs-toggle="modal"
+              data-bs-target="#designationCrudModal"
+              (click)="openCreateModal()"
+            >
+              <i class="bi bi-plus-square-fill"></i>
+              Create designation
+            </button>
+          </article>
+        </ng-template>
+      </div>
+
+      <aside class="ops-side">
+        <article class="card ops-panel-card" *ngIf="featuredDesignation; else emptyDesignationPanel">
+          <div class="ops-panel-head">
+            <div>
+              <span>Selected designation</span>
+              <h3>{{ featuredDesignation.name }}</h3>
+            </div>
+            <span class="ops-status" [ngClass]="'tone-' + featuredDesignation.qualityTone">
+              {{ featuredDesignation.qualityLabel }}
+            </span>
+          </div>
+
+          <p>{{ featuredDesignation.summary }}</p>
+
+          <div class="ops-fact-grid">
+            <div>
+              <span class="ops-detail-label">Department</span>
+              <strong>{{ featuredDesignation.departementName ? featuredDesignation.departementName : 'Pending' }}</strong>
+            </div>
+            <div>
+              <span class="ops-detail-label">Readiness</span>
+              <strong>{{ featuredDesignation.qualityScore }}%</strong>
+            </div>
+          </div>
+
+          <div class="ops-panel-note accent">
+            <span class="ops-detail-label">Next action</span>
+            <p>
+              {{ featuredDesignation.aligned
+                ? 'This title is ready to be reused in contracts, transfers, and employee setup flows.'
+                : 'Attach the title to a department so reporting and downstream employee records stay consistent.' }}
+            </p>
+          </div>
+
+          <button
+            type="button"
+            class="btn btn-primary"
+            data-bs-toggle="modal"
+            data-bs-target="#designationCrudModal"
+            (click)="openEditModal(featuredDesignation)"
+          >
+            <i class="bi bi-pencil-square"></i>
+            Edit selected designation
+          </button>
+        </article>
+
+        <ng-template #emptyDesignationPanel>
+          <article class="card ops-panel-card">
+            <span class="ops-empty-kicker">Designation preview</span>
+            <h3>Select a title to inspect it here.</h3>
+            <p>
+              The side panel highlights the current department alignment and the next cleanup step.
+            </p>
+          </article>
+        </ng-template>
+      </aside>
     </div>
   </section>
+</div>
+
+<div
+  class="modal fade text-left"
+  id="designationCrudModal"
+  tabindex="-1"
+  aria-labelledby="designationCrudModalLabel"
+  aria-hidden="true"
+>
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content ops-modal-content">
+      <div class="ops-modal-header">
+        <div>
+          <span class="ops-eyebrow">Designation editor</span>
+          <h5 class="modal-title ops-modal-title" id="designationCrudModalLabel">
+            {{ modalTitle }}
+          </h5>
+          <p class="ops-modal-copy">{{ modalSubtitle }}</p>
+        </div>
+        <button
+          type="button"
+          class="ops-modal-close"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+        >
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+
+      <div class="ops-modal-body">
+        <form [formGroup]="designationForm" (ngSubmit)="saveDesignation()">
+          <div class="ops-form-grid">
+            <section class="ops-form-section">
+              <span class="ops-panel-kicker">Title details</span>
+              <h6>Core information</h6>
+
+              <div class="ops-form-field">
+                <label for="designationName">Designation name</label>
+                <input id="designationName" type="text" formControlName="name" />
+                <div class="ops-field-error" *ngIf="submitted && designationForm.get('name').invalid">
+                  Designation name is required.
+                </div>
+              </div>
+
+              <div class="ops-form-field">
+                <label for="designationDepartement">Department</label>
+                <select id="designationDepartement" formControlName="departementId">
+                  <option value="">Select a department</option>
+                  <option *ngFor="let item of departements" [value]="item.id">
+                    {{ item.name }}
+                  </option>
+                </select>
+              </div>
+            </section>
+
+            <aside class="ops-form-preview">
+              <span class="ops-panel-kicker">Live preview</span>
+              <h4>{{ draftName }}</h4>
+              <p>
+                {{ draftDepartementName
+                  ? 'Aligned to ' + draftDepartementName + ' for cleaner org mapping.'
+                  : 'Select a department to make this title reusable across employee and contract records.' }}
+              </p>
+
+              <div class="ops-progress-wrap">
+                <div class="ops-progress-top">
+                  <span>Readiness</span>
+                  <strong>{{ draftQuality.score }}%</strong>
+                </div>
+                <div class="ops-progress-track">
+                  <span [style.width.%]="draftQuality.score"></span>
+                </div>
+              </div>
+
+              <div class="ops-chip-row">
+                <span class="ops-chip">
+                  {{ draftDepartementName ? draftDepartementName : 'Department pending' }}
+                </span>
+                <span class="ops-status" [ngClass]="'tone-' + draftQuality.tone">
+                  {{ draftQuality.label }}
+                </span>
+              </div>
+            </aside>
+          </div>
+
+          <div class="modal-footer">
+            <button
+              id="designationCrudModalClose"
+              type="button"
+              class="btn btn-light"
+              data-bs-dismiss="modal"
+            >
+              Close
+            </button>
+            <button type="submit" class="btn btn-primary" [disabled]="saving">
+              {{ saving ? 'Saving...' : modalMode === 'create' ? 'Create designation' : 'Save changes' }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
 </div>

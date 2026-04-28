@@ -1,0 +1,299 @@
+<div class="communication-shell">
+  <section class="communication-hero">
+    <div class="communication-hero-copy">
+      <span class="communication-eyebrow">Employee Communications</span>
+      <h1>Coordinate alerts, approvals, payroll notices, and internal messages.</h1>
+      <p>
+        Review the full employee notification feed, track which updates still need
+        attention, and send direct messages without leaving the admin workspace.
+      </p>
+    </div>
+
+    <div class="communication-stat-grid">
+      <article class="communication-stat-card tone-message">
+        <span class="communication-stat-label">Unread feed</span>
+        <strong>{{ unreadNotificationsCount }}</strong>
+        <small>Notifications still awaiting review in the admin inbox.</small>
+      </article>
+
+      <article class="communication-stat-card tone-finance">
+        <span class="communication-stat-label">Payroll alerts</span>
+        <strong>{{ payrollNotificationsCount }}</strong>
+        <small>Processed payroll updates captured from the payroll engine.</small>
+      </article>
+
+      <article class="communication-stat-card tone-broadcast">
+        <span class="communication-stat-label">Announcements</span>
+        <strong>{{ announcementNotificationsCount }}</strong>
+        <small>Broadcast updates published from the announcement board.</small>
+      </article>
+
+      <article class="communication-stat-card tone-focus">
+        <span class="communication-stat-label">Internal messages</span>
+        <strong>{{ internalMessagesCount }}</strong>
+        <small>Direct notes sent to employees from HR and operations.</small>
+      </article>
+    </div>
+  </section>
+
+  <section class="communication-alert" *ngIf="loadError">
+    {{ loadError }}
+  </section>
+
+  <section class="communication-grid">
+    <article class="communication-panel composer-panel">
+      <div class="communication-panel-head">
+        <div>
+          <span class="communication-eyebrow">Internal Messaging</span>
+          <h2>Send a direct note</h2>
+        </div>
+        <span class="communication-chip">{{ selectedPriorityLabel }}</span>
+      </div>
+
+      <form class="communication-form" [formGroup]="messageForm" (ngSubmit)="sendInternalMessage()">
+        <label class="communication-field">
+          <span>Employee</span>
+          <select formControlName="employeeId">
+            <option value="">Select an employee</option>
+            <option *ngFor="let employee of employees" [value]="employee.id">
+              {{ employee.name }} · {{ employee.departmentName }}
+            </option>
+          </select>
+        </label>
+
+        <label class="communication-field">
+          <span>Subject</span>
+          <input type="text" formControlName="title" placeholder="Share the purpose of the message" />
+        </label>
+
+        <div class="communication-field-row">
+          <label class="communication-field">
+            <span>Priority</span>
+            <select formControlName="priority">
+              <option value="LOW">Low priority</option>
+              <option value="MEDIUM">Medium priority</option>
+              <option value="HIGH">High priority</option>
+            </select>
+          </label>
+
+          <label class="communication-field">
+            <span>Author label</span>
+            <input type="text" formControlName="authorName" placeholder="HR Team" />
+          </label>
+        </div>
+
+        <label class="communication-field">
+          <span>Open route</span>
+          <input type="text" formControlName="route" placeholder="/communication" />
+        </label>
+
+        <label class="communication-field">
+          <span>Message</span>
+          <textarea
+            rows="6"
+            formControlName="message"
+            placeholder="Give the employee the full context, next step, and owner."
+          ></textarea>
+        </label>
+
+        <div class="communication-form-summary">
+          <div>
+            <strong>{{ selectedEmployeeName }}</strong>
+            <small>Recipient selected for the internal message.</small>
+          </div>
+          <div>
+            <strong>{{ totalNotificationsCount }}</strong>
+            <small>Total communication records currently in the feed.</small>
+          </div>
+        </div>
+
+        <div class="communication-form-actions">
+          <button type="submit" class="btn btn-primary" [disabled]="saving">
+            {{ saving ? 'Sending...' : 'Send message' }}
+          </button>
+          <button type="button" class="btn btn-outline-secondary" (click)="refreshWorkspace()" [disabled]="loading">
+            Refresh feed
+          </button>
+        </div>
+
+        <p class="communication-validation" *ngIf="submitted && messageForm.invalid">
+          Select an employee, add a subject, and provide the message body before sending.
+        </p>
+      </form>
+    </article>
+
+    <article class="communication-panel spotlight-panel" *ngIf="featuredNotification as selected">
+      <div class="communication-panel-head">
+        <div>
+          <span class="communication-eyebrow">Focused Record</span>
+          <h2>{{ selected.title }}</h2>
+        </div>
+        <span class="communication-chip" [ngClass]="selected.typeTone">{{ selected.typeLabel }}</span>
+      </div>
+
+      <div class="spotlight-meta">
+        <div>
+          <span class="meta-label">Employee</span>
+          <strong>{{ selected.employeeName }}</strong>
+        </div>
+        <div>
+          <span class="meta-label">Department</span>
+          <strong>{{ selected.departmentName }}</strong>
+        </div>
+        <div>
+          <span class="meta-label">Priority</span>
+          <strong>{{ selected.priorityLabel }}</strong>
+        </div>
+        <div>
+          <span class="meta-label">Created</span>
+          <strong>{{ selected.createdAtFullLabel }}</strong>
+        </div>
+      </div>
+
+      <p class="spotlight-message">{{ selected.message }}</p>
+
+      <div class="spotlight-footer">
+        <div>
+          <span class="meta-label">Author</span>
+          <strong>{{ selected.authorName }}</strong>
+        </div>
+        <div>
+          <span class="meta-label">Status</span>
+          <strong>{{ selected.read ? 'Reviewed' : 'Unread' }}</strong>
+        </div>
+      </div>
+
+      <div class="spotlight-actions">
+        <button
+          type="button"
+          class="btn btn-outline-secondary"
+          (click)="markAsRead(selected)"
+          [disabled]="selected.read"
+        >
+          {{ selected.read ? 'Reviewed' : 'Mark reviewed' }}
+        </button>
+        <a class="btn btn-dark" [routerLink]="selected.route || '/communication'">Open context</a>
+      </div>
+    </article>
+
+    <article class="communication-panel spotlight-panel empty-spotlight" *ngIf="!featuredNotification && !loading">
+      <div class="communication-panel-head">
+        <div>
+          <span class="communication-eyebrow">Focused Record</span>
+          <h2>No communication selected</h2>
+        </div>
+      </div>
+      <p>
+        Adjust the filters or send a new internal message to populate the active
+        communication spotlight.
+      </p>
+    </article>
+  </section>
+
+  <section class="communication-panel filter-panel">
+    <div class="communication-panel-head compact-head">
+      <div>
+        <span class="communication-eyebrow">Notification Feed</span>
+        <h2>{{ filteredResultsLabel }}</h2>
+      </div>
+      <button type="button" class="btn btn-outline-secondary" (click)="refreshWorkspace()" [disabled]="loading">
+        Refresh
+      </button>
+    </div>
+
+    <div class="communication-filter-grid">
+      <label class="communication-field">
+        <span>Search</span>
+        <input
+          type="text"
+          [ngModel]="searchTerm"
+          (ngModelChange)="onSearchTermChange($event)"
+          placeholder="Search by title, employee, author, or message"
+        />
+      </label>
+
+      <label class="communication-field">
+        <span>Type</span>
+        <select [ngModel]="activeTypeFilter" (ngModelChange)="onTypeFilterChange($event)">
+          <option *ngFor="let option of notificationTypes" [ngValue]="option">
+            {{ option === 'all' ? 'All types' : normalizeTypeLabel(option) }}
+          </option>
+        </select>
+      </label>
+
+      <label class="communication-field">
+        <span>Read status</span>
+        <select [ngModel]="activeReadFilter" (ngModelChange)="onReadFilterChange($event)">
+          <option *ngFor="let option of readFilters" [ngValue]="option">
+            {{ option === 'all' ? 'All statuses' : option === 'unread' ? 'Unread only' : 'Reviewed only' }}
+          </option>
+        </select>
+      </label>
+
+      <label class="communication-field">
+        <span>Employee</span>
+        <select [ngModel]="activeEmployeeFilter" (ngModelChange)="onEmployeeFilterChange($event)">
+          <option value="all">All employees</option>
+          <option *ngFor="let employee of employees" [value]="employee.id">
+            {{ employee.name }}
+          </option>
+        </select>
+      </label>
+    </div>
+  </section>
+
+  <section class="communication-feed">
+    <article class="feed-state" *ngIf="loading">Loading communications...</article>
+
+    <article class="feed-state" *ngIf="!loading && !filteredNotifications.length">
+      No communication records match the current filters.
+    </article>
+
+    <article
+      class="notification-card"
+      *ngFor="let item of filteredNotifications; trackBy: trackByNotificationId"
+      [class.is-active]="featuredNotification && item.id === featuredNotification.id"
+      (click)="selectNotification(item)"
+    >
+      <div class="notification-accent" [ngClass]="item.typeTone"></div>
+
+      <div class="notification-content">
+        <div class="notification-header-row">
+          <div>
+            <span class="notification-type">{{ item.typeLabel }}</span>
+            <h3>{{ item.title }}</h3>
+          </div>
+          <span class="notification-status" [class.is-read]="item.read">
+            {{ item.read ? 'Reviewed' : 'Unread' }}
+          </span>
+        </div>
+
+        <p>{{ item.excerpt }}</p>
+
+        <div class="notification-meta-row">
+          <span>{{ item.employeeName }}</span>
+          <span>{{ item.authorName }}</span>
+          <span>{{ item.createdAtLabel }}</span>
+        </div>
+      </div>
+
+      <div class="notification-actions">
+        <button
+          type="button"
+          class="btn btn-outline-secondary btn-sm"
+          (click)="markAsRead(item); $event.stopPropagation()"
+          [disabled]="item.read"
+        >
+          {{ item.read ? 'Reviewed' : 'Mark reviewed' }}
+        </button>
+        <a
+          class="btn btn-dark btn-sm"
+          [routerLink]="item.route || '/communication'"
+          (click)="$event.stopPropagation()"
+        >
+          Open
+        </a>
+      </div>
+    </article>
+  </section>
+</div>

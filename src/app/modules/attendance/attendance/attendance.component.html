@@ -1,0 +1,811 @@
+<div class="page-heading ops-page">
+  <section class="ops-shell attendance-shell">
+    <article class="card ops-hero attendance-hero">
+      <div class="ops-hero-copy">
+        <span class="ops-eyebrow">Attendance & time</span>
+        <h2>Track presence, absence, approval, and payroll readiness from one attendance workspace.</h2>
+        <p>
+          Capture HR manual entries, clock employees in or out, stage biometric exports,
+          and keep payroll linkage visible before the cycle closes.
+        </p>
+
+        <div class="attendance-quick-clock">
+          <label>
+            <span>Quick employee</span>
+            <select [(ngModel)]="quickClockEmployeeId">
+              <option *ngFor="let employee of employees" [ngValue]="employee.id">
+                {{ employee.fullName }} • {{ employee.departmentName }}
+              </option>
+            </select>
+          </label>
+
+          <div class="ops-hero-actions">
+            <button
+              type="button"
+              class="btn btn-primary"
+              (click)="clockInSelectedEmployee()"
+              [disabled]="saving || !selectedQuickClockEmployee || !!selectedQuickClockOpenRecord"
+            >
+              <i class="bi bi-box-arrow-in-right"></i>
+              Clock in
+            </button>
+            <button
+              type="button"
+              class="btn btn-light"
+              (click)="clockOutSelectedEmployee()"
+              [disabled]="saving || !selectedQuickClockOpenRecord"
+            >
+              <i class="bi bi-box-arrow-right"></i>
+              Clock out
+            </button>
+            <button
+              type="button"
+              class="btn btn-light"
+              data-bs-toggle="modal"
+              data-bs-target="#attendanceCrudModal"
+              (click)="openCreateModal()"
+            >
+              <i class="bi bi-plus-square-fill"></i>
+              HR manual entry
+            </button>
+            <a class="btn btn-light" routerLink="/pay-slip">
+              <i class="bi bi-wallet2"></i>
+              Open pay slips
+            </a>
+            <button
+              type="button"
+              class="btn btn-light"
+              (click)="refreshAttendance()"
+              [disabled]="loading"
+            >
+              <i class="bi bi-arrow-repeat"></i>
+              Refresh
+            </button>
+          </div>
+        </div>
+
+        <div class="ops-hero-notice" *ngIf="loadError">{{ loadError }}</div>
+      </div>
+
+      <div class="ops-hero-panel">
+        <span class="ops-panel-kicker">Monthly pulse</span>
+        <h3>Attendance, review, and payroll coverage for {{ reportMonthLabel }}</h3>
+
+        <div class="attendance-month-toolbar">
+          <label>
+            <span>Report month</span>
+            <input
+              type="month"
+              [ngModel]="reportMonth"
+              (ngModelChange)="setReportMonth($event)"
+            />
+          </label>
+        </div>
+
+        <div class="ops-metric-grid">
+          <div class="ops-metric-card">
+            <span>Pending approvals</span>
+            <strong>{{ pendingApprovalCount }}</strong>
+            <p>Records that still need a review decision before payroll can trust them.</p>
+          </div>
+          <div class="ops-metric-card">
+            <span>Biometric records</span>
+            <strong>{{ biometricRecordCount }}</strong>
+            <p>Imported device punches already staged inside the selected monthly report.</p>
+          </div>
+        </div>
+
+        <div class="ops-progress-wrap">
+          <div class="ops-progress-top">
+            <span>Employee coverage</span>
+            <strong>{{ monthlyCoverage }}%</strong>
+          </div>
+          <div class="ops-progress-track">
+            <span [style.width.%]="monthlyCoverage"></span>
+          </div>
+          <p>
+            {{ absenceCount }} non-working day{{ absenceCount === 1 ? '' : 's' }},
+            {{ lateArrivalsCount }} late arrival{{ lateArrivalsCount === 1 ? '' : 's' }},
+            and {{ overtimeHoursLabel }} of overtime logged this month.
+          </p>
+        </div>
+      </div>
+    </article>
+
+    <div class="ops-stat-grid">
+      <article class="card ops-stat-card tone-primary">
+        <span>Report records</span>
+        <strong>{{ totalRecordsCount }}</strong>
+        <p>Attendance entries contributing to the selected monthly review and payroll readiness.</p>
+      </article>
+
+      <article class="card ops-stat-card tone-secondary">
+        <span>Pending approvals</span>
+        <strong>{{ pendingApprovalCount }}</strong>
+        <p>Attendance entries waiting for HR or operations review.</p>
+      </article>
+
+      <article class="card ops-stat-card tone-warning">
+        <span>Late arrivals</span>
+        <strong>{{ lateArrivalsCount }}</strong>
+        <p>Late check-ins detected against the attendance start threshold this month.</p>
+      </article>
+
+      <article class="card ops-stat-card tone-danger">
+        <span>Overtime tracked</span>
+        <strong>{{ overtimeHoursLabel }}</strong>
+        <p>Combined overtime already visible for payroll review in the selected month.</p>
+      </article>
+    </div>
+
+    <article class="card ops-toolbar-card">
+      <div class="ops-toolbar">
+        <label class="ops-search-field">
+          <i class="bi bi-search"></i>
+          <input
+            type="text"
+            [ngModel]="searchTerm"
+            (ngModelChange)="onSearchTermChange($event)"
+            placeholder="Search employees, states, or approvals"
+          />
+        </label>
+
+        <div class="ops-toolbar-controls">
+          <label>
+            <span>Filter</span>
+            <select [ngModel]="activeFilter" (ngModelChange)="onFilterChange($event)">
+              <option value="all">All records</option>
+              <option value="today">Today</option>
+              <option value="late">Late arrivals</option>
+              <option value="open">Open shifts</option>
+              <option value="absence">Absence & leave</option>
+              <option value="pending-approval">Pending approval</option>
+              <option value="payroll-ready">Payroll ready / linked</option>
+            </select>
+          </label>
+
+          <label>
+            <span>Sort</span>
+            <select [ngModel]="activeSort" (ngModelChange)="onSortChange($event)">
+              <option value="latest">Latest first</option>
+              <option value="employee-asc">Employee A-Z</option>
+              <option value="most-overtime">Most overtime</option>
+            </select>
+          </label>
+        </div>
+      </div>
+
+      <div class="ops-toolbar-footer">
+        <span>{{ filteredResultsLabel }}</span>
+        <span>
+          {{ selectedQuickClockEmployee ? selectedQuickClockEmployee.fullName : 'No employee selected for quick clock' }}
+        </span>
+      </div>
+    </article>
+
+    <div class="ops-layout">
+      <div class="ops-main">
+        <div class="ops-loading-grid" *ngIf="loading; else attendanceReady">
+          <div class="ops-skeleton-card" *ngFor="let item of loadingPlaceholders"></div>
+        </div>
+
+        <ng-template #attendanceReady>
+          <div class="ops-grid" *ngIf="filteredRecords.length; else attendanceEmpty">
+            <article
+              class="card ops-card attendance-card"
+              *ngFor="let record of filteredRecords; trackBy: trackByRecordId"
+              [class.is-active]="featuredRecord ? featuredRecord.id === record.id : false"
+              (click)="selectRecord(record)"
+              tabindex="0"
+              role="button"
+            >
+              <div class="ops-card-head">
+                <div>
+                  <span class="ops-panel-kicker">{{ record.dateLabel }}</span>
+                  <h3>{{ record.employeeName }}</h3>
+                </div>
+                <span class="ops-status" [ngClass]="'tone-' + record.statusTone">
+                  {{ record.statusLabel }}
+                </span>
+              </div>
+
+              <p>{{ record.attendanceStatus }} • {{ record.roleName }} • {{ record.departmentName }}</p>
+
+              <div class="attendance-card-metrics">
+                <div>
+                  <span>Shift</span>
+                  <strong>{{ record.checkInTime || '--:--' }} - {{ record.checkOutTime || 'Open' }}</strong>
+                </div>
+                <div>
+                  <span>Worked</span>
+                  <strong>{{ record.workedHoursLabel }}</strong>
+                </div>
+                <div>
+                  <span>Approval</span>
+                  <strong>{{ record.approvalStatus }}</strong>
+                </div>
+                <div>
+                  <span>Payroll</span>
+                  <strong>{{ record.payrollStatus }}</strong>
+                </div>
+              </div>
+
+              <div class="ops-chip-row">
+                <span class="ops-chip">{{ record.source }}</span>
+                <span class="ops-chip" *ngIf="record.sourceSystem">{{ record.sourceSystem }}</span>
+                <span class="ops-chip">{{ record.approvalStatus }}</span>
+                <span class="ops-chip">{{ record.payrollStatus }}</span>
+                <span class="ops-chip" *ngIf="record.notes">Note added</span>
+              </div>
+
+              <div class="ops-card-actions">
+                <button
+                  type="button"
+                  class="btn btn-light btn-sm"
+                  data-bs-toggle="modal"
+                  data-bs-target="#attendanceCrudModal"
+                  (click)="openEditModal(record); $event.stopPropagation()"
+                >
+                  <i class="bi bi-pencil-square"></i>
+                  Edit
+                </button>
+                <button
+                  type="button"
+                  class="btn btn-light btn-sm"
+                  (click)="deleteRecord(record); $event.stopPropagation()"
+                  [disabled]="deletingId === record.id"
+                >
+                  <i class="bi bi-trash3"></i>
+                  {{ deletingId === record.id ? 'Deleting...' : 'Delete' }}
+                </button>
+              </div>
+            </article>
+          </div>
+        </ng-template>
+
+        <ng-template #attendanceEmpty>
+          <article class="card ops-empty-card">
+            <span class="ops-empty-kicker">No attendance records</span>
+            <h3>The current search or filter does not match any attendance entry.</h3>
+            <p>
+              Reset the filters or create a manual attendance record to start the monthly review and payroll flow.
+            </p>
+            <button
+              type="button"
+              class="btn btn-primary"
+              data-bs-toggle="modal"
+              data-bs-target="#attendanceCrudModal"
+              (click)="openCreateModal()"
+            >
+              <i class="bi bi-plus-square-fill"></i>
+              Add attendance entry
+            </button>
+          </article>
+        </ng-template>
+      </div>
+
+      <aside class="ops-side">
+        <article class="card ops-panel-card" *ngIf="featuredRecord; else emptyAttendancePanel">
+          <div class="ops-panel-head">
+            <div>
+              <span>Selected record</span>
+              <h3>{{ featuredRecord.employeeName }}</h3>
+            </div>
+            <span class="ops-status" [ngClass]="'tone-' + featuredRecord.statusTone">
+              {{ featuredRecord.statusLabel }}
+            </span>
+          </div>
+
+          <p>
+            {{ featuredRecord.dateLabel }} • {{ featuredRecord.attendanceStatus }} •
+            {{ featuredRecord.roleName }} • {{ featuredRecord.departmentName }}
+          </p>
+
+          <div class="ops-fact-grid">
+            <div>
+              <span class="ops-detail-label">Check in</span>
+              <strong>{{ featuredRecord.checkInTime || '--:--' }}</strong>
+            </div>
+            <div>
+              <span class="ops-detail-label">Check out</span>
+              <strong>{{ featuredRecord.checkOutTime || 'Open' }}</strong>
+            </div>
+            <div>
+              <span class="ops-detail-label">Worked</span>
+              <strong>{{ featuredRecord.workedHoursLabel }}</strong>
+            </div>
+            <div>
+              <span class="ops-detail-label">Approval</span>
+              <strong>{{ featuredRecord.approvalStatus }}</strong>
+            </div>
+            <div>
+              <span class="ops-detail-label">Payroll</span>
+              <strong>{{ featuredRecord.payrollStatus }}</strong>
+            </div>
+            <div>
+              <span class="ops-detail-label">Source</span>
+              <strong>{{ featuredRecord.source }}</strong>
+            </div>
+          </div>
+
+          <div class="attendance-review-panel" *ngIf="featuredRecord.reviewedBy || featuredRecord.linkedPaySlipId || featuredRecord.notes || featuredRecord.sourceSystem || featuredRecord.deviceId || featuredRecord.importedAt">
+            <div *ngIf="featuredRecord.reviewedBy">
+              <span class="ops-detail-label">Reviewed by</span>
+              <strong>{{ featuredRecord.reviewedBy }}</strong>
+              <small>{{ featuredRecord.reviewedAtLabel }}</small>
+            </div>
+            <div *ngIf="featuredRecord.sourceSystem || featuredRecord.deviceId || featuredRecord.importedAt">
+              <span class="ops-detail-label">Biometric sync</span>
+              <strong>{{ featuredRecord.sourceSystem || 'Biometric device' }}</strong>
+              <small *ngIf="featuredRecord.deviceId">Device {{ featuredRecord.deviceId }}</small>
+              <small *ngIf="featuredRecord.importedAt">{{ featuredRecord.importedAtLabel }}</small>
+            </div>
+            <div *ngIf="featuredRecord.linkedPaySlipId">
+              <span class="ops-detail-label">Linked pay slip</span>
+              <strong>{{ featuredRecord.linkedPaySlipCycle }}</strong>
+              <small>Net {{ featuredRecord.linkedPaySlipNetSalary | number:'1.0-0' }}</small>
+            </div>
+            <div *ngIf="featuredRecord.notes">
+              <span class="ops-detail-label">Notes</span>
+              <p>{{ featuredRecord.notes }}</p>
+            </div>
+          </div>
+
+          <div class="ops-panel-note accent">
+            <span class="ops-detail-label">Next action</span>
+            <p>{{ featuredRecommendation }}</p>
+          </div>
+
+          <div class="attendance-side-actions">
+            <button
+              type="button"
+              class="btn btn-primary"
+              (click)="approveRecord(featuredRecord)"
+              [disabled]="saving || featuredRecord.approvalStatus === 'Approved'"
+            >
+              <i class="bi bi-check2-circle"></i>
+              Approve record
+            </button>
+            <button
+              type="button"
+              class="btn btn-light"
+              (click)="rejectRecord(featuredRecord)"
+              [disabled]="saving || featuredRecord.approvalStatus === 'Rejected'"
+            >
+              <i class="bi bi-x-circle"></i>
+              Reject record
+            </button>
+            <button
+              type="button"
+              class="btn btn-light"
+              data-bs-toggle="modal"
+              data-bs-target="#attendanceCrudModal"
+              (click)="openEditModal(featuredRecord)"
+            >
+              <i class="bi bi-pencil-square"></i>
+              Edit selected record
+            </button>
+            <a class="btn btn-light" routerLink="/pay-slip">
+              <i class="bi bi-wallet2"></i>
+              Open pay slips
+            </a>
+          </div>
+        </article>
+
+        <ng-template #emptyAttendancePanel>
+          <article class="card ops-panel-card">
+            <span class="ops-empty-kicker">Attendance preview</span>
+            <h3>Select a record to inspect it here.</h3>
+            <p>
+              The side panel highlights attendance state, approval flow, and payroll linkage for the selected record.
+            </p>
+          </article>
+        </ng-template>
+      </aside>
+    </div>
+
+    <div class="attendance-insight-grid">
+      <article class="card ops-panel-card">
+        <div class="ops-panel-head">
+          <div>
+            <span>Late arrivals</span>
+            <h3>{{ reportMonthLabel }} exceptions</h3>
+          </div>
+          <span class="ops-status tone-warning">
+            {{ reportLateArrivals.length }} flagged
+          </span>
+        </div>
+
+        <div class="attendance-exception-list" *ngIf="reportLateArrivals.length; else emptyLateArrivals">
+          <button
+            type="button"
+            class="attendance-exception-item"
+            *ngFor="let record of reportLateArrivals | slice:0:6"
+            (click)="selectRecord(record)"
+          >
+            <div>
+              <strong>{{ record.employeeName }}</strong>
+              <span>{{ record.dateLabel }} • {{ record.departmentName }}</span>
+            </div>
+            <span>{{ record.lateMinutes }} min late</span>
+          </button>
+        </div>
+
+        <ng-template #emptyLateArrivals>
+          <p class="attendance-empty-copy">
+            No late-arrival exceptions are currently flagged for {{ reportMonthLabel }}.
+          </p>
+        </ng-template>
+      </article>
+
+      <article class="card ops-panel-card">
+        <div class="ops-panel-head">
+          <div>
+            <span>Overtime</span>
+            <h3>{{ reportMonthLabel }} extended shifts</h3>
+          </div>
+          <span class="ops-status tone-secondary">
+            {{ reportOvertimeRecords.length }} shift{{ reportOvertimeRecords.length === 1 ? '' : 's' }}
+          </span>
+        </div>
+
+        <div class="attendance-exception-list" *ngIf="reportOvertimeRecords.length; else emptyOvertimeRecords">
+          <button
+            type="button"
+            class="attendance-exception-item"
+            *ngFor="let record of reportOvertimeRecords | slice:0:6"
+            (click)="selectRecord(record)"
+          >
+            <div>
+              <strong>{{ record.employeeName }}</strong>
+              <span>{{ record.dateLabel }} • {{ record.departmentName }}</span>
+            </div>
+            <span>{{ formatDurationLabel(record.overtimeMinutes) }}</span>
+          </button>
+        </div>
+
+        <ng-template #emptyOvertimeRecords>
+          <p class="attendance-empty-copy">
+            No overtime has been logged for {{ reportMonthLabel }} yet.
+          </p>
+        </ng-template>
+      </article>
+    </div>
+
+    <article class="card ops-panel-card attendance-biometric-card">
+      <div class="ops-panel-head">
+        <div>
+          <span>Biometric integration</span>
+          <h3>Stage and sync device exports</h3>
+        </div>
+        <span class="ops-status" [ngClass]="biometricPreviewEntries.length ? 'tone-strong' : 'tone-secondary'">
+          {{ biometricPreviewEntries.length }} staged
+        </span>
+      </div>
+
+      <p>
+        Upload or paste CSV and JSON exports from biometric systems. The sync resolves employees
+        by id or full name, then creates or updates attendance records while keeping HR review visible.
+      </p>
+
+      <div class="attendance-biometric-grid">
+        <section class="ops-form-section">
+          <span class="ops-panel-kicker">Import controls</span>
+          <h6>Provider, approval flow, and payload</h6>
+
+          <div class="attendance-biometric-field-grid">
+            <div class="ops-form-field">
+              <label for="attendanceBiometricProvider">Provider</label>
+              <input
+                id="attendanceBiometricProvider"
+                type="text"
+                [ngModel]="biometricProviderName"
+                (ngModelChange)="biometricProviderName = $event || ''"
+                placeholder="HQ biometric bridge"
+              />
+            </div>
+
+            <div class="ops-form-field">
+              <label for="attendanceBiometricFormat">Payload format</label>
+              <select
+                id="attendanceBiometricFormat"
+                [ngModel]="biometricImportMode"
+                (ngModelChange)="onBiometricImportModeChange($event)"
+              >
+                <option value="csv">CSV export</option>
+                <option value="json">JSON export</option>
+              </select>
+            </div>
+
+            <div class="ops-form-field">
+              <label for="attendanceBiometricApproval">Default approval</label>
+              <select
+                id="attendanceBiometricApproval"
+                [ngModel]="biometricDefaultApprovalStatus"
+                (ngModelChange)="biometricDefaultApprovalStatus = $event === 'Approved' ? 'Approved' : 'Pending'"
+              >
+                <option value="Pending">Pending HR review</option>
+                <option value="Approved">Approved on import</option>
+              </select>
+            </div>
+
+            <label class="attendance-checkbox-field">
+              <input
+                type="checkbox"
+                [ngModel]="biometricOverwriteExisting"
+                (ngModelChange)="biometricOverwriteExisting = !!$event"
+              />
+              <span>Overwrite existing attendance for the same employee and date.</span>
+            </label>
+          </div>
+
+          <div class="ops-form-field">
+            <label for="attendanceBiometricPayload">Payload</label>
+            <textarea
+              id="attendanceBiometricPayload"
+              rows="10"
+              [ngModel]="biometricPayload"
+              (ngModelChange)="onBiometricPayloadChange($event)"
+              placeholder="Paste a CSV or JSON biometric export here."
+            ></textarea>
+          </div>
+
+          <div class="attendance-biometric-actions">
+            <label class="btn btn-light attendance-upload-button">
+              <input type="file" accept=".csv,.json,.txt" (change)="onBiometricFileSelected($event)" />
+              <i class="bi bi-upload"></i>
+              Load export
+            </label>
+            <button type="button" class="btn btn-light" (click)="loadBiometricSample()">
+              <i class="bi bi-magic"></i>
+              Load sample
+            </button>
+            <button
+              type="button"
+              class="btn btn-primary"
+              (click)="syncBiometricEntries()"
+              [disabled]="biometricSyncing || !!biometricParseError || !biometricPreviewEntries.length"
+            >
+              <i class="bi bi-hdd-network"></i>
+              {{ biometricSyncing ? 'Syncing...' : 'Sync biometric punches' }}
+            </button>
+          </div>
+
+          <div class="ops-field-error" *ngIf="biometricParseError">
+            {{ biometricParseError }}
+          </div>
+        </section>
+
+        <aside class="ops-form-preview">
+          <span class="ops-panel-kicker">Preview</span>
+          <h4>
+            {{ biometricPreviewEntries.length ? biometricPreviewEntries.length + ' staged punch' + (biometricPreviewEntries.length === 1 ? '' : 'es') : 'No biometric punches staged' }}
+          </h4>
+          <p>
+            CSV headers: employeeId, employeeName, date, checkInTime, checkOutTime, deviceId,
+            externalRecordId, notes.
+          </p>
+
+          <div class="attendance-biometric-preview" *ngIf="biometricPreviewEntries.length">
+            <div class="attendance-biometric-preview-item" *ngFor="let entry of biometricPreviewEntries | slice:0:6">
+              <div>
+                <strong>{{ entry.employeeName || ('Employee #' + entry.employeeId) }}</strong>
+                <span>{{ entry.date || 'Date pending' }} • {{ entry.checkInTime || '--:--' }} to {{ entry.checkOutTime || 'Open' }}</span>
+              </div>
+              <small>{{ entry.deviceId || 'Device pending' }}</small>
+            </div>
+          </div>
+
+          <div class="attendance-biometric-result" *ngIf="biometricImportResult">
+            <div class="ops-chip-row attendance-chip-row">
+              <span class="ops-chip">{{ biometricImportResult.importedCount }} imported</span>
+              <span class="ops-chip">{{ biometricImportResult.updatedCount }} updated</span>
+              <span class="ops-chip">{{ biometricImportResult.skippedCount }} skipped</span>
+            </div>
+            <p>
+              {{ biometricImportResult.providerName }} synced {{ biometricImportResult.importedAtLabel }}.
+            </p>
+            <ul class="attendance-biometric-errors" *ngIf="biometricImportResult.errors.length">
+              <li *ngFor="let error of biometricImportResult.errors | slice:0:4">{{ error }}</li>
+            </ul>
+          </div>
+        </aside>
+      </div>
+    </article>
+
+    <article class="card ops-panel-card attendance-summary-card">
+      <div class="ops-panel-head attendance-summary-head">
+        <div>
+          <span>Monthly attendance report</span>
+          <h3>{{ reportMonthLabel }} employee attendance summary</h3>
+        </div>
+        <div class="attendance-summary-actions">
+          <span class="ops-status tone-secondary">
+            {{ monthlySummaries.length }} employee{{ monthlySummaries.length === 1 ? '' : 's' }}
+          </span>
+          <button type="button" class="btn btn-light" (click)="exportMonthlyReport()" [disabled]="!monthlyRecords.length">
+            <i class="bi bi-download"></i>
+            Export CSV
+          </button>
+        </div>
+      </div>
+
+      <div class="attendance-summary-list" *ngIf="monthlySummaries.length; else emptySummary">
+        <div class="attendance-summary-item" *ngFor="let summary of monthlySummaries | slice:0:12">
+          <div>
+            <strong>{{ summary.employeeName }}</strong>
+            <span>{{ summary.roleName }} • {{ summary.departmentName }}</span>
+            <div class="ops-chip-row attendance-chip-row">
+              <span class="ops-chip">{{ summary.payrollStatus }}</span>
+              <span class="ops-chip" *ngIf="summary.linkedPaySlipId">
+                {{ summary.linkedPaySlipCycle }}
+              </span>
+            </div>
+          </div>
+          <div class="attendance-summary-metrics">
+            <span>{{ summary.presentDays }} present</span>
+            <span>{{ summary.lateArrivalCount }} late</span>
+            <span>{{ summary.absenceCount }} non-working</span>
+            <span>{{ summary.pendingCount }} pending</span>
+            <span>{{ summary.overtimeLabel }}</span>
+            <span *ngIf="summary.biometricCount">{{ summary.biometricCount }} biometric</span>
+            <span *ngIf="summary.linkedPaySlipId">
+              Net {{ summary.linkedPaySlipNetSalary | number:'1.0-0' }}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <ng-template #emptySummary>
+        <p class="attendance-empty-copy">
+          Monthly summaries for {{ reportMonthLabel }} will appear here as soon as attendance records are available.
+        </p>
+      </ng-template>
+    </article>
+  </section>
+</div>
+
+<div
+  class="modal fade text-left"
+  id="attendanceCrudModal"
+  tabindex="-1"
+  aria-labelledby="attendanceCrudModalLabel"
+  aria-hidden="true"
+>
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <form class="modal-content ops-modal-content" [formGroup]="attendanceForm" (ngSubmit)="saveAttendance()">
+      <div class="ops-modal-header">
+        <div>
+          <span class="ops-eyebrow">Attendance editor</span>
+          <h5 class="modal-title ops-modal-title" id="attendanceCrudModalLabel">
+            {{ modalTitle }}
+          </h5>
+          <p class="ops-modal-copy">{{ modalSubtitle }}</p>
+        </div>
+        <button
+          type="button"
+          class="ops-modal-close"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+        >
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+
+      <div class="ops-modal-body">
+        <div class="ops-form-grid">
+          <section class="ops-form-section">
+            <span class="ops-panel-kicker">Entry details</span>
+            <h6>State, shift, and review</h6>
+
+            <div class="ops-form-field">
+              <label for="attendanceEmployee">Employee</label>
+              <select id="attendanceEmployee" formControlName="employeeId">
+                <option value="">Select employee</option>
+                <option *ngFor="let employee of employees" [value]="employee.id">
+                  {{ employee.fullName }} • {{ employee.departmentName }}
+                </option>
+              </select>
+              <div class="ops-field-error" *ngIf="submitted && attendanceForm.get('employeeId').invalid">
+                Employee is required.
+              </div>
+            </div>
+
+            <div class="ops-form-field">
+              <label for="attendanceDate">Date</label>
+              <input id="attendanceDate" type="date" formControlName="date" />
+              <div class="ops-field-error" *ngIf="submitted && attendanceForm.get('date').invalid">
+                Date is required.
+              </div>
+            </div>
+
+            <div class="ops-form-field">
+              <label for="attendanceStatus">Attendance status</label>
+              <select id="attendanceStatus" formControlName="attendanceStatus">
+                <option value="Present">Present</option>
+                <option value="Remote">Remote</option>
+                <option value="Half day">Half day</option>
+                <option value="On leave">On leave</option>
+                <option value="Absent">Absent</option>
+              </select>
+            </div>
+
+            <div class="attendance-form-grid">
+              <div class="ops-form-field">
+                <label for="attendanceCheckIn">Check in</label>
+                <input id="attendanceCheckIn" type="time" formControlName="checkInTime" />
+                <div class="ops-field-error" *ngIf="submitted && selectedStatusRequiresTime && !attendanceForm.value.checkInTime">
+                  Check-in time is required for this attendance status.
+                </div>
+              </div>
+
+              <div class="ops-form-field">
+                <label for="attendanceCheckOut">Check out</label>
+                <input id="attendanceCheckOut" type="time" formControlName="checkOutTime" />
+              </div>
+            </div>
+
+            <div class="attendance-form-hint" *ngIf="!selectedStatusRequiresTime">
+              Absence and leave records can be saved without clock times.
+            </div>
+
+            <div class="ops-form-field">
+              <label for="attendanceSource">Source</label>
+              <select id="attendanceSource" formControlName="source">
+                <option value="manual">Manual entry</option>
+                <option value="self-service">Self-service clock</option>
+                <option value="biometric">Biometric sync</option>
+              </select>
+            </div>
+
+            <div class="ops-form-field">
+              <label for="attendanceApprovalStatus">Approval status</label>
+              <select id="attendanceApprovalStatus" formControlName="approvalStatus">
+                <option value="Pending">Pending</option>
+                <option value="Approved">Approved</option>
+                <option value="Rejected">Rejected</option>
+              </select>
+            </div>
+
+            <div class="ops-form-field">
+              <label for="attendanceNotes">Notes</label>
+              <textarea id="attendanceNotes" rows="4" formControlName="notes"></textarea>
+            </div>
+          </section>
+
+          <aside class="ops-form-preview">
+            <span class="ops-panel-kicker">Live preview</span>
+            <h4>{{ attendanceForm.value.date || 'Attendance date pending' }}</h4>
+            <p>
+              {{ attendanceForm.value.attendanceStatus || 'Status pending' }} •
+              {{ attendanceForm.value.checkInTime || '--:--' }} to
+              {{ attendanceForm.value.checkOutTime || 'Open shift' }}
+            </p>
+
+            <div class="ops-chip-row attendance-chip-row">
+              <span class="ops-chip">{{ attendanceEditorSourceLabel }}</span>
+              <span class="ops-chip">{{ attendanceForm.value.approvalStatus || 'Pending' }}</span>
+              <span class="ops-chip">
+                {{ attendanceForm.value.employeeId ? 'Employee selected' : 'Select employee' }}
+              </span>
+            </div>
+          </aside>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button
+          id="attendanceCrudModalClose"
+          type="button"
+          class="btn btn-light"
+          data-bs-dismiss="modal"
+        >
+          Close
+        </button>
+        <button type="submit" class="btn btn-primary" [disabled]="saving">
+          {{ saving ? 'Saving...' : modalMode === 'create' ? 'Create entry' : 'Save changes' }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

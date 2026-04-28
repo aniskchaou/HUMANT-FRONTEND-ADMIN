@@ -1,137 +1,390 @@
-<!-- <div class="page-heading">
-  <section class="section">
-    <div class="card">
-      <div class="card-header">
-        <h2>Notices</h2>
-      </div>
-      <div class="card-body">
-        <div class="dataTable-container">
-          <table
-            id="table"
-            cellpadding="0"
-            cellspacing="0"
-            border="0"
-            class="datatable-1 table table-bordered table-striped display"
-            width="100%"
-          >
-            <thead>
-              <tr>
-                <th>start</th>
-                <th>end Date</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr class="odd gradeX" *ngFor="let t of training$">
-                <td>{{ t.StartDate }}</td>
-                <td>{{ t.EndDate }}</td>
-                <td>
-                  <button
-                    type="button"
-                    data-bs-toggle="modal"
-                    (click)="edit(t.id)"
-                    data-bs-target="#edit"
-                    class="btn btn-warning btn-sm"
-                  >
-                    <i class="fas fa-edit"></i>
-                  </button>
-                  <button
-                    type="button"
-                    class="btn btn-danger btn-sm"
-                    (click)="delete(t.id)"
-                  >
-                    <i class="fas fa-trash-alt"></i>
-                  </button>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+<div class="page-heading ops-page">
+  <section class="ops-shell">
+    <article class="card ops-hero">
+      <div class="ops-hero-copy">
+        <span class="ops-eyebrow">Internal notices</span>
+        <h2>Turn notices into clear, time-bound communication instead of buried text.</h2>
+        <p>
+          Manage notice windows with a structured timeline, a readable side panel, and direct editing
+          from the selected record.
+        </p>
 
-          <button
-            type="button"
-            class="btn btn-success btn-sm"
-            data-bs-toggle="modal"
-            data-bs-target="#add"
-          >
-            <i class="fas fa-plus-square"></i>
+        <div class="ops-hero-actions">
+          <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#noticeCrudModal" (click)="openCreateModal()">
+            <i class="bi bi-plus-square-fill"></i>
+            Create notice
           </button>
-           
-          <div
-            class="modal fade text-left"
-            id="edit"
-            tabindex="-1"
-            aria-labelledby="myModalLabel1"
-            style="display: none"
-            aria-hidden="true"
-          >
-            <div
-              class="modal-dialog modal-dialog-scrollable modal-lg"
-              role="document"
-            >
-              <div class="modal-content">
-                <div class="modal-header">
-                  <h5 class="modal-title" id="myModalLabel1">Edit</h5>
-                  <button
-                    type="button"
-                    class="close rounded-pill"
-                    data-bs-dismiss="modal"
-                    aria-label="Close"
-                  >
-                    <i data-feather="x"></i>
-                  </button>
-                </div>
-                <div class="modal-body">
-                  <app-edit-training [id]="id"></app-edit-training>
-                </div>
-                <div class="modal-footer">
-                  <button type="button" class="btn" data-bs-dismiss="modal">
-                    <i class="bx bx-x d-block d-sm-none"></i>
-                    <span class="d-none d-sm-block">Close</span>
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div> 
+          <button type="button" class="btn btn-light" (click)="refreshNotices()" [disabled]="loading">
+            <i class="bi bi-arrow-repeat"></i>
+            Refresh
+          </button>
+        </div>
 
-          <div
-            class="modal fade text-left"
-            id="add"
-            tabindex="-1"
-            aria-labelledby="myModalLabel1"
-            style="display: none"
-            aria-hidden="true"
-          >
-            <div
-              class="modal-dialog modal-dialog-scrollable modal-lg"
-              role="document"
-            >
-              <div class="modal-content">
-                <div class="modal-header">
-                  <h5 class="modal-title" id="myModalLabel1">Create</h5>
-                  <button
-                    type="button"
-                    class="close rounded-pill"
-                    data-bs-dismiss="modal"
-                    aria-label="Close"
-                  >
-                    <i data-feather="x"></i>
-                  </button>
-                </div>
-                <div class="modal-body">
-                  <app-add-notice></app-add-notice>
-                </div>
-                <div class="modal-footer">
-                  <button type="button" class="btn" data-bs-dismiss="modal">
-                    <i class="bx bx-x d-block d-sm-none"></i>
-                    <span class="d-none d-sm-block">Close</span>
-                  </button>
-                </div>
-              </div>
-            </div>
+        <div class="ops-hero-notice" *ngIf="loadError">{{ loadError }}</div>
+      </div>
+
+      <div class="ops-hero-panel">
+        <span class="ops-panel-kicker">Communication pulse</span>
+        <h3>Current notice timing and coverage</h3>
+
+        <div class="ops-metric-grid">
+          <div class="ops-metric-card">
+            <span>Total notices</span>
+            <strong>{{ totalNoticesCount }}</strong>
+            <p>All communication notices currently tracked in the workspace.</p>
+          </div>
+          <div class="ops-metric-card">
+            <span>Live now</span>
+            <strong>{{ activeNoticesCount }}</strong>
+            <p>Notices whose display window is active today.</p>
           </div>
         </div>
       </div>
+    </article>
+
+    <div class="ops-stat-grid">
+      <article class="card ops-stat-card tone-primary">
+        <span>Notices</span>
+        <strong>{{ totalNoticesCount }}</strong>
+        <p>Notice records currently managed in the communication workspace.</p>
+      </article>
+      <article class="card ops-stat-card tone-secondary">
+        <span>Live now</span>
+        <strong>{{ activeNoticesCount }}</strong>
+        <p>Notices currently visible within their time window.</p>
+      </article>
+      <article class="card ops-stat-card tone-warning">
+        <span>Upcoming</span>
+        <strong>{{ upcomingNoticesCount }}</strong>
+        <p>Notice records scheduled for a future publish period.</p>
+      </article>
+      <article class="card ops-stat-card tone-danger">
+        <span>With notes</span>
+        <strong>{{ documentedNoticesCount }}</strong>
+        <p>Notices that already include descriptive message content.</p>
+      </article>
+    </div>
+
+    <article class="card ops-toolbar-card">
+      <div class="ops-toolbar">
+        <label class="ops-search-field">
+          <i class="bi bi-search"></i>
+          <input type="text" [ngModel]="searchTerm" (ngModelChange)="onSearchTermChange($event)" placeholder="Search notices or message text" />
+        </label>
+
+        <div class="ops-toolbar-controls">
+          <label>
+            <span>Filter</span>
+            <select [ngModel]="activeFilter" (ngModelChange)="onFilterChange($event)">
+              <option value="all">All notices</option>
+              <option value="active">Live now</option>
+              <option value="upcoming">Upcoming</option>
+              <option value="expired">Expired</option>
+              <option value="needs-note">Needs note</option>
+            </select>
+          </label>
+
+          <label>
+            <span>Sort</span>
+            <select [ngModel]="activeSort" (ngModelChange)="onSortChange($event)">
+              <option value="latest-start">Latest start</option>
+              <option value="quality">Readiness</option>
+              <option value="title-asc">Title A-Z</option>
+            </select>
+          </label>
+        </div>
+      </div>
+
+      <div class="ops-toolbar-footer">
+        <span>{{ filteredResultsLabel }}</span>
+        <span>{{ featuredNotice ? featuredNotice.noticeTitle : 'No notice selected' }}</span>
+      </div>
+    </article>
+
+    <div class="ops-layout">
+      <div class="ops-main">
+        <div class="ops-loading-grid" *ngIf="loading; else noticeReady">
+          <div class="ops-skeleton-card" *ngFor="let item of loadingPlaceholders"></div>
+        </div>
+
+        <ng-template #noticeReady>
+          <div class="ops-grid" *ngIf="filteredNotices.length; else noticeEmpty">
+            <article
+              class="card ops-card"
+              *ngFor="let item of filteredNotices; trackBy: trackByNoticeId"
+              [class.is-active]="featuredNotice ? featuredNotice.id === item.id : false"
+              (click)="openDetailsModal(item)"
+              (keydown.enter)="openDetailsModal(item)"
+              (keydown.space)="$event.preventDefault(); openDetailsModal(item)"
+              tabindex="0"
+              role="button"
+              aria-label="Open notice details"
+            >
+              <div class="ops-card-head">
+                <div>
+                  <span class="ops-panel-kicker">Notice</span>
+                  <h3>{{ item.noticeTitle }}</h3>
+                </div>
+                <span class="ops-status" [ngClass]="'tone-' + item.qualityTone">{{ item.qualityLabel }}</span>
+              </div>
+
+              <p>{{ item.summary }}</p>
+
+              <div class="ops-progress-wrap">
+                <div class="ops-progress-top">
+                  <span>Communication readiness</span>
+                  <strong>{{ item.qualityScore }}%</strong>
+                </div>
+                <div class="ops-progress-track">
+                  <span [style.width.%]="item.qualityScore"></span>
+                </div>
+              </div>
+
+              <div class="ops-chip-row">
+                <span class="ops-chip">{{ item.startDateLabel }}</span>
+                <span class="ops-chip">{{ item.timelineLabel }}</span>
+              </div>
+
+              <div class="ops-card-view">
+                <span>Click to view details</span>
+                <i class="bi bi-arrow-up-right"></i>
+              </div>
+
+              <div class="ops-card-actions">
+                <button type="button" class="btn btn-light btn-sm" data-bs-toggle="modal" data-bs-target="#noticeCrudModal" (click)="openEditModal(item); $event.stopPropagation()">
+                  <i class="bi bi-pencil-square"></i>
+                  Edit
+                </button>
+                <button type="button" class="btn btn-light btn-sm" (click)="deleteNotice(item); $event.stopPropagation()" [disabled]="deletingId === item.id">
+                  <i class="bi bi-trash3"></i>
+                  {{ deletingId === item.id ? 'Deleting...' : 'Delete' }}
+                </button>
+              </div>
+            </article>
+          </div>
+        </ng-template>
+
+        <ng-template #noticeEmpty>
+          <article class="card ops-empty-card">
+            <span class="ops-empty-kicker">No matching notices</span>
+            <h3>The current search or filter does not match any notice.</h3>
+            <p>Reset the filters or create a notice to rebuild the communication schedule.</p>
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#noticeCrudModal" (click)="openCreateModal()">
+              <i class="bi bi-plus-square-fill"></i>
+              Create notice
+            </button>
+          </article>
+        </ng-template>
+      </div>
+
+      <aside class="ops-side">
+        <article class="card ops-panel-card" *ngIf="featuredNotice; else emptyNoticePanel">
+          <div class="ops-panel-head">
+            <div>
+              <span>Selected notice</span>
+              <h3>{{ featuredNotice.noticeTitle }}</h3>
+            </div>
+            <span class="ops-status" [ngClass]="'tone-' + featuredNotice.qualityTone">{{ featuredNotice.qualityLabel }}</span>
+          </div>
+
+          <p>{{ featuredNotice.noticeNote || featuredNotice.timelineLabel }}</p>
+
+          <div class="ops-fact-grid">
+            <div>
+              <span class="ops-detail-label">Start</span>
+              <strong>{{ featuredNotice.startDateLabel }}</strong>
+            </div>
+            <div>
+              <span class="ops-detail-label">End</span>
+              <strong>{{ featuredNotice.endDateLabel }}</strong>
+            </div>
+            <div>
+              <span class="ops-detail-label">Window</span>
+              <strong>{{ featuredNotice.timelineLabel }}</strong>
+            </div>
+          </div>
+
+          <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#noticeCrudModal" (click)="openEditModal(featuredNotice)">
+            <i class="bi bi-pencil-square"></i>
+            Edit selected notice
+          </button>
+        </article>
+
+        <ng-template #emptyNoticePanel>
+          <article class="card ops-panel-card">
+            <span class="ops-empty-kicker">Notice preview</span>
+            <h3>Select a notice to inspect it here.</h3>
+            <p>The side panel highlights the communication window and full note text for the selected notice.</p>
+          </article>
+        </ng-template>
+      </aside>
     </div>
   </section>
 </div>
- -->
+
+<div class="modal fade text-left" id="noticeDetailsModal" tabindex="-1" aria-labelledby="noticeDetailsModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content ops-modal-content" *ngIf="featuredNotice">
+      <div class="ops-modal-header">
+        <div>
+          <span class="ops-eyebrow">Notice details</span>
+          <h5 class="modal-title ops-modal-title" id="noticeDetailsModalLabel">{{ featuredNotice.noticeTitle }}</h5>
+          <p class="ops-modal-copy">Review the full message window, communication status, and message content for the selected notice.</p>
+        </div>
+
+        <div class="ops-details-actions">
+          <span class="ops-status" [ngClass]="'tone-' + featuredNotice.qualityTone">{{ featuredNotice.qualityLabel }}</span>
+          <button type="button" class="ops-modal-close" data-bs-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="ops-modal-body">
+        <div class="ops-details-layout">
+          <div class="ops-details-main">
+            <section class="ops-details-section">
+              <span class="ops-panel-kicker">Notice summary</span>
+              <h6>Message content</h6>
+              <p class="ops-detail-copy">{{ featuredNotice.noticeNote || 'No detailed note has been added to this notice yet.' }}</p>
+            </section>
+
+            <div class="ops-details-metrics">
+              <article class="ops-details-metric">
+                <span class="ops-detail-label">Start</span>
+                <strong>{{ featuredNotice.startDateLabel }}</strong>
+              </article>
+              <article class="ops-details-metric">
+                <span class="ops-detail-label">End</span>
+                <strong>{{ featuredNotice.endDateLabel }}</strong>
+              </article>
+              <article class="ops-details-metric">
+                <span class="ops-detail-label">Readiness</span>
+                <strong>{{ featuredNotice.qualityScore }}%</strong>
+              </article>
+            </div>
+
+            <section class="ops-details-section">
+              <span class="ops-panel-kicker">Timeline</span>
+              <h6>Communication window</h6>
+              <p class="ops-detail-copy">{{ featuredNotice.timelineLabel }}</p>
+            </section>
+          </div>
+
+          <aside class="ops-details-side">
+            <section class="ops-details-facts">
+              <span class="ops-panel-kicker">Quick facts</span>
+              <h6>Notice overview</h6>
+
+              <div class="ops-details-fact">
+                <strong>Status</strong>
+                <span>{{ featuredNotice.qualityLabel }}</span>
+              </div>
+              <div class="ops-details-fact">
+                <strong>Window</strong>
+                <span>{{ featuredNotice.timelineLabel }}</span>
+              </div>
+              <div class="ops-details-fact">
+                <strong>Message</strong>
+                <span>{{ featuredNotice.noticeNote ? 'Documented' : 'Missing note' }}</span>
+              </div>
+              <div class="ops-details-fact">
+                <strong>Record ID</strong>
+                <span>#{{ featuredNotice.id }}</span>
+              </div>
+            </section>
+          </aside>
+        </div>
+      </div>
+
+      <div class="ops-modal-footer">
+        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary" data-bs-dismiss="modal" data-bs-toggle="modal" data-bs-target="#noticeCrudModal" (click)="openEditModal(featuredNotice)">
+          <i class="bi bi-pencil-square"></i>
+          Edit notice
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade text-left" id="noticeCrudModal" tabindex="-1" aria-labelledby="noticeCrudModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content ops-modal-content">
+      <div class="ops-modal-header">
+        <div>
+          <span class="ops-eyebrow">Notice editor</span>
+          <h5 class="modal-title ops-modal-title" id="noticeCrudModalLabel">{{ modalTitle }}</h5>
+          <p class="ops-modal-copy">{{ modalSubtitle }}</p>
+        </div>
+        <button type="button" class="ops-modal-close" data-bs-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+
+      <div class="ops-modal-body">
+        <form [formGroup]="noticeForm" (ngSubmit)="saveNotice()">
+          <div class="ops-form-grid">
+            <section class="ops-form-section">
+              <span class="ops-panel-kicker">Notice setup</span>
+              <h6>Core information</h6>
+
+              <div class="ops-form-field">
+                <label for="noticeTitle">Title</label>
+                <input id="noticeTitle" type="text" formControlName="noticeTitle" placeholder="Example: Office closure notice" />
+                <div class="ops-field-error" *ngIf="submitted && noticeForm.get('noticeTitle').invalid">Notice title is required.</div>
+              </div>
+
+              <div class="ops-form-split">
+                <div class="ops-form-field">
+                  <label for="noticeStartDate">Start date</label>
+                  <input id="noticeStartDate" type="date" formControlName="startDate" />
+                  <div class="ops-field-error" *ngIf="submitted && noticeForm.get('startDate').invalid">Start date is required.</div>
+                </div>
+
+                <div class="ops-form-field">
+                  <label for="noticeEndDate">End date</label>
+                  <input id="noticeEndDate" type="date" formControlName="endDate" />
+                  <div class="ops-field-error" *ngIf="submitted && noticeForm.get('endDate').invalid">End date is required.</div>
+                </div>
+              </div>
+
+              <div class="ops-form-field">
+                <label for="noticeNote">Notice note</label>
+                <textarea id="noticeNote" rows="5" formControlName="noticeNote" placeholder="Explain the instruction, impact, or action employees should take."></textarea>
+              </div>
+            </section>
+
+            <aside class="ops-form-preview">
+              <span class="ops-panel-kicker">Live preview</span>
+              <h4>{{ draftTitle }}</h4>
+              <p>{{ noticeForm.value.noticeNote || 'Add message context so the notice reads clearly.' }}</p>
+
+              <div class="ops-progress-wrap">
+                <div class="ops-progress-top">
+                  <span>Readiness</span>
+                  <strong>{{ draftQuality.score }}%</strong>
+                </div>
+                <div class="ops-progress-track">
+                  <span [style.width.%]="draftQuality.score"></span>
+                </div>
+              </div>
+
+              <div class="ops-chip-row">
+                <span class="ops-chip">{{ draftQuality.label }}</span>
+              </div>
+            </aside>
+          </div>
+
+          <div class="ops-modal-actions">
+            <button type="button" class="btn btn-light" data-bs-dismiss="modal" id="noticeCrudModalClose">Cancel</button>
+            <button type="submit" class="btn btn-primary" [disabled]="saving">
+              <i class="bi" [ngClass]="saving ? 'bi-arrow-repeat' : 'bi-check2-circle'"></i>
+              {{ saving ? 'Saving...' : modalMode === 'create' ? 'Create notice' : 'Save changes' }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>

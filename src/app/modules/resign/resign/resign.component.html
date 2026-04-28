@@ -1,75 +1,775 @@
-<div class="page-heading">
-  <section class="section">
-    <div class="card">
-      <div class="card-header">
-        <h2>Resignations</h2>
-      </div>
-      <div class="card-body">
-        <div class="dataTable-container">
-          <button
-            type="button"
-            class="btn btn-success btn-sm"
-            data-bs-toggle="modal"
-            data-bs-target="#add"
-          >
-            <i class="fas fa-plus-square"></i> Create
+<div class="page-heading ops-page">
+  <section class="ops-shell">
+    <article class="card ops-hero">
+      <div class="ops-hero-copy">
+        <span class="ops-eyebrow">{{ isEmployeeWorkspace ? 'Exit & resignation' : 'Resignation' }}</span>
+        <h2>{{ isEmployeeWorkspace ? 'Submit your resignation and track every exit step without leaving the page.' : 'Track exits with clearer timing, department impact, approval status, and settlement context.' }}</h2>
+        <p>
+          {{ isEmployeeWorkspace ? 'Submit resignation, follow approval, see interview and clearance progress, and review final settlement from one routed workspace.' : 'Manage resignations directly on the routed page, then continue through approval, exit interview, clearance, and final settlement without context switching.' }}
+        </p>
+
+        <div class="ops-hero-actions">
+          <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#resignationCrudModal" (click)="openCreateModal()">
+            <i class="bi bi-plus-square-fill"></i>
+            {{ isEmployeeWorkspace ? 'Submit resignation' : 'Create resignation' }}
           </button>
-          <table
-            id="table"
-            cellpadding="0"
-            cellspacing="0"
-            border="0"
-            class="datatable-1 table table-bordered table-striped display"
-            width="100%"
-          >
-            <thead>
-              <tr>
-                <th>Employee</th>
-                <th>Departement</th>
-                <th>Date</th>
-                <th>Reason</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr class="odd gradeX" *ngFor="let item of resignations$">
-                <td>{{ item.employeeName.fullName }}</td>
-                <td>{{ item.departement.name }}</td>
-                <td>{{ item.resignationDate }}</td>
-                <td>{{ item.resignationReason }}</td>
-                <td>
-                  <button
-                    type="button"
-                    data-bs-toggle="modal"
-                    (click)="edit(item.id)"
-                    data-bs-target="#edit"
-                    class="btn btn-warning btn-sm"
-                  >
-                    <i class="fas fa-edit"></i>
-                  </button>
-                  <button
-                    type="button"
-                    class="btn btn-danger btn-sm"
-                    (click)="delete(item.id)"
-                  >
-                    <i class="fas fa-trash-alt"></i>
-                  </button>
-                </td>
-              </tr>
-            </tbody>
-            <tfoot>
-              <tr>
-                <th>Employee</th>
-                <th>Departement</th>
-                <th>Date</th>
-                <th>Reason</th>
-                <th>Actions</th>
-              </tr>
-            </tfoot>
-          </table>
+          <button type="button" class="btn btn-light" (click)="refreshResignations()" [disabled]="loading">
+            <i class="bi bi-arrow-repeat"></i>
+            Refresh
+          </button>
+        </div>
+
+        <div class="ops-hero-notice" *ngIf="loadError">{{ loadError }}</div>
+      </div>
+
+      <div class="ops-hero-panel">
+        <span class="ops-panel-kicker">Exit pulse</span>
+        <h3>{{ workflowEmployeeId ? workflowEmployeeName + ' exit workflow at a glance' : 'Resignation timing and current offboarding load' }}</h3>
+
+        <div class="ops-metric-grid">
+          <div class="ops-metric-card">
+            <span>Approval</span>
+            <strong>{{ latestExitRequest ? latestExitRequest.statusLabel : 'Not started' }}</strong>
+            <p>{{ latestExitRequest ? 'Latest request targets ' + latestExitRequest.lastWorkingDayLabel + '.' : 'No exit approval request is linked yet.' }}</p>
+          </div>
+          <div class="ops-metric-card">
+            <span>Settlement</span>
+            <strong>{{ latestFinalSettlement ? latestFinalSettlement.settlementDateLabel : 'Pending' }}</strong>
+            <p>{{ latestFinalSettlement ? latestFinalSettlement.summary : 'Final settlement has not been issued yet.' }}</p>
+          </div>
         </div>
       </div>
+    </article>
+
+    <div class="ops-stat-grid">
+      <article class="card ops-stat-card tone-primary">
+        <span>Resignations</span>
+        <strong>{{ totalResignationsCount }}</strong>
+        <p>Total resignation records currently tracked.</p>
+      </article>
+      <article class="card ops-stat-card tone-secondary">
+        <span>Scheduled</span>
+        <strong>{{ scheduledResignationsCount }}</strong>
+        <p>Exits still ahead on the timeline and needing handoff planning.</p>
+      </article>
+      <article class="card ops-stat-card tone-warning">
+        <span>Recent</span>
+        <strong>{{ recentResignationsCount }}</strong>
+        <p>Resignations recorded in the latest operational window.</p>
+      </article>
+      <article class="card ops-stat-card tone-danger">
+        <span>Documented</span>
+        <strong>{{ documentedResignationsCount }}</strong>
+        <p>Exit records with sufficiently detailed reason context.</p>
+      </article>
+      <article class="card ops-stat-card tone-warning">
+        <span>Pending approval</span>
+        <strong>{{ pendingApprovalCount }}</strong>
+        <p>Exit requests currently waiting for approval or rejection.</p>
+      </article>
+      <article class="card ops-stat-card tone-secondary">
+        <span>Interviews</span>
+        <strong>{{ scheduledInterviewsCount }}</strong>
+        <p>Exit interviews scheduled or completed across the current workflow set.</p>
+      </article>
+      <article class="card ops-stat-card tone-primary">
+        <span>Clearance complete</span>
+        <strong>{{ completedClearanceCount }}</strong>
+        <p>Clearance items already marked as cleared.</p>
+      </article>
+      <article class="card ops-stat-card tone-danger">
+        <span>Settlements</span>
+        <strong>{{ settlementIssuedCount }}</strong>
+        <p>Final settlements issued through the exit workflow.</p>
+      </article>
     </div>
-    <app-resign-modal [id]="id"></app-resign-modal>
+
+    <article class="card ops-toolbar-card">
+      <div class="ops-toolbar">
+        <label class="ops-search-field">
+          <i class="bi bi-search"></i>
+          <input type="text" [ngModel]="searchTerm" (ngModelChange)="onSearchTermChange($event)" placeholder="Search employees, departments, or resignation reasons" />
+        </label>
+
+        <div class="ops-toolbar-controls">
+          <label>
+            <span>Filter</span>
+            <select [ngModel]="activeFilter" (ngModelChange)="onFilterChange($event)">
+              <option value="all">All resignations</option>
+              <option value="scheduled">Scheduled exits</option>
+              <option value="recent">Recent exits</option>
+              <option value="needs-context">Needs context</option>
+            </select>
+          </label>
+
+          <label>
+            <span>Sort</span>
+            <select [ngModel]="activeSort" (ngModelChange)="onSortChange($event)">
+              <option value="latest-date">Latest resignation date</option>
+              <option value="employee-asc">Employee A-Z</option>
+              <option value="department-asc">Department A-Z</option>
+            </select>
+          </label>
+        </div>
+      </div>
+
+      <div class="ops-toolbar-footer">
+        <span>{{ filteredResultsLabel }}</span>
+        <span>{{ featuredResignation ? featuredResignation.employeeName : 'No resignation selected' }}</span>
+      </div>
+    </article>
+
+    <div class="ops-layout">
+      <div class="ops-main">
+        <div class="ops-loading-grid" *ngIf="loading; else resignationReady">
+          <div class="ops-skeleton-card" *ngFor="let item of loadingPlaceholders"></div>
+        </div>
+
+        <ng-template #resignationReady>
+          <div class="ops-grid" *ngIf="filteredResignations.length; else resignationEmpty">
+            <article
+              class="card ops-card"
+              *ngFor="let item of filteredResignations; trackBy: trackByResignationId"
+              [class.is-active]="featuredResignation ? featuredResignation.id === item.id : false"
+              (click)="openDetailsModal(item)"
+              (keydown.enter)="openDetailsModal(item)"
+              (keydown.space)="$event.preventDefault(); openDetailsModal(item)"
+              tabindex="0"
+              role="button"
+              aria-label="Open resignation details"
+            >
+              <div class="ops-card-head">
+                <div>
+                  <span class="ops-panel-kicker">Resignation</span>
+                  <h3>{{ item.employeeName }}</h3>
+                </div>
+                <span class="ops-status" [ngClass]="'tone-' + item.qualityTone">{{ item.qualityLabel }}</span>
+              </div>
+
+              <p>{{ item.summary }}</p>
+
+              <div class="ops-progress-wrap">
+                <div class="ops-progress-top">
+                  <span>Exit readiness</span>
+                  <strong>{{ item.qualityScore }}%</strong>
+                </div>
+                <div class="ops-progress-track">
+                  <span [style.width.%]="item.qualityScore"></span>
+                </div>
+              </div>
+
+              <div class="ops-chip-row">
+                <span class="ops-chip">{{ item.departmentName }}</span>
+                <span class="ops-chip">{{ item.resignationDateLabel }}</span>
+              </div>
+
+              <div class="ops-card-view">
+                <span>Click to view details</span>
+                <i class="bi bi-arrow-up-right"></i>
+              </div>
+
+              <div class="ops-card-actions">
+                <button type="button" class="btn btn-light btn-sm" data-bs-toggle="modal" data-bs-target="#resignationCrudModal" (click)="openEditModal(item); $event.stopPropagation()">
+                  <i class="bi bi-pencil-square"></i>
+                  {{ isEmployeeWorkspace ? 'Update' : 'Edit' }}
+                </button>
+                <button *ngIf="canDeleteResignation" type="button" class="btn btn-light btn-sm" (click)="deleteResignation(item); $event.stopPropagation()" [disabled]="deletingId === item.id">
+                  <i class="bi bi-trash3"></i>
+                  {{ deletingId === item.id ? 'Deleting...' : 'Delete' }}
+                </button>
+              </div>
+            </article>
+          </div>
+        </ng-template>
+
+        <ng-template #resignationEmpty>
+          <article class="card ops-empty-card">
+            <span class="ops-empty-kicker">No matching resignations</span>
+            <h3>The current search or filter does not match any resignation record.</h3>
+            <p>{{ isEmployeeWorkspace ? 'Submit your resignation to begin the exit workflow, then return here to track approval, interview, clearance, and settlement.' : 'Reset the filters or create a resignation to rebuild the exit timeline.' }}</p>
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#resignationCrudModal" (click)="openCreateModal()">
+              <i class="bi bi-plus-square-fill"></i>
+              {{ isEmployeeWorkspace ? 'Submit resignation' : 'Create resignation' }}
+            </button>
+          </article>
+        </ng-template>
+      </div>
+
+      <aside class="ops-side">
+        <article class="card ops-panel-card" *ngIf="featuredResignation; else emptyResignationPanel">
+          <div class="ops-panel-head">
+            <div>
+              <span>Selected resignation</span>
+              <h3>{{ featuredResignation.employeeName }}</h3>
+            </div>
+            <span class="ops-status" [ngClass]="'tone-' + featuredResignation.qualityTone">{{ featuredResignation.qualityLabel }}</span>
+          </div>
+
+          <p>{{ featuredResignation.summary }}</p>
+
+          <div class="ops-fact-grid">
+            <div>
+              <span class="ops-detail-label">Department</span>
+              <strong>{{ featuredResignation.departmentName }}</strong>
+            </div>
+            <div>
+              <span class="ops-detail-label">Exit date</span>
+              <strong>{{ featuredResignation.resignationDateLabel }}</strong>
+            </div>
+            <div>
+              <span class="ops-detail-label">Scheduled</span>
+              <strong>{{ featuredResignation.scheduled ? 'Yes' : 'No' }}</strong>
+            </div>
+            <div>
+              <span class="ops-detail-label">Documented</span>
+              <strong>{{ featuredResignation.documented ? 'Yes' : 'No' }}</strong>
+            </div>
+          </div>
+
+          <div class="ops-note-card">
+            <h4>Recommendation</h4>
+            <p>{{ featuredRecommendation }}</p>
+          </div>
+
+          <div class="ops-note-card accent-soft">
+            <h4>Next action</h4>
+            <p>{{ featuredNextAction }}</p>
+          </div>
+
+          <div class="ops-fact-grid compact-facts">
+            <div>
+              <span class="ops-detail-label">Approval</span>
+              <strong>{{ latestExitRequest ? latestExitRequest.statusLabel : 'Pending setup' }}</strong>
+            </div>
+            <div>
+              <span class="ops-detail-label">Interview</span>
+              <strong>{{ latestExitInterview ? latestExitInterview.interviewDateLabel : 'Not scheduled' }}</strong>
+            </div>
+            <div>
+              <span class="ops-detail-label">Clearance</span>
+              <strong>{{ clearanceProgressLabel }}</strong>
+            </div>
+            <div>
+              <span class="ops-detail-label">Settlement</span>
+              <strong>{{ latestFinalSettlement ? latestFinalSettlement.settlementDateLabel : 'Pending' }}</strong>
+            </div>
+          </div>
+
+          <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#resignationCrudModal" (click)="openEditModal(featuredResignation)">
+            <i class="bi bi-pencil-square"></i>
+            {{ isEmployeeWorkspace ? 'Update selected request' : 'Edit selected resignation' }}
+          </button>
+        </article>
+
+        <ng-template #emptyResignationPanel>
+          <article class="card ops-panel-card">
+            <span class="ops-empty-kicker">Exit preview</span>
+            <h3>Select a resignation to inspect it here.</h3>
+            <p>The side panel highlights timing, department impact, and the quality of exit context.</p>
+          </article>
+        </ng-template>
+      </aside>
+    </div>
+
+    <section class="workflow-shell" *ngIf="workflowEmployeeId">
+      <article class="card workflow-overview-card">
+        <div class="workflow-card-head">
+          <div>
+            <span class="ops-panel-kicker">Workflow overview</span>
+            <h3>{{ workflowEmployeeName }}</h3>
+            <p class="workflow-card-copy">{{ workflowDepartmentName }} exit journey from approval through settlement.</p>
+          </div>
+        </div>
+
+        <div class="workflow-summary-grid">
+          <div class="workflow-summary-item">
+            <span>Approval</span>
+            <strong>{{ latestExitRequest ? latestExitRequest.statusLabel : 'Not started' }}</strong>
+            <p>{{ latestExitRequest ? latestExitRequest.reason || 'Reason recorded in workflow.' : 'No approval request is linked yet.' }}</p>
+          </div>
+          <div class="workflow-summary-item">
+            <span>Interview</span>
+            <strong>{{ latestExitInterview ? latestExitInterview.interviewDateLabel : 'Pending' }}</strong>
+            <p>{{ latestExitInterview ? latestExitInterview.interviewerName : 'No exit interview has been scheduled yet.' }}</p>
+          </div>
+          <div class="workflow-summary-item">
+            <span>Clearance</span>
+            <strong>{{ clearanceProgressLabel }}</strong>
+            <p>{{ employeeClearances.length ? employeeClearances.length + ' tracked clearance steps.' : 'No clearance steps have been created yet.' }}</p>
+          </div>
+          <div class="workflow-summary-item">
+            <span>Settlement</span>
+            <strong>{{ latestFinalSettlement ? (latestFinalSettlement.totalAmount | number:'1.0-2') : 'Pending' }}</strong>
+            <p>{{ latestFinalSettlement ? 'Issued ' + latestFinalSettlement.settlementDateLabel : 'Final settlement not issued yet.' }}</p>
+          </div>
+        </div>
+      </article>
+
+      <div class="workflow-grid">
+        <article class="card workflow-card">
+          <div class="workflow-card-head">
+            <div>
+              <span class="ops-panel-kicker">Approval</span>
+              <h3>Exit approval workflow</h3>
+              <p class="workflow-card-copy">Submit or manage the approval request that governs the employee's last working day.</p>
+            </div>
+            <button *ngIf="canEditExitRequest" type="button" class="btn btn-light btn-sm" (click)="startExitRequestCreate()">Reset</button>
+          </div>
+
+          <div class="workflow-anchored-field">
+            <span class="ops-detail-label">Employee</span>
+            <strong>{{ workflowEmployeeName }}</strong>
+          </div>
+
+          <form *ngIf="canEditExitRequest; else approvalReadOnly" [formGroup]="exitRequestForm" (ngSubmit)="saveExitRequest()" class="workflow-form">
+            <div class="workflow-form-grid">
+              <label class="workflow-field">
+                <span>Request date</span>
+                <input type="date" formControlName="requestDate" />
+              </label>
+
+              <label class="workflow-field">
+                <span>Last working day</span>
+                <input type="date" formControlName="lastWorkingDay" />
+              </label>
+
+              <label class="workflow-field" *ngIf="canManageExitWorkflow">
+                <span>Status</span>
+                <select formControlName="status">
+                  <option *ngFor="let option of exitRequestStatusOptions" [value]="option">{{ option }}</option>
+                </select>
+              </label>
+
+              <div class="workflow-inline-note" *ngIf="!canManageExitWorkflow">
+                HR, managers, or admin users update approval status after you submit resignation.
+              </div>
+
+              <label class="workflow-field span-2">
+                <span>Reason</span>
+                <textarea rows="4" formControlName="reason" placeholder="Capture the resignation rationale and approval context."></textarea>
+              </label>
+            </div>
+
+            <div class="workflow-actions">
+              <button type="submit" class="btn btn-primary" [disabled]="savingExitRequest">
+                <i class="bi" [ngClass]="savingExitRequest ? 'bi-arrow-repeat' : 'bi-check2-circle'"></i>
+                {{ savingExitRequest ? 'Saving...' : exitRequestEditorMode === 'edit' ? 'Save approval request' : 'Create approval request' }}
+              </button>
+            </div>
+          </form>
+
+          <ng-template #approvalReadOnly>
+            <div class="workflow-empty" *ngIf="!hasWorkflowResignation">
+              Submit a resignation first to start the exit approval workflow.
+            </div>
+          </ng-template>
+
+          <div class="workflow-list" *ngIf="employeeExitRequests.length; else approvalEmpty">
+            <article *ngFor="let item of employeeExitRequests; trackBy: trackByWorkflowId" class="workflow-record" [ngClass]="{'is-approved': item.status === 'APPROVED', 'is-pending': item.status === 'PENDING', 'is-rejected': item.status === 'REJECTED'}">
+              <div class="workflow-record-head">
+                <div>
+                  <span class="workflow-record-label">Approval request</span>
+                  <h4>{{ item.statusLabel }}</h4>
+                </div>
+                <button *ngIf="canEditExitRequest" type="button" class="btn btn-light btn-sm" (click)="editExitRequest(item)">
+                  {{ canManageExitWorkflow ? 'Edit' : 'Update details' }}
+                </button>
+              </div>
+
+              <p>{{ item.summary }}</p>
+
+              <div class="workflow-meta">
+                <span>Requested {{ item.requestDateLabel }}</span>
+                <span>Last day {{ item.lastWorkingDayLabel }}</span>
+              </div>
+            </article>
+          </div>
+
+          <ng-template #approvalEmpty>
+            <div class="workflow-empty">
+              {{ hasWorkflowResignation ? 'No exit approval request has been logged yet.' : 'Approval starts after the resignation is submitted.' }}
+            </div>
+          </ng-template>
+        </article>
+
+        <article class="card workflow-card">
+          <div class="workflow-card-head">
+            <div>
+              <span class="ops-panel-kicker">Interview</span>
+              <h3>Exit interview</h3>
+              <p class="workflow-card-copy">Capture interview ownership, feedback, and suggestions before the employee leaves.</p>
+            </div>
+            <button *ngIf="canManageExitWorkflow" type="button" class="btn btn-light btn-sm" (click)="startExitInterviewCreate()">Reset</button>
+          </div>
+
+          <form *ngIf="canManageExitWorkflow" [formGroup]="exitInterviewForm" (ngSubmit)="saveExitInterview()" class="workflow-form">
+            <div class="workflow-form-grid">
+              <label class="workflow-field">
+                <span>Interview date</span>
+                <input type="date" formControlName="interviewDate" />
+              </label>
+
+              <label class="workflow-field">
+                <span>Interviewer</span>
+                <input type="text" formControlName="interviewerName" placeholder="Manager or HR lead" />
+              </label>
+
+              <label class="workflow-field span-2">
+                <span>Feedback</span>
+                <textarea rows="4" formControlName="feedback" placeholder="Capture feedback from the exit interview."></textarea>
+              </label>
+
+              <label class="workflow-field span-2">
+                <span>Suggestions</span>
+                <textarea rows="3" formControlName="suggestions" placeholder="Capture retention, policy, or team suggestions."></textarea>
+              </label>
+            </div>
+
+            <div class="workflow-actions">
+              <button type="submit" class="btn btn-primary" [disabled]="savingExitInterview">
+                <i class="bi" [ngClass]="savingExitInterview ? 'bi-arrow-repeat' : 'bi-check2-circle'"></i>
+                {{ savingExitInterview ? 'Saving...' : exitInterviewEditorMode === 'edit' ? 'Save interview' : 'Schedule interview' }}
+              </button>
+            </div>
+          </form>
+
+          <div class="workflow-list" *ngIf="employeeExitInterviews.length; else interviewEmpty">
+            <article *ngFor="let item of employeeExitInterviews; trackBy: trackByWorkflowId" class="workflow-record">
+              <div class="workflow-record-head">
+                <div>
+                  <span class="workflow-record-label">Exit interview</span>
+                  <h4>{{ item.interviewDateLabel }}</h4>
+                </div>
+                <button *ngIf="canManageExitWorkflow" type="button" class="btn btn-light btn-sm" (click)="editExitInterview(item)">Edit</button>
+              </div>
+
+              <p>{{ item.summary }}</p>
+            </article>
+          </div>
+
+          <ng-template #interviewEmpty>
+            <div class="workflow-empty">No exit interview has been recorded for this employee yet.</div>
+          </ng-template>
+        </article>
+
+        <article class="card workflow-card">
+          <div class="workflow-card-head">
+            <div>
+              <span class="ops-panel-kicker">Clearance</span>
+              <h3>Clearance process</h3>
+              <p class="workflow-card-copy">Track each clearance requirement so final settlement only proceeds once blockers are closed.</p>
+            </div>
+            <button *ngIf="canManageExitWorkflow" type="button" class="btn btn-light btn-sm" (click)="startClearanceCreate()">Reset</button>
+          </div>
+
+          <form *ngIf="canManageExitWorkflow" [formGroup]="clearanceForm" (ngSubmit)="saveClearance()" class="workflow-form">
+            <div class="workflow-form-grid">
+              <label class="workflow-field">
+                <span>Clearance type</span>
+                <select formControlName="clearanceType">
+                  <option *ngFor="let option of clearanceTypeOptions" [value]="option">{{ option }}</option>
+                </select>
+              </label>
+
+              <label class="workflow-field">
+                <span>Clearance date</span>
+                <input type="date" formControlName="clearanceDate" />
+              </label>
+
+              <label class="workflow-check">
+                <input type="checkbox" formControlName="isCleared" />
+                <span>Mark as cleared</span>
+              </label>
+
+              <label class="workflow-field span-2">
+                <span>Remarks</span>
+                <textarea rows="3" formControlName="remarks" placeholder="Capture blockers, asset handoff notes, or sign-off context."></textarea>
+              </label>
+            </div>
+
+            <div class="workflow-actions">
+              <button type="submit" class="btn btn-primary" [disabled]="savingClearance">
+                <i class="bi" [ngClass]="savingClearance ? 'bi-arrow-repeat' : 'bi-check2-circle'"></i>
+                {{ savingClearance ? 'Saving...' : clearanceEditorMode === 'edit' ? 'Save clearance' : 'Add clearance step' }}
+              </button>
+            </div>
+          </form>
+
+          <div class="workflow-list" *ngIf="employeeClearances.length; else clearanceEmpty">
+            <article *ngFor="let item of employeeClearances; trackBy: trackByWorkflowId" class="workflow-record" [ngClass]="{'is-approved': item.isCleared, 'is-pending': !item.isCleared}">
+              <div class="workflow-record-head">
+                <div>
+                  <span class="workflow-record-label">{{ item.clearanceType }}</span>
+                  <h4>{{ item.isCleared ? 'Cleared' : 'Pending clearance' }}</h4>
+                </div>
+                <button *ngIf="canManageExitWorkflow" type="button" class="btn btn-light btn-sm" (click)="editClearance(item)">Edit</button>
+              </div>
+
+              <p>{{ item.summary }}</p>
+
+              <div class="workflow-meta">
+                <span>{{ item.clearanceDateLabel }}</span>
+              </div>
+            </article>
+          </div>
+
+          <ng-template #clearanceEmpty>
+            <div class="workflow-empty">No clearance steps have been added for this employee yet.</div>
+          </ng-template>
+        </article>
+
+        <article class="card workflow-card">
+          <div class="workflow-card-head">
+            <div>
+              <span class="ops-panel-kicker">Settlement</span>
+              <h3>Final settlement</h3>
+              <p class="workflow-card-copy">Close the exit financially once approval, interview, and clearance work are complete.</p>
+            </div>
+            <button *ngIf="canManageFinalSettlement" type="button" class="btn btn-light btn-sm" (click)="startFinalSettlementCreate()">Reset</button>
+          </div>
+
+          <form *ngIf="canManageFinalSettlement" [formGroup]="finalSettlementForm" (ngSubmit)="saveFinalSettlement()" class="workflow-form">
+            <div class="workflow-form-grid">
+              <label class="workflow-field">
+                <span>Settlement date</span>
+                <input type="date" formControlName="settlementDate" />
+              </label>
+
+              <label class="workflow-field">
+                <span>Total amount</span>
+                <input type="number" min="0" step="0.01" formControlName="totalAmount" placeholder="0.00" />
+              </label>
+
+              <label class="workflow-field span-2">
+                <span>Remarks</span>
+                <textarea rows="3" formControlName="remarks" placeholder="Capture payout composition or payroll context."></textarea>
+              </label>
+            </div>
+
+            <div class="workflow-actions">
+              <button type="submit" class="btn btn-primary" [disabled]="savingFinalSettlement">
+                <i class="bi" [ngClass]="savingFinalSettlement ? 'bi-arrow-repeat' : 'bi-check2-circle'"></i>
+                {{ savingFinalSettlement ? 'Saving...' : finalSettlementEditorMode === 'edit' ? 'Save settlement' : 'Record settlement' }}
+              </button>
+            </div>
+          </form>
+
+          <div class="workflow-list" *ngIf="employeeFinalSettlements.length; else settlementEmpty">
+            <article *ngFor="let item of employeeFinalSettlements; trackBy: trackByWorkflowId" class="workflow-record is-approved">
+              <div class="workflow-record-head">
+                <div>
+                  <span class="workflow-record-label">Final settlement</span>
+                  <h4>{{ item.totalAmount | number:'1.0-2' }}</h4>
+                </div>
+                <button *ngIf="canManageFinalSettlement" type="button" class="btn btn-light btn-sm" (click)="editFinalSettlement(item)">Edit</button>
+              </div>
+
+              <p>{{ item.summary }}</p>
+
+              <div class="workflow-meta">
+                <span>{{ item.settlementDateLabel }}</span>
+              </div>
+            </article>
+          </div>
+
+          <ng-template #settlementEmpty>
+            <div class="workflow-empty">No final settlement has been recorded for this employee yet.</div>
+          </ng-template>
+        </article>
+      </div>
+    </section>
   </section>
+</div>
+
+<div class="modal fade text-left" id="resignationDetailsModal" tabindex="-1" aria-labelledby="resignationDetailsModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content ops-modal-content" *ngIf="featuredResignation">
+      <div class="ops-modal-header">
+        <div>
+          <span class="ops-eyebrow">Resignation details</span>
+          <h5 class="modal-title ops-modal-title" id="resignationDetailsModalLabel">{{ featuredResignation.employeeName }}</h5>
+          <p class="ops-modal-copy">Review department ownership, exit date, and the resignation reason for the selected record.</p>
+        </div>
+
+        <div class="ops-details-actions">
+          <span class="ops-status" [ngClass]="'tone-' + featuredResignation.qualityTone">{{ featuredResignation.qualityLabel }}</span>
+          <button type="button" class="ops-modal-close" data-bs-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="ops-modal-body">
+        <div class="ops-details-layout">
+          <div class="ops-details-main">
+            <section class="ops-details-section">
+              <span class="ops-panel-kicker">Exit summary</span>
+              <h6>Resignation overview</h6>
+              <p class="ops-detail-copy">{{ featuredResignation.summary }}</p>
+            </section>
+
+            <div class="ops-details-metrics">
+              <article class="ops-details-metric">
+                <span class="ops-detail-label">Department</span>
+                <strong>{{ featuredResignation.departmentName }}</strong>
+              </article>
+              <article class="ops-details-metric">
+                <span class="ops-detail-label">Exit date</span>
+                <strong>{{ featuredResignation.resignationDateLabel }}</strong>
+              </article>
+              <article class="ops-details-metric">
+                <span class="ops-detail-label">Status</span>
+                <strong>{{ featuredResignation.scheduled ? 'Scheduled' : 'Logged' }}</strong>
+              </article>
+            </div>
+
+            <section class="ops-details-section">
+              <span class="ops-panel-kicker">Exit reason</span>
+              <h6>Offboarding context</h6>
+              <p class="ops-detail-copy">{{ featuredResignation.resignationReason || 'No resignation reason has been recorded yet.' }}</p>
+            </section>
+
+            <section class="ops-details-section accent-soft">
+              <span class="ops-panel-kicker">Recommendation</span>
+              <h6>Offboarding follow-up</h6>
+              <p>{{ featuredRecommendation }}</p>
+            </section>
+          </div>
+
+          <aside class="ops-details-side">
+            <section class="ops-details-facts">
+              <span class="ops-panel-kicker">Quick facts</span>
+              <h6>Exit overview</h6>
+
+              <div class="ops-details-fact">
+                <strong>Employee</strong>
+                <span>{{ featuredResignation.employeeName }}</span>
+              </div>
+              <div class="ops-details-fact">
+                <strong>Recent</strong>
+                <span>{{ featuredResignation.recent ? 'Yes' : 'No' }}</span>
+              </div>
+              <div class="ops-details-fact">
+                <strong>Documented</strong>
+                <span>{{ featuredResignation.documented ? 'Yes' : 'No' }}</span>
+              </div>
+              <div class="ops-details-fact">
+                <strong>Record ID</strong>
+                <span>#{{ featuredResignation.id }}</span>
+              </div>
+            </section>
+          </aside>
+        </div>
+      </div>
+
+      <div class="ops-modal-footer">
+        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary" data-bs-dismiss="modal" data-bs-toggle="modal" data-bs-target="#resignationCrudModal" (click)="openEditModal(featuredResignation)">
+          <i class="bi bi-pencil-square"></i>
+          {{ isEmployeeWorkspace ? 'Update resignation' : 'Edit resignation' }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade text-left" id="resignationCrudModal" tabindex="-1" aria-labelledby="resignationCrudModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content ops-modal-content">
+      <div class="ops-modal-header">
+        <div>
+          <span class="ops-eyebrow">Resignation editor</span>
+          <h5 class="modal-title ops-modal-title" id="resignationCrudModalLabel">{{ modalTitle }}</h5>
+          <p class="ops-modal-copy">{{ modalSubtitle }}</p>
+        </div>
+        <button type="button" class="ops-modal-close" data-bs-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+
+      <div class="ops-modal-body">
+        <form [formGroup]="resignationForm" (ngSubmit)="saveResignation()">
+          <div class="ops-form-grid">
+            <section class="ops-form-section">
+              <span class="ops-panel-kicker">Exit setup</span>
+              <h6>Resignation information</h6>
+
+              <div class="ops-form-field" *ngIf="!isEmployeeWorkspace; else selfResignationEmployeeNotice">
+                <label for="resignationEmployeeId">Employee</label>
+                <select id="resignationEmployeeId" formControlName="employeeId">
+                  <option value="">Select employee</option>
+                  <option *ngFor="let option of employees" [value]="option.id">{{ option.name }}</option>
+                </select>
+                <div class="ops-field-error" *ngIf="submitted && resignationForm.get('employeeId').invalid">Employee is required.</div>
+              </div>
+
+              <ng-template #selfResignationEmployeeNotice>
+                <div class="ops-panel-note accent">
+                  <span class="ops-detail-label">Employee</span>
+                  <p>{{ currentEmployee ? currentEmployee.name : 'Your signed-in employee profile will be used automatically.' }}</p>
+                </div>
+              </ng-template>
+
+              <div class="ops-form-field" *ngIf="!isEmployeeWorkspace; else selfResignationDepartmentNotice">
+                <label for="resignationDepartmentId">Department</label>
+                <select id="resignationDepartmentId" formControlName="departmentId">
+                  <option value="">Select department</option>
+                  <option *ngFor="let option of departments" [value]="option.id">{{ option.name }}</option>
+                </select>
+                <div class="ops-field-error" *ngIf="submitted && resignationForm.get('departmentId').invalid">Department is required.</div>
+              </div>
+
+              <ng-template #selfResignationDepartmentNotice>
+                <div class="ops-panel-note accent-soft">
+                  <span class="ops-detail-label">Department</span>
+                  <p>{{ currentEmployee ? currentEmployee.departmentName : 'Your current department will be used automatically.' }}</p>
+                </div>
+              </ng-template>
+
+              <div class="ops-form-field">
+                <label for="resignationDate">Resignation date</label>
+                <input id="resignationDate" type="date" formControlName="resignationDate" />
+                <div class="ops-field-error" *ngIf="submitted && resignationForm.get('resignationDate').invalid">Resignation date is required.</div>
+              </div>
+
+              <div class="ops-form-field">
+                <label for="resignationReason">Reason</label>
+                <textarea id="resignationReason" rows="4" formControlName="resignationReason" placeholder="Add the resignation rationale and any offboarding context."></textarea>
+                <div class="ops-field-error" *ngIf="submitted && resignationForm.get('resignationReason').invalid">Reason is required.</div>
+              </div>
+            </section>
+
+            <aside class="ops-form-preview">
+              <span class="ops-panel-kicker">Live preview</span>
+              <h4>{{ draftEmployeeName || 'Employee pending' }}</h4>
+              <p>{{ draftDepartmentName || 'Department pending' }} exit record with readiness focused on date and reason clarity.</p>
+
+              <div class="ops-progress-wrap">
+                <div class="ops-progress-top">
+                  <span>Readiness</span>
+                  <strong>{{ draftQuality.score }}%</strong>
+                </div>
+                <div class="ops-progress-track">
+                  <span [style.width.%]="draftQuality.score"></span>
+                </div>
+              </div>
+
+              <div class="ops-chip-row">
+                <span class="ops-chip">{{ draftQuality.label }}</span>
+                <span class="ops-chip">{{ draftDepartmentName || 'Department pending' }}</span>
+              </div>
+            </aside>
+          </div>
+
+          <div class="ops-modal-actions">
+            <button type="button" class="btn btn-light" data-bs-dismiss="modal" id="resignationCrudModalClose">Cancel</button>
+            <button type="submit" class="btn btn-primary" [disabled]="saving">
+              <i class="bi" [ngClass]="saving ? 'bi-arrow-repeat' : 'bi-check2-circle'"></i>
+              {{ saving ? 'Saving...' : modalMode === 'create' ? (isEmployeeWorkspace ? 'Submit resignation' : 'Create resignation') : 'Save changes' }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
 </div>

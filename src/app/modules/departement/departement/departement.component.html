@@ -1,157 +1,856 @@
-<div class="page-heading">
-  <section class="section">
-    <div class="card">
-      <div class="card-header">
-        <h2>Departements</h2>
-      </div>
-      <div class="card-body">
-        <div class="dataTable-container">
+<div class="page-heading ops-page">
+  <section class="ops-shell">
+    <article class="card ops-hero">
+      <div class="ops-hero-copy">
+        <span class="ops-eyebrow">Org design</span>
+        <h2>Shape departments, teams, and reporting lines from one org workspace.</h2>
+        <p>
+          Keep ownership visible, connect teams to departments, expose manager
+          hierarchies, and keep transfers close to the structure they change.
+        </p>
+
+        <div class="ops-hero-actions">
           <button
             type="button"
-            class="btn btn-success btn-sm"
+            class="btn btn-primary"
             data-bs-toggle="modal"
-            data-bs-target="#add"
+            data-bs-target="#departementCrudModal"
+            (click)="openCreateModal()"
           >
-            <i class="fas fa-plus-square"></i> Create
+            <i class="bi bi-plus-square-fill"></i>
+            Create department
           </button>
-          <table
-            id="table"
-            cellpadding="0"
-            cellspacing="0"
-            border="0"
-            class="datatable-1 table table-bordered table-striped display"
-            width="100%"
+          <button
+            type="button"
+            class="btn btn-light"
+            data-bs-toggle="modal"
+            data-bs-target="#teamCrudModal"
+            (click)="openTeamCreateModal()"
           >
-            <thead>
-              <tr>
-                <th>Name</th>
-                <th>Manager</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr class="odd gradeX" *ngFor="let item of departements$">
-                <td>{{ item.name }}</td>
-                <td>{{ item.manager }}</td>
-                <td>
-                  <button
-                    type="button"
-                    data-bs-toggle="modal"
-                    (click)="edit(item.id)"
-                    data-bs-target="#edit"
-                    class="btn btn-warning btn-sm"
-                  >
-                    <i class="fas fa-edit"></i>
-                  </button>
-                  <button
-                    type="button"
-                    class="btn btn-danger btn-sm"
-                    (click)="delete(item.id)"
-                  >
-                    <i class="fas fa-trash-alt"></i>
-                  </button>
-                </td>
-              </tr>
-            </tbody>
-            <tfoot>
-              <tr>
-                <th>Name</th>
-                <th>Manager</th>
-                <th>Actions</th>
-              </tr>
-            </tfoot>
-          </table>
+            <i class="bi bi-diagram-3-fill"></i>
+            Create team
+          </button>
+          <a
+            class="btn btn-light"
+            routerLink="/transfert"
+          >
+            <i class="bi bi-arrow-left-right"></i>
+            Manage transfers
+          </a>
+          <button
+            type="button"
+            class="btn btn-light"
+            (click)="refreshDepartements()"
+            [disabled]="loading"
+          >
+            <i class="bi bi-arrow-repeat"></i>
+            Refresh
+          </button>
+        </div>
 
-          <div
-            class="modal fade text-left"
-            id="edit"
-            tabindex="-1"
-            aria-labelledby="myModalLabel1"
-            style="display: none"
-            aria-hidden="true"
-          >
-            <div
-              class="modal-dialog modal-dialog-scrollable modal-lg"
-              role="document"
+        <div class="ops-hero-notice" *ngIf="loadError">{{ loadError }}</div>
+      </div>
+
+      <div class="ops-hero-panel">
+        <span class="ops-panel-kicker">Coverage pulse</span>
+        <h3>Leadership readiness across departments</h3>
+
+        <div class="ops-metric-grid">
+          <div class="ops-metric-card">
+            <span>Total departments</span>
+            <strong>{{ totalDepartementsCount }}</strong>
+            <p>All department records currently available from the backend.</p>
+          </div>
+          <div class="ops-metric-card">
+            <span>Active teams</span>
+            <strong>{{ totalTeamsCount }}</strong>
+            <p>Teams currently mapped into the organization workspace.</p>
+          </div>
+          <div class="ops-metric-card">
+            <span>Hierarchy leads</span>
+            <strong>{{ orgLeadsCount }}</strong>
+            <p>Managers with at least one direct report in the current structure.</p>
+          </div>
+        </div>
+
+        <div class="ops-progress-wrap">
+          <div class="ops-progress-top">
+            <span>Ownership coverage</span>
+            <strong>{{ managementCoverage }}%</strong>
+          </div>
+          <div class="ops-progress-track">
+            <span [style.width.%]="managementCoverage"></span>
+          </div>
+          <p>
+            {{ needsManagerCount }} department{{ needsManagerCount === 1 ? '' : 's' }} still need a named owner.
+          </p>
+        </div>
+      </div>
+    </article>
+
+    <div class="ops-stat-grid">
+      <article class="card ops-stat-card tone-primary">
+        <span>Department records</span>
+        <strong>{{ totalDepartementsCount }}</strong>
+        <p>The organization map currently tracked in the admin workspace.</p>
+      </article>
+
+      <article class="card ops-stat-card tone-secondary">
+        <span>Teams</span>
+        <strong>{{ totalTeamsCount }}</strong>
+        <p>Cross-functional groups that are now visible next to departments.</p>
+      </article>
+
+      <article class="card ops-stat-card tone-warning">
+        <span>Hierarchy leads</span>
+        <strong>{{ orgLeadsCount }}</strong>
+        <p>Managers currently carrying direct reports in the live org chart.</p>
+      </article>
+
+      <article class="card ops-stat-card tone-danger">
+        <span>Recent transfers</span>
+        <strong>{{ recentTransfersCount }}</strong>
+        <p>Tracked transfer moves that affect team and department composition.</p>
+      </article>
+    </div>
+
+    <article class="card ops-toolbar-card">
+      <div class="ops-toolbar">
+        <label class="ops-search-field">
+          <i class="bi bi-search"></i>
+          <input
+            type="text"
+            [ngModel]="searchTerm"
+            (ngModelChange)="onSearchTermChange($event)"
+            placeholder="Search department names or managers"
+          />
+        </label>
+
+        <div class="ops-toolbar-controls">
+          <label>
+            <span>Filter</span>
+            <select
+              [ngModel]="activeFilter"
+              (ngModelChange)="onFilterChange($event)"
             >
-              <div class="modal-content">
-                <div class="modal-header">
-                  <h5 class="modal-title" id="myModalLabel1">Edit</h5>
-                  <button
-                    type="button"
-                    class="close rounded-pill"
-                    data-bs-dismiss="modal"
-                    aria-label="Close"
-                  >
-                    <i data-feather="x"></i>
-                  </button>
+              <option value="all">All departments</option>
+              <option value="staffed">Managed only</option>
+              <option value="needs-manager">Needs manager</option>
+            </select>
+          </label>
+
+          <label>
+            <span>Sort</span>
+            <select
+              [ngModel]="activeSort"
+              (ngModelChange)="onSortChange($event)"
+            >
+              <option value="quality">Readiness</option>
+              <option value="name-asc">Name A-Z</option>
+              <option value="manager-asc">Manager A-Z</option>
+            </select>
+          </label>
+        </div>
+      </div>
+
+      <div class="ops-toolbar-footer">
+        <span>{{ filteredResultsLabel }}</span>
+        <span>
+          {{ featuredDepartement ? featuredDepartement.name : 'No department selected' }}
+        </span>
+      </div>
+    </article>
+
+    <div class="ops-layout">
+      <div class="ops-main">
+        <div class="ops-loading-grid" *ngIf="loading; else departementReady">
+          <div
+            class="ops-skeleton-card"
+            *ngFor="let item of loadingPlaceholders"
+          ></div>
+        </div>
+
+        <ng-template #departementReady>
+          <div class="ops-grid" *ngIf="filteredDepartements.length; else departementEmpty">
+            <article
+              class="card ops-card"
+              *ngFor="let item of filteredDepartements; trackBy: trackByDepartementId"
+              [class.is-active]="featuredDepartement ? featuredDepartement.id === item.id : false"
+              (click)="selectDepartement(item)"
+              tabindex="0"
+              role="button"
+            >
+              <div class="ops-card-head">
+                <div>
+                  <span class="ops-panel-kicker">Department</span>
+                  <h3>{{ item.name }}</h3>
                 </div>
-                <div class="modal-body">
-                  <app-edit-departement
-                    [id]="id"
-                    (closeModalEventEdit)="closeModalEdit()"
-                  ></app-edit-departement>
+                <span class="ops-status" [ngClass]="'tone-' + item.qualityTone">
+                  {{ item.qualityLabel }}
+                </span>
+              </div>
+
+              <p>{{ item.summary }}</p>
+
+              <div class="ops-progress-wrap">
+                <div class="ops-progress-top">
+                  <span>Operational readiness</span>
+                  <strong>{{ item.qualityScore }}%</strong>
                 </div>
-                <div class="modal-footer">
-                  <button
-                    id="closeEdit"
-                    type="button"
-                    class="btn"
-                    data-bs-dismiss="modal"
-                  >
-                    <i class="bx bx-x d-block d-sm-none"></i>
-                    <span class="d-none d-sm-block">Close</span>
-                  </button>
+                <div class="ops-progress-track">
+                  <span [style.width.%]="item.qualityScore"></span>
                 </div>
               </div>
+
+              <div class="ops-chip-row">
+                <span class="ops-chip">
+                  {{ item.manager ? item.manager : 'Manager pending' }}
+                </span>
+                <span class="ops-chip">{{ item.employeeCount }} employees</span>
+                <span class="ops-chip">{{ item.teamCount }} teams</span>
+                <span class="ops-chip">{{ item.transferCount }} transfers</span>
+              </div>
+
+              <div class="ops-card-actions">
+                <button
+                  type="button"
+                  class="btn btn-light btn-sm"
+                  data-bs-toggle="modal"
+                  data-bs-target="#departementCrudModal"
+                  (click)="openEditModal(item); $event.stopPropagation()"
+                >
+                  <i class="bi bi-pencil-square"></i>
+                  Edit
+                </button>
+                <button
+                  type="button"
+                  class="btn btn-light btn-sm"
+                  (click)="deleteDepartement(item); $event.stopPropagation()"
+                  [disabled]="deletingId === item.id"
+                >
+                  <i class="bi bi-trash3"></i>
+                  {{ deletingId === item.id ? 'Deleting...' : 'Delete' }}
+                </button>
+              </div>
+            </article>
+          </div>
+        </ng-template>
+
+        <ng-template #departementEmpty>
+          <article class="card ops-empty-card">
+            <span class="ops-empty-kicker">No matching departments</span>
+            <h3>The current search or filter does not match any department.</h3>
+            <p>
+              Reset the filters or create a new department to rebuild the org map.
+            </p>
+            <button
+              type="button"
+              class="btn btn-primary"
+              data-bs-toggle="modal"
+              data-bs-target="#departementCrudModal"
+              (click)="openCreateModal()"
+            >
+              <i class="bi bi-plus-square-fill"></i>
+              Create department
+            </button>
+          </article>
+        </ng-template>
+      </div>
+
+      <aside class="ops-side">
+        <article class="card ops-panel-card" *ngIf="featuredDepartement; else emptyDepartementPanel">
+          <div class="ops-panel-head">
+            <div>
+              <span>Selected department</span>
+              <h3>{{ featuredDepartement.name }}</h3>
+            </div>
+            <span class="ops-status" [ngClass]="'tone-' + featuredDepartement.qualityTone">
+              {{ featuredDepartement.qualityLabel }}
+            </span>
+          </div>
+
+          <p>{{ featuredDepartement.summary }}</p>
+
+          <div class="ops-fact-grid">
+            <div>
+              <span class="ops-detail-label">Manager</span>
+              <strong>{{ featuredDepartement.manager ? featuredDepartement.manager : 'Pending' }}</strong>
+            </div>
+            <div>
+              <span class="ops-detail-label">Employees</span>
+              <strong>{{ featuredDepartement.employeeCount }}</strong>
+            </div>
+            <div>
+              <span class="ops-detail-label">Teams</span>
+              <strong>{{ featuredDepartement.teamCount }}</strong>
+            </div>
+            <div>
+              <span class="ops-detail-label">Transfers</span>
+              <strong>{{ featuredDepartement.transferCount }}</strong>
+            </div>
+            <div>
+              <span class="ops-detail-label">Readiness</span>
+              <strong>{{ featuredDepartement.qualityScore }}%</strong>
             </div>
           </div>
 
-          <div
-            class="modal fade text-left"
-            id="add"
-            tabindex="-1"
-            aria-labelledby="myModalLabel1"
-            style="display: none"
-            aria-hidden="true"
-          >
-            <div
-              class="modal-dialog modal-dialog-scrollable modal-lg"
-              role="document"
+          <div class="ops-panel-note accent">
+            <span class="ops-detail-label">Next action</span>
+            <p>
+              {{ featuredDepartement.staffed
+                ? featuredDepartement.teamCount
+                  ? 'Keep the department owner, team leads, and transfer flow aligned so the org chart stays trustworthy.'
+                  : 'This department has ownership but still needs at least one visible team structure.'
+                : 'Assign a department owner so the structure is ready for contracts, transfers, and employee mapping.' }}
+            </p>
+          </div>
+
+          <div class="departement-side-actions">
+            <button
+              type="button"
+              class="btn btn-primary"
+              data-bs-toggle="modal"
+              data-bs-target="#departementCrudModal"
+              (click)="openEditModal(featuredDepartement)"
             >
-              <div class="modal-content">
-                <div class="modal-header">
-                  <h5 class="modal-title" id="myModalLabel1">Create</h5>
-                  <button
-                    type="button"
-                    class="close rounded-pill"
-                    data-bs-dismiss="modal"
-                    aria-label="Close"
-                  >
-                    <i data-feather="x"></i>
-                  </button>
-                </div>
-                <div class="modal-body">
-                  <app-add-departement
-                    (closeModalEvent)="closeModalAdd()"
-                  ></app-add-departement>
-                </div>
-                <div class="modal-footer">
-                  <button
-                    type="button"
-                    id="closeAdd"
-                    class="btn"
-                    data-bs-dismiss="modal"
-                  >
-                    <i class="bx bx-x d-block d-sm-none"></i>
-                    <span class="d-none d-sm-block">Close</span>
-                  </button>
-                </div>
-              </div>
+              <i class="bi bi-pencil-square"></i>
+              Edit selected department
+            </button>
+            <button
+              type="button"
+              class="btn btn-light"
+              data-bs-toggle="modal"
+              data-bs-target="#teamCrudModal"
+              (click)="openTeamCreateModal()"
+            >
+              <i class="bi bi-diagram-3-fill"></i>
+              Create team
+            </button>
+            <a class="btn btn-light" routerLink="/transfert">
+              <i class="bi bi-arrow-left-right"></i>
+              Open transfers
+            </a>
+          </div>
+        </article>
+
+        <ng-template #emptyDepartementPanel>
+          <article class="card ops-panel-card">
+            <span class="ops-empty-kicker">Department preview</span>
+            <h3>Select a department to inspect it here.</h3>
+            <p>
+              The side panel highlights the selected department, its team footprint, and the next org cleanup step.
+            </p>
+          </article>
+        </ng-template>
+      </aside>
+    </div>
+
+    <article class="card ops-panel-card departement-assignment-board">
+      <div class="ops-panel-head">
+        <div>
+          <span>Department reassignment</span>
+          <h3>Drag employees across department lanes</h3>
+        </div>
+        <span class="ops-status tone-secondary">
+          {{ departmentAssignmentLanes.length > 0 ? departmentAssignmentLanes.length - 1 : 0 }} active lane{{ departmentAssignmentLanes.length - 1 === 1 ? '' : 's' }}
+        </span>
+      </div>
+
+      <p class="departement-board-copy">
+        Drag an employee card onto a department lane to create an effective transfer immediately. The backend then syncs the employee profile to the new department automatically.
+      </p>
+
+      <div class="departement-lane-grid" *ngIf="departmentAssignmentLanes.length">
+        <div
+          class="departement-drop-lane"
+          *ngFor="let lane of departmentAssignmentLanes; trackBy: trackByDepartmentLaneId"
+          [class.is-active]="featuredDepartement && lane.id === featuredDepartement.id"
+          [class.is-readonly]="!lane.droppable"
+          [class.is-drop-target]="draggedEmployeeId !== null && lane.droppable"
+          (dragover)="allowEmployeeDrop($event)"
+          (drop)="onDepartmentDrop($event, lane)"
+        >
+          <div class="departement-lane-head">
+            <div>
+              <strong>{{ lane.name }}</strong>
+              <span>
+                {{ lane.manager ? lane.manager : lane.droppable ? 'Manager pending' : 'Source lane only' }}
+              </span>
+            </div>
+            <small>{{ lane.employeeCount }} employees</small>
+          </div>
+
+          <p class="departement-lane-summary">{{ lane.summary }}</p>
+
+          <div
+            class="departement-drop-employee"
+            *ngFor="let employee of lane.employees; trackBy: trackByEmployeeId"
+            draggable="true"
+            (dragstart)="onEmployeeDragStart($event, employee)"
+            (dragend)="onEmployeeDragEnd()"
+            [class.is-moving]="reassigningEmployeeId === employee.id"
+          >
+            <div>
+              <strong>{{ employee.fullName }}</strong>
+              <span>{{ employee.roleName }}</span>
+            </div>
+            <small>{{ employee.managerName || 'No manager assigned' }}</small>
+          </div>
+
+          <p class="departement-empty-copy" *ngIf="!lane.employees.length">
+            No employees in this lane.
+          </p>
+        </div>
+      </div>
+    </article>
+
+    <div class="departement-insight-grid" *ngIf="featuredDepartement">
+      <article class="card ops-panel-card departement-insight-card">
+        <div class="ops-panel-head">
+          <div>
+            <span>Department squad</span>
+            <h3>{{ featuredDepartement.name }} employees</h3>
+          </div>
+          <span class="ops-status tone-medium">
+            {{ featuredDepartmentEmployees.length }} listed
+          </span>
+        </div>
+
+        <div class="departement-rich-list" *ngIf="featuredDepartmentEmployees.length; else emptyDepartmentEmployees">
+          <div class="departement-rich-list-item" *ngFor="let employee of featuredDepartmentEmployees | slice:0:8">
+            <div>
+              <strong>{{ employee.fullName }}</strong>
+              <span>{{ employee.roleName }}</span>
+            </div>
+            <small>{{ employee.managerName || 'No manager assigned' }}</small>
+          </div>
+        </div>
+
+        <ng-template #emptyDepartmentEmployees>
+          <p class="departement-empty-copy">
+            No employees are currently assigned to this department.
+          </p>
+        </ng-template>
+      </article>
+
+      <article class="card ops-panel-card departement-insight-card">
+        <div class="ops-panel-head">
+          <div>
+            <span>Teams in focus</span>
+            <h3>Department-linked teams</h3>
+          </div>
+          <button
+            type="button"
+            class="btn btn-light btn-sm"
+            data-bs-toggle="modal"
+            data-bs-target="#teamCrudModal"
+            (click)="openTeamCreateModal()"
+          >
+            <i class="bi bi-plus-square-fill"></i>
+            Add team
+          </button>
+        </div>
+
+        <div class="departement-rich-list" *ngIf="featuredDepartmentTeams.length; else emptyDepartmentTeams">
+          <div class="departement-rich-list-item" *ngFor="let team of featuredDepartmentTeams; trackBy: trackByTeamId">
+            <div>
+              <strong>{{ team.name }}</strong>
+              <span>{{ team.managerName || 'Lead pending' }} • {{ team.memberCount }} members</span>
+            </div>
+            <div class="departement-inline-actions">
+              <button
+                type="button"
+                class="btn btn-light btn-sm"
+                data-bs-toggle="modal"
+                data-bs-target="#teamCrudModal"
+                (click)="openTeamEditModal(team)"
+              >
+                Edit
+              </button>
+              <button
+                type="button"
+                class="btn btn-light btn-sm"
+                (click)="deleteTeam(team)"
+                [disabled]="deletingTeamId === team.id"
+              >
+                {{ deletingTeamId === team.id ? 'Deleting...' : 'Delete' }}
+              </button>
             </div>
           </div>
         </div>
-      </div>
+
+        <ng-template #emptyDepartmentTeams>
+          <p class="departement-empty-copy">
+            No team is currently connected to this department.
+          </p>
+        </ng-template>
+      </article>
+
+      <article class="card ops-panel-card departement-insight-card departement-team-board-card">
+        <div class="ops-panel-head">
+          <div>
+            <span>Team reassignment</span>
+            <h3>Drag employees across team lanes</h3>
+          </div>
+          <span class="ops-status tone-secondary">
+            {{ teamAssignmentLanes.length }} lane{{ teamAssignmentLanes.length === 1 ? '' : 's' }}
+          </span>
+        </div>
+
+        <p class="departement-board-copy">
+          Keep active team membership clean inside {{ featuredDepartement.name }} by dragging employees between lanes or back into the unassigned lane.
+        </p>
+
+        <div class="departement-team-board" *ngIf="teamAssignmentLanes.length">
+          <div
+            class="departement-team-lane"
+            *ngFor="let lane of teamAssignmentLanes; trackBy: trackByTeamLaneId"
+            (dragover)="allowEmployeeDrop($event)"
+            (drop)="onTeamLaneDrop($event, lane)"
+          >
+            <div class="departement-lane-head">
+              <div>
+                <strong>{{ lane.title }}</strong>
+                <span>{{ lane.managerName ? lane.managerName : 'No lead assigned' }}</span>
+              </div>
+              <small>{{ lane.employees.length }} assigned</small>
+            </div>
+
+            <p class="departement-lane-summary">{{ lane.summary }}</p>
+
+            <div
+              class="departement-drop-employee"
+              *ngFor="let employee of lane.employees; trackBy: trackByEmployeeId"
+              draggable="true"
+              (dragstart)="onEmployeeDragStart($event, employee)"
+              (dragend)="onEmployeeDragEnd()"
+              [class.is-moving]="reassigningEmployeeId === employee.id"
+            >
+              <div>
+                <strong>{{ employee.fullName }}</strong>
+                <span>{{ employee.roleName }}</span>
+              </div>
+              <small>{{ employee.managerName || 'No manager assigned' }}</small>
+            </div>
+
+            <p class="departement-empty-copy" *ngIf="!lane.employees.length">
+              No employees are currently assigned here.
+            </p>
+          </div>
+        </div>
+      </article>
+
+      <article class="card ops-panel-card departement-insight-card departement-org-chart-card">
+        <div class="ops-panel-head">
+          <div>
+            <span>Org chart</span>
+            <h3>Tree view with connectors</h3>
+          </div>
+          <span class="ops-status tone-secondary">
+            {{ featuredOrgChartRoots.length }} root{{ featuredOrgChartRoots.length === 1 ? '' : 's' }}
+          </span>
+        </div>
+
+        <p class="departement-board-copy">
+          Depth labels reveal reporting levels, and the connector lines make the live structure readable without leaving the department workspace.
+        </p>
+
+        <div class="departement-org-chart" *ngIf="featuredOrgChartRoots.length; else emptyOrgNodes">
+          <div
+            class="departement-org-chart-root"
+            *ngFor="let node of featuredOrgChartRoots; trackBy: trackByOrgTreeNodeId"
+          >
+            <ng-container
+              *ngTemplateOutlet="orgChartTreeNode; context: { $implicit: node }"
+            ></ng-container>
+          </div>
+        </div>
+
+        <ng-template #emptyOrgNodes>
+          <p class="departement-empty-copy">
+            No hierarchy is visible yet for this department.
+          </p>
+        </ng-template>
+      </article>
+
+      <article class="card ops-panel-card departement-insight-card">
+        <div class="ops-panel-head">
+          <div>
+            <span>Transfer flow</span>
+            <h3>Recent department moves</h3>
+          </div>
+          <a class="btn btn-light btn-sm" routerLink="/transfert">
+            <i class="bi bi-arrow-left-right"></i>
+            Open transfer module
+          </a>
+        </div>
+
+        <div class="departement-rich-list" *ngIf="featuredDepartmentTransfers.length; else emptyTransfers">
+          <div class="departement-rich-list-item" *ngFor="let transfer of featuredDepartmentTransfers | slice:0:6">
+            <div>
+              <strong>{{ transfer.employeeName }}</strong>
+              <span>
+                {{ transfer.fromDepartment || 'Unassigned' }} → {{ transfer.toDepartment || 'Unassigned' }}
+              </span>
+            </div>
+            <small>{{ transfer.transferDateLabel }}</small>
+          </div>
+        </div>
+
+        <ng-template #emptyTransfers>
+          <p class="departement-empty-copy">
+            No transfer records currently touch this department.
+          </p>
+        </ng-template>
+      </article>
     </div>
   </section>
+</div>
+
+<ng-template #orgChartTreeNode let-node>
+  <div
+    class="departement-tree-node"
+    [class.is-child]="node.depth > 0"
+    [style.--tree-depth]="node.depth"
+  >
+    <div class="departement-tree-card">
+      <div class="departement-tree-head">
+        <div>
+          <strong>{{ node.fullName }}</strong>
+          <span>{{ node.roleName }}</span>
+        </div>
+        <small>Level {{ node.depth + 1 }}</small>
+      </div>
+
+      <p class="departement-tree-meta">
+        {{ node.managerName ? 'Reports to ' + node.managerName : 'Department root' }}
+      </p>
+
+      <div class="ops-chip-row">
+        <span class="ops-chip">{{ node.departmentName }}</span>
+        <span class="ops-chip">
+          {{ node.directReportCount }} report{{ node.directReportCount === 1 ? '' : 's' }}
+        </span>
+        <span class="ops-chip" *ngIf="node.teamNames.length">
+          {{ node.teamNames[0] }}
+        </span>
+        <span class="ops-chip" *ngIf="node.teamNames.length > 1">
+          +{{ node.teamNames.length - 1 }} more team{{ node.teamNames.length - 1 === 1 ? '' : 's' }}
+        </span>
+      </div>
+    </div>
+
+    <div class="departement-tree-children" *ngIf="node.reports.length">
+      <ng-container *ngFor="let report of node.reports; trackBy: trackByOrgTreeNodeId">
+        <ng-container
+          *ngTemplateOutlet="orgChartTreeNode; context: { $implicit: report }"
+        ></ng-container>
+      </ng-container>
+    </div>
+  </div>
+</ng-template>
+
+<div
+  class="modal fade text-left"
+  id="departementCrudModal"
+  tabindex="-1"
+  aria-labelledby="departementCrudModalLabel"
+  aria-hidden="true"
+>
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content ops-modal-content">
+      <div class="ops-modal-header">
+        <div>
+          <span class="ops-eyebrow">Department editor</span>
+          <h5 class="modal-title ops-modal-title" id="departementCrudModalLabel">
+            {{ modalTitle }}
+          </h5>
+          <p class="ops-modal-copy">{{ modalSubtitle }}</p>
+        </div>
+        <button
+          type="button"
+          class="ops-modal-close"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+        >
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+
+      <div class="ops-modal-body">
+        <form [formGroup]="departementForm" (ngSubmit)="saveDepartement()">
+          <div class="ops-form-grid">
+            <section class="ops-form-section">
+              <span class="ops-panel-kicker">Record details</span>
+              <h6>Core information</h6>
+
+              <div class="ops-form-field">
+                <label for="departementName">Department name</label>
+                <input id="departementName" type="text" formControlName="name" />
+                <div class="ops-field-error" *ngIf="submitted && departementForm.get('name').invalid">
+                  Department name is required.
+                </div>
+              </div>
+
+              <div class="ops-form-field">
+                <label for="departementManager">Manager</label>
+                <input
+                  id="departementManager"
+                  type="text"
+                  formControlName="manager"
+                  placeholder="Assign an owner for this team"
+                />
+              </div>
+            </section>
+
+            <aside class="ops-form-preview">
+              <span class="ops-panel-kicker">Live preview</span>
+              <h4>{{ draftName }}</h4>
+              <p>
+                {{ draftManager
+                  ? 'Managed by ' + draftManager + ' with a visible point of accountability.'
+                  : 'Add a manager so the department is ready for downstream records and approvals.' }}
+              </p>
+
+              <div class="ops-progress-wrap">
+                <div class="ops-progress-top">
+                  <span>Readiness</span>
+                  <strong>{{ draftQuality.score }}%</strong>
+                </div>
+                <div class="ops-progress-track">
+                  <span [style.width.%]="draftQuality.score"></span>
+                </div>
+              </div>
+
+              <div class="ops-chip-row">
+                <span class="ops-chip">
+                  {{ draftManager ? draftManager : 'Manager pending' }}
+                </span>
+                <span class="ops-status" [ngClass]="'tone-' + draftQuality.tone">
+                  {{ draftQuality.label }}
+                </span>
+              </div>
+            </aside>
+          </div>
+
+          <div class="modal-footer">
+            <button
+              id="departementCrudModalClose"
+              type="button"
+              class="btn btn-light"
+              data-bs-dismiss="modal"
+            >
+              Close
+            </button>
+            <button type="submit" class="btn btn-primary" [disabled]="saving">
+              {{ saving ? 'Saving...' : modalMode === 'create' ? 'Create department' : 'Save changes' }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+</div>
+
+<div
+  class="modal fade text-left"
+  id="teamCrudModal"
+  tabindex="-1"
+  aria-labelledby="teamCrudModalLabel"
+  aria-hidden="true"
+>
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content ops-modal-content">
+      <div class="ops-modal-header">
+        <div>
+          <span class="ops-eyebrow">Team editor</span>
+          <h5 class="modal-title ops-modal-title" id="teamCrudModalLabel">
+            {{ teamModalTitle }}
+          </h5>
+          <p class="ops-modal-copy">{{ teamModalSubtitle }}</p>
+        </div>
+        <button
+          type="button"
+          class="ops-modal-close"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+        >
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+
+      <div class="ops-modal-body">
+        <form [formGroup]="teamForm" (ngSubmit)="saveTeam()">
+          <div class="ops-form-grid">
+            <section class="ops-form-section">
+              <span class="ops-panel-kicker">Team setup</span>
+              <h6>Structure and ownership</h6>
+
+              <div class="ops-form-field">
+                <label for="teamName">Team name</label>
+                <input id="teamName" type="text" formControlName="name" />
+                <div class="ops-field-error" *ngIf="teamSubmitted && teamForm.get('name').invalid">
+                  Team name is required.
+                </div>
+              </div>
+
+              <div class="ops-form-field">
+                <label for="teamDescription">Description</label>
+                <textarea id="teamDescription" rows="3" formControlName="description"></textarea>
+              </div>
+
+              <div class="ops-form-field">
+                <label for="teamManager">Team lead</label>
+                <select id="teamManager" formControlName="managerId">
+                  <option value="">No lead selected</option>
+                  <option *ngFor="let employee of employees" [value]="employee.id">
+                    {{ employee.fullName }} • {{ employee.departmentName }}
+                  </option>
+                </select>
+              </div>
+
+              <div class="ops-form-field">
+                <label for="teamMembers">Members</label>
+                <select id="teamMembers" formControlName="memberIds" multiple>
+                  <option *ngFor="let employee of employees" [value]="employee.id">
+                    {{ employee.fullName }} • {{ employee.departmentName }}
+                  </option>
+                </select>
+              </div>
+            </section>
+
+            <aside class="ops-form-preview">
+              <span class="ops-panel-kicker">Live preview</span>
+              <h4>{{ teamForm.value.name || 'Untitled team' }}</h4>
+              <p>
+                {{ teamForm.value.description || 'Add a short description so this team has a clear operating scope.' }}
+              </p>
+
+              <div class="ops-chip-row">
+                <span class="ops-chip">
+                  {{ teamForm.value.managerId ? 'Lead assigned' : 'Lead pending' }}
+                </span>
+                <span class="ops-chip">
+                  {{ (teamForm.value.memberIds || []).length || 0 }} members selected
+                </span>
+              </div>
+            </aside>
+          </div>
+
+          <div class="modal-footer">
+            <button
+              id="teamCrudModalClose"
+              type="button"
+              class="btn btn-light"
+              data-bs-dismiss="modal"
+            >
+              Close
+            </button>
+            <button type="submit" class="btn btn-primary" [disabled]="teamSaving">
+              {{ teamSaving ? 'Saving...' : teamModalMode === 'create' ? 'Create team' : 'Save changes' }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
 </div>

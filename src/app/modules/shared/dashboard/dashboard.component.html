@@ -1,86 +1,132 @@
-<section class="row">
-  <div class="col-12 col-lg-9">
-    <div class="row">
-      <div class="col-6 col-lg-3 col-md-6">
-        <div class="card">
-          <div class="card-body px-3 py-4-5">
-            <div class="row">
-              <div class="col-md-4">
-                <div class="stats-icon purple">
-                  <i class="iconly-boldShow"></i>
-                </div>
-              </div>
-              <div class="col-md-8">
-                <h6 class="text-muted font-semibold">Employees</h6>
-                <h6 class="font-extrabold mb-0">1</h6>
-              </div>
-            </div>
-          </div>
-        </div>
+<section class="dashboard-shell">
+  <article class="card dashboard-hero">
+    <div class="dashboard-hero-copy">
+      <div class="dashboard-hero-top">
+        <span class="dashboard-eyebrow">Executive overview</span>
+        <span
+          class="dashboard-status-pill"
+          [class.is-loading]="loading"
+          [class.is-partial]="!loading && partialData"
+        >
+          {{
+            loading
+              ? 'Refreshing live metrics'
+              : partialData
+              ? 'Live data with partial fallback'
+              : lastUpdatedLabel
+          }}
+        </span>
       </div>
-      <div class="col-6 col-lg-3 col-md-6">
-        <div class="card">
-          <div class="card-body px-3 py-4-5">
-            <div class="row">
-              <div class="col-md-4">
-                <div class="stats-icon blue">
-                  <i class="iconly-boldProfile"></i>
-                </div>
-              </div>
-              <div class="col-md-8">
-                <h6 class="text-muted font-semibold">Jobs</h6>
-                <h6 class="font-extrabold mb-0">1</h6>
-              </div>
-            </div>
-          </div>
-        </div>
+      <h2>Operational command across people, payroll, recruitment, and communications.</h2>
+      <p>
+        The dashboard now pulls live records from the core HR modules and turns
+        them into an executive command surface: workforce counts, compensation
+        visibility, recruiting demand, training activity, and communication health.
+      </p>
+      <div class="dashboard-hero-actions">
+        <button
+          type="button"
+          class="btn btn-primary"
+          (click)="reloadDashboard()"
+          [disabled]="loading"
+        >
+          Refresh dashboard
+        </button>
+        <a routerLink="/employee" class="btn btn-light">Open employee directory</a>
+        <a routerLink="/salary" class="btn btn-light">Review payroll</a>
       </div>
-      <div class="col-6 col-lg-3 col-md-6">
-        <div class="card">
-          <div class="card-body px-3 py-4-5">
-            <div class="row">
-              <div class="col-md-4">
-                <div class="stats-icon green">
-                  <i class="iconly-boldAdd-User"></i>
-                </div>
-              </div>
-              <div class="col-md-8">
-                <h6 class="text-muted font-semibold">Contracts</h6>
-                <h6 class="font-extrabold mb-0">1</h6>
-              </div>
-            </div>
-          </div>
-        </div>
+
+      <div class="dashboard-hero-notice" *ngIf="loadError">
+        {{ loadError }}
       </div>
-      <div class="col-6 col-lg-3 col-md-6">
-        <div class="card">
-          <div class="card-body px-3 py-4-5">
-            <div class="row">
-              <div class="col-md-4">
-                <div class="stats-icon red">
-                  <i class="iconly-boldBookmark"></i>
-                </div>
-              </div>
-              <div class="col-md-8">
-                <h6 class="text-muted font-semibold">Trainings</h6>
-                <h6 class="font-extrabold mb-0">1</h6>
-              </div>
-            </div>
-          </div>
+    </div>
+
+    <div class="dashboard-hero-panel">
+      <span class="dashboard-panel-kicker">Live operating pulse</span>
+      <h3>Today at a glance</h3>
+      <div class="dashboard-hero-metrics">
+        <div *ngFor="let item of heroMetrics">
+          <strong>{{ item.value }}</strong>
+          <span>{{ item.label }}</span>
         </div>
       </div>
     </div>
-    <div class="row">
-      <div class="col-12">
-        <div class="card">
-          <div class="card-header">
-            <h4>Salaries by departments</h4>
+  </article>
+
+  <div class="dashboard-layout">
+    <div class="dashboard-main">
+      <div class="dashboard-stat-grid">
+        <a
+          class="card dashboard-stat-card"
+          *ngFor="let item of summaryCards"
+          [ngClass]="'tone-' + item.tone"
+          [routerLink]="item.route"
+        >
+          <div class="dashboard-stat-icon">
+            <i [class]="item.icon"></i>
           </div>
-          <div class="card-body" style="position: relative">
+          <div class="dashboard-stat-copy">
+            <span>{{ item.label }}</span>
+            <h3>{{ item.value }}</h3>
+            <p>{{ item.detail }}</p>
+          </div>
+          <div class="dashboard-stat-delta">{{ item.delta }}</div>
+        </a>
+      </div>
+
+      <article class="card dashboard-modules-card">
+        <div class="dashboard-section-head">
+          <div>
+            <span>Navigation shortcuts</span>
+            <h3>Operational hubs</h3>
+          </div>
+          <a routerLink="/configuration" class="dashboard-section-link">Workspace settings</a>
+        </div>
+
+        <div class="dashboard-link-grid">
+          <a
+            class="dashboard-link-card"
+            *ngFor="let item of moduleLinks"
+            [ngClass]="'tone-' + item.tone"
+            [routerLink]="item.route"
+          >
+            <div class="dashboard-link-icon">
+              <i [class]="item.icon"></i>
+            </div>
+            <div class="dashboard-link-copy">
+              <strong>{{ item.label }}</strong>
+              <p>{{ item.detail }}</p>
+            </div>
+            <span>{{ item.count }}</span>
+          </a>
+        </div>
+      </article>
+
+      <div class="dashboard-chart-grid">
+        <article class="card dashboard-chart-card">
+          <div class="dashboard-section-head">
+            <div>
+              <span>Compensation distribution</span>
+              <h3>Configured salary packages</h3>
+            </div>
+            <a routerLink="/salary" class="dashboard-section-link">Open payroll</a>
+          </div>
+
+          <div class="dashboard-chart-meta">
+            <span
+              class="dashboard-chart-badge"
+              [class.is-preview]="payrollChartState.mode === 'preview'"
+            >
+              {{ payrollChartState.mode === 'live' ? 'Live data' : 'Preview data' }}
+            </span>
+            <p>{{ payrollChartState.note }}</p>
+          </div>
+
+          <div class="dashboard-chart-wrap">
             <ngx-charts-bar-vertical
-              [view]="view"
+              [view]="barChartView"
               [scheme]="colorScheme"
-              [results]="single"
+              [results]="payrollChartData"
               [gradient]="gradient"
               [xAxis]="showXAxis"
               [yAxis]="showYAxis"
@@ -92,78 +138,161 @@
             >
             </ngx-charts-bar-vertical>
           </div>
-        </div>
-      </div>
-      <div class="col-12">
-        <div class="card">
-          <div class="card-header">
-            <h4>Employees by departments</h4>
+        </article>
+
+        <article class="card dashboard-chart-card">
+          <div class="dashboard-section-head">
+            <div>
+              <span>Workforce mix</span>
+              <h3>Employees by gender</h3>
+            </div>
+            <a routerLink="/employee" class="dashboard-section-link">Open people ops</a>
           </div>
-          <div class="card-body" style="position: relative">
+
+          <div class="dashboard-chart-meta">
+            <span
+              class="dashboard-chart-badge"
+              [class.is-preview]="workforceChartState.mode === 'preview'"
+            >
+              {{ workforceChartState.mode === 'live' ? 'Live data' : 'Preview data' }}
+            </span>
+            <p>{{ workforceChartState.note }}</p>
+          </div>
+
+          <div class="dashboard-chart-wrap dashboard-chart-wrap-compact">
             <ngx-charts-pie-chart
-              [view]="view2"
+              [view]="pieChartView"
               [scheme]="colorScheme2"
-              [results]="single"
+              [results]="workforceChartData"
               [gradient]="gradient2"
               [legend]="showLegend2"
               [legendPosition]="legendPosition2"
               [labels]="showLabels2"
               [doughnut]="isDoughnut2"
-              (select)="onSelect($event)"
-              (activate)="onActivate($event)"
-              (deactivate)="onDeactivate($event)"
             >
             </ngx-charts-pie-chart>
           </div>
-        </div>
+        </article>
       </div>
-    </div>
-    <!--     <div class="row">
-      <div class="col-12 col-xl-4">
-        <div class="card">
-          <div class="card-header">
-            <h4>Profile Visit</h4>
-          </div>
-          <div class="card-body"></div>
-        </div>
-      </div>
-      <div class="col-12 col-xl-8">
-        <div class="card">
-          <div class="card-header">
-            <h4>Latest Comments</h4>
-          </div>
-          <div class="card-body">
-            <div class="table-responsive"></div>
+
+      <article class="card dashboard-activity-card">
+        <div class="dashboard-section-head">
+          <div>
+            <span>Operational queue</span>
+            <h3>Priority reviews</h3>
           </div>
         </div>
-      </div>
-    </div> -->
-  </div>
-  <div class="col-12 col-lg-3">
-    <div class="card">
-      <div class="card-body py-4 px-5">
-        <div class="d-flex align-items-center">
-          <div class="avatar avatar-xl">
-            <img src="assets/images/faces/1.jpg" alt="Face 1" />
+
+        <div class="dashboard-activity-list" *ngIf="priorityItems.length; else priorityEmpty">
+          <a
+            class="dashboard-activity-item"
+            *ngFor="let item of priorityItems"
+            [routerLink]="item.route"
+          >
+            <div>
+              <strong>{{ item.title }}</strong>
+              <p>{{ item.description }}</p>
+            </div>
+            <span>{{ item.meta }}</span>
+          </a>
+        </div>
+
+        <ng-template #priorityEmpty>
+          <div class="dashboard-card-empty">
+            No priority items are available yet. As dated records arrive, this queue will highlight the next actions.
           </div>
-          <div class="ms-3 name">
-            <h5 class="font-bold">Administrator</h5>
-            <h6 class="text-muted mb-0">@admins</h6>
+        </ng-template>
+      </article>
+    </div>
+
+    <aside class="dashboard-side">
+      <article class="card dashboard-command-card">
+        <div class="dashboard-section-head">
+          <div>
+            <span>Command center</span>
+            <h3>Data footprint</h3>
           </div>
         </div>
-      </div>
-    </div>
-    <div class="card">
-      <div class="card-header">
-        <h4>Recent Messages</h4>
-      </div>
-      <div class="card-content pb-4"></div>
-    </div>
-    <div class="card">
-      <div class="card-header">
-        <h4>Visitors Profile</h4>
-      </div>
-      <div class="card-body" style="position: relative"></div>
-    </div>
+
+        <div class="dashboard-command-grid">
+          <div>
+            <span>Tracked records</span>
+            <strong>{{ recordFootprintLabel }}</strong>
+          </div>
+          <div>
+            <span>Live modules</span>
+            <strong>{{ activeModuleCount }}</strong>
+          </div>
+          <div>
+            <span>Items needing review</span>
+            <strong>{{ attentionCountLabel }}</strong>
+          </div>
+          <div>
+            <span>Last sync</span>
+            <strong>{{ lastUpdatedLabel }}</strong>
+          </div>
+        </div>
+
+        <div class="dashboard-command-actions">
+          <a routerLink="/announcement" class="btn btn-light">Announcements</a>
+          <a routerLink="/training" class="btn btn-light">Training</a>
+        </div>
+      </article>
+
+      <article class="card dashboard-focus-card">
+        <div class="dashboard-section-head">
+          <div>
+            <span>Execution focus</span>
+            <h3>Progress signals</h3>
+          </div>
+        </div>
+
+        <div class="dashboard-focus-list" *ngIf="focusAreas.length; else focusEmpty">
+          <div class="dashboard-focus-item" *ngFor="let item of focusAreas">
+            <div class="dashboard-focus-top">
+              <strong>{{ item.label }}</strong>
+              <span>{{ item.progress }}%</span>
+            </div>
+            <p>{{ item.description }}</p>
+            <div class="dashboard-progress">
+              <span [style.width.%]="item.progress"></span>
+            </div>
+          </div>
+        </div>
+
+        <ng-template #focusEmpty>
+          <div class="dashboard-card-empty">
+            Progress signals will appear once the dashboard can measure module data.
+          </div>
+        </ng-template>
+      </article>
+
+      <article class="card dashboard-timeline-card">
+        <div class="dashboard-section-head">
+          <div>
+            <span>Activity feed</span>
+            <h3>Latest updates</h3>
+          </div>
+        </div>
+
+        <div class="dashboard-timeline" *ngIf="timeline.length; else timelineEmpty">
+          <div class="dashboard-timeline-item" *ngFor="let item of timeline">
+            <span class="dashboard-timeline-time" [ngClass]="'tone-' + item.tone">
+              {{ item.stamp }}
+            </span>
+            <div>
+              <strong>{{ item.title }}</strong>
+              <p>{{ item.description }}</p>
+            </div>
+          </div>
+        </div>
+
+        <ng-template #timelineEmpty>
+          <div class="dashboard-card-empty">
+            Recent dated activity will appear here as soon as modules receive timeline-worthy records.
+          </div>
+        </ng-template>
+      </article>
+    </aside>
   </div>
 </section>

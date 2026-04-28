@@ -1,150 +1,382 @@
-<div class="page-heading">
-  <section class="section">
-    <div class="card">
-      <div class="card-header">
-        <h2>Contract Types</h2>
-      </div>
-      <div class="card-body">
-        <div class="dataTable-container">
+<div class="page-heading ops-page">
+  <section class="ops-shell">
+    <article class="card ops-hero">
+      <div class="ops-hero-copy">
+        <span class="ops-eyebrow">Policy framework</span>
+        <h2>Manage contract types with clearer reuse and less ambiguity.</h2>
+        <p>
+          Maintain the agreement models used across employment, consulting, and
+          fixed-term work while seeing which types are actually active.
+        </p>
+
+        <div class="ops-hero-actions">
           <button
             type="button"
-            class="btn btn-success btn-sm"
+            class="btn btn-primary"
             data-bs-toggle="modal"
-            data-bs-target="#add"
+            data-bs-target="#contractTypeCrudModal"
+            (click)="openCreateModal()"
           >
-            <i class="fas fa-plus-square"></i> Create
+            <i class="bi bi-plus-square-fill"></i>
+            Create contract type
           </button>
-          <table
-            class="table table-bordered"
-            id="table"
-            width="100%"
-            cellspacing="0"
+          <button
+            type="button"
+            class="btn btn-light"
+            (click)="refreshContractTypes()"
+            [disabled]="loading"
           >
-            <thead>
-              <tr>
-                <th>Contract Type</th>
-                <th></th>
-              </tr>
-            </thead>
-            <tfoot>
-              <tr>
-                <th>Contract Type</th>
-                <th></th>
-              </tr>
-            </tfoot>
-            <tbody>
-              <tr *ngFor="let c of contractType$">
-                <td>{{ c.name }}</td>
-                <td>
-                  <button
-                    type="button"
-                    data-bs-toggle="modal"
-                    (click)="edit(c.id)"
-                    data-bs-target="#edit"
-                    class="btn btn-warning btn-sm"
-                  >
-                    <i class="fas fa-edit"></i>
-                  </button>
-                  <button
-                    type="button"
-                    class="btn btn-danger btn-sm"
-                    (click)="delete(c.id)"
-                  >
-                    <i class="fas fa-trash-alt"></i>
-                  </button>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+            <i class="bi bi-arrow-repeat"></i>
+            Refresh
+          </button>
+        </div>
 
-          <div
-            class="modal fade text-left"
-            id="edit"
-            tabindex="-1"
-            aria-labelledby="myModalLabel1"
-            style="display: none"
-            aria-hidden="true"
-          >
-            <div
-              class="modal-dialog modal-dialog-scrollable modal-lg"
-              role="document"
-            >
-              <div class="modal-content">
-                <div class="modal-header">
-                  <h5 class="modal-title" id="myModalLabel1">Edit</h5>
-                  <button
-                    type="button"
-                    class="close rounded-pill"
-                    data-bs-dismiss="modal"
-                    aria-label="Close"
-                  >
-                    <i data-feather="x"></i>
-                  </button>
-                </div>
-                <div class="modal-body">
-                  <app-edit-contract-type
-                    (closeModalEvent)="closeModalEdit()"
-                    [id]="id"
-                  ></app-edit-contract-type>
-                </div>
-                <div class="modal-footer">
-                  <button
-                    type="button"
-                    class="btn closeEdit"
-                    data-bs-dismiss="modal"
-                  >
-                    <i class="bx bx-x d-block d-sm-none"></i>
-                    <span class="d-none d-sm-block">Close</span>
-                  </button>
-                </div>
-              </div>
-            </div>
+        <div class="ops-hero-notice" *ngIf="loadError">{{ loadError }}</div>
+      </div>
+
+      <div class="ops-hero-panel">
+        <span class="ops-panel-kicker">Usage pulse</span>
+        <h3>How active the contract type library is right now</h3>
+
+        <div class="ops-metric-grid">
+          <div class="ops-metric-card">
+            <span>Total types</span>
+            <strong>{{ totalContractTypesCount }}</strong>
+            <p>Agreement models currently tracked in the backend.</p>
           </div>
-
-          <div
-            class="modal fade text-left"
-            id="add"
-            tabindex="-1"
-            aria-labelledby="myModalLabel1"
-            style="display: none"
-            aria-hidden="true"
-          >
-            <div
-              class="modal-dialog modal-dialog-scrollable modal-lg"
-              role="document"
-            >
-              <div class="modal-content">
-                <div class="modal-header">
-                  <h5 class="modal-title" id="myModalLabel1">Create</h5>
-                  <button
-                    type="button"
-                    class="close rounded-pill"
-                    data-bs-dismiss="modal"
-                    aria-label="Close"
-                  >
-                    <i data-feather="x"></i>
-                  </button>
-                </div>
-                <div class="modal-body">
-                  <app-add-contract-type
-                    (closeModalEvent)="closeModalAdd()"
-                  ></app-add-contract-type>
-                </div>
-                <div class="modal-footer">
-                  <button
-                    type="button"
-                    class="btn closeAdd"
-                    data-bs-dismiss="modal"
-                  >
-                    <i class="bx bx-x d-block d-sm-none"></i>
-                    <span class="d-none d-sm-block">Close</span>
-                  </button>
-                </div>
-              </div>
-            </div>
+          <div class="ops-metric-card">
+            <span>Active types</span>
+            <strong>{{ activeContractTypesCount }}</strong>
+            <p>Contract types already referenced by at least one contract.</p>
           </div>
         </div>
+
+        <div class="ops-progress-wrap">
+          <div class="ops-progress-top">
+            <span>Active coverage</span>
+            <strong>{{ activeCoverage }}%</strong>
+          </div>
+          <div class="ops-progress-track">
+            <span [style.width.%]="activeCoverage"></span>
+          </div>
+          <p>
+            {{ unusedContractTypesCount }} type{{ unusedContractTypesCount === 1 ? '' : 's' }} currently have no contracts attached.
+          </p>
+        </div>
       </div>
+    </article>
+
+    <div class="ops-stat-grid">
+      <article class="card ops-stat-card tone-primary">
+        <span>Contract types</span>
+        <strong>{{ totalContractTypesCount }}</strong>
+        <p>Total agreement models available to operations teams.</p>
+      </article>
+
+      <article class="card ops-stat-card tone-secondary">
+        <span>In use</span>
+        <strong>{{ activeContractTypesCount }}</strong>
+        <p>Types that already support at least one active contract record.</p>
+      </article>
+
+      <article class="card ops-stat-card tone-warning">
+        <span>Unused types</span>
+        <strong>{{ unusedContractTypesCount }}</strong>
+        <p>Records that may need activation, cleanup, or naming review.</p>
+      </article>
+
+      <article class="card ops-stat-card tone-danger">
+        <span>Alternative models</span>
+        <strong>{{ alternativeContractTypesCount }}</strong>
+        <p>Types used for non-standard hiring or engagement patterns.</p>
+      </article>
+    </div>
+
+    <article class="card ops-toolbar-card">
+      <div class="ops-toolbar">
+        <label class="ops-search-field">
+          <i class="bi bi-search"></i>
+          <input
+            type="text"
+            [ngModel]="searchTerm"
+            (ngModelChange)="onSearchTermChange($event)"
+            placeholder="Search contract type names"
+          />
+        </label>
+
+        <div class="ops-toolbar-controls">
+          <label>
+            <span>Filter</span>
+            <select
+              [ngModel]="activeFilter"
+              (ngModelChange)="onFilterChange($event)"
+            >
+              <option value="all">All contract types</option>
+              <option value="in-use">In use</option>
+              <option value="unused">Unused</option>
+              <option value="alternative">Alternative models</option>
+            </select>
+          </label>
+
+          <label>
+            <span>Sort</span>
+            <select
+              [ngModel]="activeSort"
+              (ngModelChange)="onSortChange($event)"
+            >
+              <option value="quality">Activity</option>
+              <option value="name-asc">Name A-Z</option>
+              <option value="usage-desc">Usage count</option>
+            </select>
+          </label>
+        </div>
+      </div>
+
+      <div class="ops-toolbar-footer">
+        <span>{{ filteredResultsLabel }}</span>
+        <span>
+          {{ featuredContractType ? featuredContractType.name : 'No contract type selected' }}
+        </span>
+      </div>
+    </article>
+
+    <div class="ops-layout">
+      <div class="ops-main">
+        <div class="ops-loading-grid" *ngIf="loading; else contractTypeReady">
+          <div class="ops-skeleton-card" *ngFor="let item of loadingPlaceholders"></div>
+        </div>
+
+        <ng-template #contractTypeReady>
+          <div class="ops-grid" *ngIf="filteredContractTypes.length; else contractTypeEmpty">
+            <article
+              class="card ops-card"
+              *ngFor="let item of filteredContractTypes; trackBy: trackByContractTypeId"
+              [class.is-active]="featuredContractType ? featuredContractType.id === item.id : false"
+              (click)="selectContractType(item)"
+              tabindex="0"
+              role="button"
+            >
+              <div class="ops-card-head">
+                <div>
+                  <span class="ops-panel-kicker">Contract type</span>
+                  <h3>{{ item.name }}</h3>
+                </div>
+                <span class="ops-status" [ngClass]="'tone-' + item.qualityTone">
+                  {{ item.qualityLabel }}
+                </span>
+              </div>
+
+              <p>{{ item.summary }}</p>
+
+              <div class="ops-progress-wrap">
+                <div class="ops-progress-top">
+                  <span>Activity score</span>
+                  <strong>{{ item.qualityScore }}%</strong>
+                </div>
+                <div class="ops-progress-track">
+                  <span [style.width.%]="item.qualityScore"></span>
+                </div>
+              </div>
+
+              <div class="ops-chip-row">
+                <span class="ops-chip">
+                  {{ item.usageCount }} contract{{ item.usageCount === 1 ? '' : 's' }}
+                </span>
+                <span class="ops-chip">
+                  {{ item.alternative ? 'Alternative model' : 'Core model' }}
+                </span>
+              </div>
+
+              <div class="ops-card-actions">
+                <button
+                  type="button"
+                  class="btn btn-light btn-sm"
+                  data-bs-toggle="modal"
+                  data-bs-target="#contractTypeCrudModal"
+                  (click)="openEditModal(item); $event.stopPropagation()"
+                >
+                  <i class="bi bi-pencil-square"></i>
+                  Edit
+                </button>
+                <button
+                  type="button"
+                  class="btn btn-light btn-sm"
+                  (click)="deleteContractType(item); $event.stopPropagation()"
+                  [disabled]="deletingId === item.id"
+                >
+                  <i class="bi bi-trash3"></i>
+                  {{ deletingId === item.id ? 'Deleting...' : 'Delete' }}
+                </button>
+              </div>
+            </article>
+          </div>
+        </ng-template>
+
+        <ng-template #contractTypeEmpty>
+          <article class="card ops-empty-card">
+            <span class="ops-empty-kicker">No matching contract types</span>
+            <h3>The current filters do not match any contract type.</h3>
+            <p>
+              Reset the search or create a new agreement model to continue building the library.
+            </p>
+            <button
+              type="button"
+              class="btn btn-primary"
+              data-bs-toggle="modal"
+              data-bs-target="#contractTypeCrudModal"
+              (click)="openCreateModal()"
+            >
+              <i class="bi bi-plus-square-fill"></i>
+              Create contract type
+            </button>
+          </article>
+        </ng-template>
+      </div>
+
+      <aside class="ops-side">
+        <article class="card ops-panel-card" *ngIf="featuredContractType; else emptyContractTypePanel">
+          <div class="ops-panel-head">
+            <div>
+              <span>Selected contract type</span>
+              <h3>{{ featuredContractType.name }}</h3>
+            </div>
+            <span class="ops-status" [ngClass]="'tone-' + featuredContractType.qualityTone">
+              {{ featuredContractType.qualityLabel }}
+            </span>
+          </div>
+
+          <p>{{ featuredContractType.summary }}</p>
+
+          <div class="ops-fact-grid">
+            <div>
+              <span class="ops-detail-label">Usage count</span>
+              <strong>{{ featuredContractType.usageCount }}</strong>
+            </div>
+            <div>
+              <span class="ops-detail-label">Model type</span>
+              <strong>{{ featuredContractType.alternative ? 'Alternative' : 'Core' }}</strong>
+            </div>
+          </div>
+
+          <div class="ops-panel-note accent">
+            <span class="ops-detail-label">Next action</span>
+            <p>
+              {{ featuredContractType.inUse
+                ? 'Keep the naming stable so downstream contracts remain consistent and easy to report on.'
+                : 'Decide whether this model should be assigned to new contracts or cleaned up if it is obsolete.' }}
+            </p>
+          </div>
+
+          <button
+            type="button"
+            class="btn btn-primary"
+            data-bs-toggle="modal"
+            data-bs-target="#contractTypeCrudModal"
+            (click)="openEditModal(featuredContractType)"
+          >
+            <i class="bi bi-pencil-square"></i>
+            Edit selected type
+          </button>
+        </article>
+
+        <ng-template #emptyContractTypePanel>
+          <article class="card ops-panel-card">
+            <span class="ops-empty-kicker">Contract type preview</span>
+            <h3>Select a contract type to inspect it here.</h3>
+            <p>
+              The side panel highlights current usage and whether the type is part of the core model set.
+            </p>
+          </article>
+        </ng-template>
+      </aside>
     </div>
   </section>
+</div>
+
+<div
+  class="modal fade text-left"
+  id="contractTypeCrudModal"
+  tabindex="-1"
+  aria-labelledby="contractTypeCrudModalLabel"
+  aria-hidden="true"
+>
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content ops-modal-content">
+      <div class="ops-modal-header">
+        <div>
+          <span class="ops-eyebrow">Contract type editor</span>
+          <h5 class="modal-title ops-modal-title" id="contractTypeCrudModalLabel">
+            {{ modalTitle }}
+          </h5>
+          <p class="ops-modal-copy">{{ modalSubtitle }}</p>
+        </div>
+        <button
+          type="button"
+          class="ops-modal-close"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+        >
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+
+      <div class="ops-modal-body">
+        <form [formGroup]="contractTypeForm" (ngSubmit)="saveContractType()">
+          <div class="ops-form-grid">
+            <section class="ops-form-section">
+              <span class="ops-panel-kicker">Type details</span>
+              <h6>Core information</h6>
+
+              <div class="ops-form-field">
+                <label for="contractTypeName">Contract type name</label>
+                <input id="contractTypeName" type="text" formControlName="name" />
+                <div class="ops-field-error" *ngIf="submitted && contractTypeForm.get('name').invalid">
+                  Contract type name is required.
+                </div>
+              </div>
+            </section>
+
+            <aside class="ops-form-preview">
+              <span class="ops-panel-kicker">Live preview</span>
+              <h4>{{ draftName }}</h4>
+              <p>
+                Use this contract type as a stable agreement model across the contract desk and employee records.
+              </p>
+
+              <div class="ops-progress-wrap">
+                <div class="ops-progress-top">
+                  <span>Readiness</span>
+                  <strong>{{ draftQuality.score }}%</strong>
+                </div>
+                <div class="ops-progress-track">
+                  <span [style.width.%]="draftQuality.score"></span>
+                </div>
+              </div>
+
+              <div class="ops-chip-row">
+                <span class="ops-chip">Core library entry</span>
+                <span class="ops-status" [ngClass]="'tone-' + draftQuality.tone">
+                  {{ draftQuality.label }}
+                </span>
+              </div>
+            </aside>
+          </div>
+
+          <div class="modal-footer">
+            <button
+              id="contractTypeCrudModalClose"
+              type="button"
+              class="btn btn-light"
+              data-bs-dismiss="modal"
+            >
+              Close
+            </button>
+            <button type="submit" class="btn btn-primary" [disabled]="saving">
+              {{ saving ? 'Saving...' : modalMode === 'create' ? 'Create type' : 'Save changes' }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
 </div>

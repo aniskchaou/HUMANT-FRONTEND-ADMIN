@@ -1,76 +1,418 @@
-<div class="page-heading">
-  <section class="section">
-    <div class="card">
-      <div class="card-header">
-        <h2>Avance sur salaire</h2>
-      </div>
-      <div class="card-body">
-        <div class="dataTable-container">
-          <button
-            type="button"
-            class="btn btn-success btn-sm"
-            data-bs-toggle="modal"
-            data-bs-target="#add"
-          >
-            <i class="fas fa-plus-square"></i>
-          </button>
-          <table
-            id="table"
-            cellpadding="0"
-            cellspacing="0"
-            border="0"
-            class="datatable-1 table table-bordered table-striped display"
-            width="100%"
-          >
-            <thead>
-              <tr>
-                <th>Name</th>
-                <th>Amount</th>
-                <th>Date</th>
-                <th>Remark</th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr class="odd gradeX" *ngFor="let a of salary$">
-                <td>{{ a.employeeName }}</td>
-                <th>{{ a.amount }}</th>
-                <td>{{ a.date }}</td>
-                <td>{{ a.remarks }}</td>
-                <td>
-                  <button
-                    type="button"
-                    data-bs-toggle="modal"
-                    (click)="edit(a.id)"
-                    data-bs-target="#edit"
-                    class="btn btn-warning btn-sm"
-                  >
-                    <i class="fas fa-edit"></i>
-                  </button>
-                  <button
-                    type="button"
-                    class="btn btn-danger btn-sm"
-                    (click)="delete(a.id)"
-                  >
-                    <i class="fas fa-trash-alt"></i>
-                  </button>
-                </td>
-              </tr>
-            </tbody>
-            <tfoot>
-              <tr>
-                <th>Name</th>
-                <th>Amount</th>
-                <th>Date</th>
-                <th>Remark</th>
-                <th></th>
-              </tr>
-            </tfoot>
-          </table>
+<div class="page-heading ops-page">
+  <section class="ops-shell">
+    <article class="card ops-hero">
+      <div class="ops-hero-copy">
+        <span class="ops-eyebrow">Advance Salary</span>
+        <h2>Handle payroll advances with more visibility into amount, reason, and employee context.</h2>
+        <p>
+          Review advance salary requests from one routed workspace built for payroll coordination instead of legacy modal fragments.
+        </p>
 
-          <app-advance-salary-modal [id]="id"></app-advance-salary-modal>
+        <div class="ops-hero-actions">
+          <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#advanceCrudModal" (click)="openCreateModal()">
+            <i class="bi bi-plus-square-fill"></i>
+            Create advance
+          </button>
+          <button type="button" class="btn btn-light" (click)="refreshAdvances()" [disabled]="loading">
+            <i class="bi bi-arrow-repeat"></i>
+            Refresh
+          </button>
+        </div>
+
+        <div class="ops-hero-notice" *ngIf="loadError">{{ loadError }}</div>
+      </div>
+
+      <div class="ops-hero-panel">
+        <span class="ops-panel-kicker">Advance pulse</span>
+        <h3>Current advance requests and payroll exposure</h3>
+
+        <div class="ops-metric-grid">
+          <div class="ops-metric-card">
+            <span>Average advance</span>
+            <strong>{{ averageAdvanceAmount | number:'1.0-0' }}</strong>
+            <p>Average salary advance currently tracked across the workspace.</p>
+          </div>
+          <div class="ops-metric-card">
+            <span>High-value</span>
+            <strong>{{ highValueAdvanceCount }}</strong>
+            <p>Advance requests that need tighter payroll follow-up.</p>
+          </div>
         </div>
       </div>
+    </article>
+
+    <div class="ops-stat-grid">
+      <article class="card ops-stat-card tone-primary">
+        <span>Requests</span>
+        <strong>{{ totalAdvancesCount }}</strong>
+        <p>Total salary advance records currently managed by payroll.</p>
+      </article>
+      <article class="card ops-stat-card tone-secondary">
+        <span>High-value</span>
+        <strong>{{ highValueAdvanceCount }}</strong>
+        <p>Advance requests above the normal working threshold.</p>
+      </article>
+      <article class="card ops-stat-card tone-warning">
+        <span>Documented</span>
+        <strong>{{ documentedAdvanceCount }}</strong>
+        <p>Requests that already include enough payroll note context.</p>
+      </article>
+      <article class="card ops-stat-card tone-danger">
+        <span>Average amount</span>
+        <strong>{{ averageAdvanceAmount | number:'1.0-0' }}</strong>
+        <p>Typical advance value currently moving through the process.</p>
+      </article>
+    </div>
+
+    <article class="card ops-toolbar-card">
+      <div class="ops-toolbar">
+        <label class="ops-search-field">
+          <i class="bi bi-search"></i>
+          <input type="text" [ngModel]="searchTerm" (ngModelChange)="onSearchTermChange($event)" placeholder="Search employees, reasons, or notes" />
+        </label>
+
+        <div class="ops-toolbar-controls">
+          <label>
+            <span>Filter</span>
+            <select [ngModel]="activeFilter" (ngModelChange)="onFilterChange($event)">
+              <option value="all">All requests</option>
+              <option value="high-value">High-value</option>
+              <option value="documented">Documented</option>
+              <option value="needs-note">Needs note</option>
+            </select>
+          </label>
+
+          <label>
+            <span>Sort</span>
+            <select [ngModel]="activeSort" (ngModelChange)="onSortChange($event)">
+              <option value="latest-date">Latest request date</option>
+              <option value="amount-desc">Highest amount</option>
+              <option value="employee-asc">Employee A-Z</option>
+            </select>
+          </label>
+        </div>
+      </div>
+
+      <div class="ops-toolbar-footer">
+        <span>{{ filteredResultsLabel }}</span>
+        <span>{{ featuredAdvance ? featuredAdvance.employeeName : 'No request selected' }}</span>
+      </div>
+    </article>
+
+    <div class="ops-layout">
+      <div class="ops-main">
+        <div class="ops-loading-grid" *ngIf="loading; else advanceReady">
+          <div class="ops-skeleton-card" *ngFor="let item of loadingPlaceholders"></div>
+        </div>
+
+        <ng-template #advanceReady>
+          <div class="ops-grid" *ngIf="filteredAdvances.length; else advanceEmpty">
+            <article
+              class="card ops-card"
+              *ngFor="let item of filteredAdvances; trackBy: trackByAdvanceId"
+              [class.is-active]="featuredAdvance ? featuredAdvance.id === item.id : false"
+              (click)="openDetailsModal(item)"
+              (keydown.enter)="openDetailsModal(item)"
+              (keydown.space)="$event.preventDefault(); openDetailsModal(item)"
+              tabindex="0"
+              role="button"
+              aria-label="Open advance request details"
+            >
+              <div class="ops-card-head">
+                <div>
+                  <span class="ops-panel-kicker">Advance request</span>
+                  <h3>{{ item.employeeName }}</h3>
+                </div>
+                <span class="ops-status" [ngClass]="'tone-' + item.qualityTone">{{ item.qualityLabel }}</span>
+              </div>
+
+              <p>{{ item.summary }}</p>
+
+              <div class="ops-progress-wrap">
+                <div class="ops-progress-top">
+                  <span>Request readiness</span>
+                  <strong>{{ item.qualityScore }}%</strong>
+                </div>
+                <div class="ops-progress-track">
+                  <span [style.width.%]="item.qualityScore"></span>
+                </div>
+              </div>
+
+              <div class="ops-chip-row">
+                <span class="ops-chip">{{ item.reason }}</span>
+                <span class="ops-chip">{{ item.amount | number:'1.0-0' }}</span>
+              </div>
+
+              <div class="ops-card-view">
+                <span>Click to view details</span>
+                <i class="bi bi-arrow-up-right"></i>
+              </div>
+
+              <div class="ops-card-actions">
+                <button type="button" class="btn btn-light btn-sm" data-bs-toggle="modal" data-bs-target="#advanceCrudModal" (click)="openEditModal(item); $event.stopPropagation()">
+                  <i class="bi bi-pencil-square"></i>
+                  Edit
+                </button>
+                <button type="button" class="btn btn-light btn-sm" (click)="deleteAdvance(item); $event.stopPropagation()" [disabled]="deletingId === item.id">
+                  <i class="bi bi-trash3"></i>
+                  {{ deletingId === item.id ? 'Deleting...' : 'Delete' }}
+                </button>
+              </div>
+            </article>
+          </div>
+        </ng-template>
+
+        <ng-template #advanceEmpty>
+          <article class="card ops-empty-card">
+            <span class="ops-empty-kicker">No matching advance requests</span>
+            <h3>The current search or filter does not match any salary advance.</h3>
+            <p>Reset the filters or create an advance request to rebuild the payroll advance view.</p>
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#advanceCrudModal" (click)="openCreateModal()">
+              <i class="bi bi-plus-square-fill"></i>
+              Create advance
+            </button>
+          </article>
+        </ng-template>
+      </div>
+
+      <aside class="ops-side">
+        <article class="card ops-panel-card" *ngIf="featuredAdvance; else emptyAdvancePanel">
+          <div class="ops-panel-head">
+            <div>
+              <span>Selected request</span>
+              <h3>{{ featuredAdvance.employeeName }}</h3>
+            </div>
+            <span class="ops-status" [ngClass]="'tone-' + featuredAdvance.qualityTone">{{ featuredAdvance.qualityLabel }}</span>
+          </div>
+
+          <p>{{ featuredAdvance.summary }}</p>
+
+          <div class="ops-fact-grid">
+            <div>
+              <span class="ops-detail-label">Reason</span>
+              <strong>{{ featuredAdvance.reason }}</strong>
+            </div>
+            <div>
+              <span class="ops-detail-label">Amount</span>
+              <strong>{{ featuredAdvance.amount | number:'1.0-0' }}</strong>
+            </div>
+            <div>
+              <span class="ops-detail-label">Request date</span>
+              <strong>{{ featuredAdvance.dateLabel }}</strong>
+            </div>
+            <div>
+              <span class="ops-detail-label">Documented</span>
+              <strong>{{ featuredAdvance.documented ? 'Yes' : 'No' }}</strong>
+            </div>
+          </div>
+
+          <div class="ops-note-card">
+            <h4>Recommendation</h4>
+            <p>{{ featuredRecommendation }}</p>
+          </div>
+
+          <div class="ops-note-card accent-soft">
+            <h4>Next action</h4>
+            <p>{{ featuredNextAction }}</p>
+          </div>
+
+          <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#advanceCrudModal" (click)="openEditModal(featuredAdvance)">
+            <i class="bi bi-pencil-square"></i>
+            Edit selected advance
+          </button>
+        </article>
+
+        <ng-template #emptyAdvancePanel>
+          <article class="card ops-panel-card">
+            <span class="ops-empty-kicker">Advance preview</span>
+            <h3>Select an advance request to inspect it here.</h3>
+            <p>The side panel highlights the amount, reason, and payroll follow-up guidance.</p>
+          </article>
+        </ng-template>
+      </aside>
     </div>
   </section>
+</div>
+
+<div class="modal fade text-left" id="advanceDetailsModal" tabindex="-1" aria-labelledby="advanceDetailsModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content ops-modal-content" *ngIf="featuredAdvance">
+      <div class="ops-modal-header">
+        <div>
+          <span class="ops-eyebrow">Advance details</span>
+          <h5 class="modal-title ops-modal-title" id="advanceDetailsModalLabel">{{ featuredAdvance.employeeName }}</h5>
+          <p class="ops-modal-copy">Review the requested amount, reason, and payroll note for the selected advance salary record.</p>
+        </div>
+
+        <div class="ops-details-actions">
+          <span class="ops-status" [ngClass]="'tone-' + featuredAdvance.qualityTone">{{ featuredAdvance.qualityLabel }}</span>
+          <button type="button" class="ops-modal-close" data-bs-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="ops-modal-body">
+        <div class="ops-details-layout">
+          <div class="ops-details-main">
+            <section class="ops-details-section">
+              <span class="ops-panel-kicker">Advance summary</span>
+              <h6>Payroll request overview</h6>
+              <p class="ops-detail-copy">{{ featuredAdvance.summary }}</p>
+            </section>
+
+            <div class="ops-details-metrics">
+              <article class="ops-details-metric">
+                <span class="ops-detail-label">Amount</span>
+                <strong>{{ featuredAdvance.amount | number:'1.0-0' }}</strong>
+              </article>
+              <article class="ops-details-metric">
+                <span class="ops-detail-label">Reason</span>
+                <strong>{{ featuredAdvance.reason }}</strong>
+              </article>
+              <article class="ops-details-metric">
+                <span class="ops-detail-label">Date</span>
+                <strong>{{ featuredAdvance.dateLabel }}</strong>
+              </article>
+            </div>
+
+            <section class="ops-details-section">
+              <span class="ops-panel-kicker">Payroll note</span>
+              <h6>Recorded context</h6>
+              <p class="ops-detail-copy">{{ featuredAdvance.remarks || 'No remark has been recorded for this advance yet.' }}</p>
+            </section>
+
+            <section class="ops-details-section accent-soft">
+              <span class="ops-panel-kicker">Recommendation</span>
+              <h6>Follow-up</h6>
+              <p>{{ featuredRecommendation }}</p>
+            </section>
+          </div>
+
+          <aside class="ops-details-side">
+            <section class="ops-details-facts">
+              <span class="ops-panel-kicker">Quick facts</span>
+              <h6>Advance overview</h6>
+
+              <div class="ops-details-fact">
+                <strong>Employee</strong>
+                <span>{{ featuredAdvance.employeeName }}</span>
+              </div>
+              <div class="ops-details-fact">
+                <strong>High-value</strong>
+                <span>{{ featuredAdvance.highValue ? 'Yes' : 'No' }}</span>
+              </div>
+              <div class="ops-details-fact">
+                <strong>Documented</strong>
+                <span>{{ featuredAdvance.documented ? 'Yes' : 'No' }}</span>
+              </div>
+              <div class="ops-details-fact">
+                <strong>Record ID</strong>
+                <span>#{{ featuredAdvance.id }}</span>
+              </div>
+            </section>
+          </aside>
+        </div>
+      </div>
+
+      <div class="ops-modal-footer">
+        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary" data-bs-dismiss="modal" data-bs-toggle="modal" data-bs-target="#advanceCrudModal" (click)="openEditModal(featuredAdvance)">
+          <i class="bi bi-pencil-square"></i>
+          Edit advance
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade text-left" id="advanceCrudModal" tabindex="-1" aria-labelledby="advanceCrudModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content ops-modal-content">
+      <div class="ops-modal-header">
+        <div>
+          <span class="ops-eyebrow">Advance editor</span>
+          <h5 class="modal-title ops-modal-title" id="advanceCrudModalLabel">{{ modalTitle }}</h5>
+          <p class="ops-modal-copy">{{ modalSubtitle }}</p>
+        </div>
+        <button type="button" class="ops-modal-close" data-bs-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+
+      <div class="ops-modal-body">
+        <form [formGroup]="advanceForm" (ngSubmit)="saveAdvance()">
+          <div class="ops-form-grid">
+            <section class="ops-form-section">
+              <span class="ops-panel-kicker">Request setup</span>
+              <h6>Advance information</h6>
+
+              <div class="ops-form-field">
+                <label for="advanceEmployeeId">Employee</label>
+                <select id="advanceEmployeeId" formControlName="employeeId">
+                  <option value="">Select employee</option>
+                  <option *ngFor="let option of employees" [value]="option.id">{{ option.name }}</option>
+                </select>
+                <div class="ops-field-error" *ngIf="submitted && advanceForm.get('employeeId').invalid">Employee is required.</div>
+              </div>
+
+              <div class="ops-form-field">
+                <label for="advanceReason">Reason</label>
+                <input id="advanceReason" type="text" formControlName="reason" placeholder="Example: Medical" />
+                <div class="ops-field-error" *ngIf="submitted && advanceForm.get('reason').invalid">Reason is required.</div>
+              </div>
+
+              <div class="ops-form-split">
+                <div class="ops-form-field">
+                  <label for="advanceAmount">Amount</label>
+                  <input id="advanceAmount" type="number" min="0" formControlName="amount" placeholder="Example: 500" />
+                  <div class="ops-field-error" *ngIf="submitted && advanceForm.get('amount').invalid">Amount is required.</div>
+                </div>
+
+                <div class="ops-form-field">
+                  <label for="advanceDate">Request date</label>
+                  <input id="advanceDate" type="date" formControlName="date" />
+                  <div class="ops-field-error" *ngIf="submitted && advanceForm.get('date').invalid">Request date is required.</div>
+                </div>
+              </div>
+
+              <div class="ops-form-field">
+                <label for="advanceRemarks">Remarks</label>
+                <textarea id="advanceRemarks" rows="4" formControlName="remarks" placeholder="Add payroll note or approval context."></textarea>
+              </div>
+            </section>
+
+            <aside class="ops-form-preview">
+              <span class="ops-panel-kicker">Live preview</span>
+              <h4>{{ draftEmployeeName || 'Employee pending' }}</h4>
+              <p>Advance amount {{ draftAmount | number:'1.0-0' }} with readiness focused on request clarity and note coverage.</p>
+
+              <div class="ops-progress-wrap">
+                <div class="ops-progress-top">
+                  <span>Readiness</span>
+                  <strong>{{ draftQuality.score }}%</strong>
+                </div>
+                <div class="ops-progress-track">
+                  <span [style.width.%]="draftQuality.score"></span>
+                </div>
+              </div>
+
+              <div class="ops-chip-row">
+                <span class="ops-chip">{{ draftQuality.label }}</span>
+                <span class="ops-chip">{{ draftAmount | number:'1.0-0' }}</span>
+              </div>
+            </aside>
+          </div>
+
+          <div class="ops-modal-actions">
+            <button type="button" class="btn btn-light" data-bs-dismiss="modal" id="advanceCrudModalClose">Cancel</button>
+            <button type="submit" class="btn btn-primary" [disabled]="saving">
+              <i class="bi" [ngClass]="saving ? 'bi-arrow-repeat' : 'bi-check2-circle'"></i>
+              {{ saving ? 'Saving...' : modalMode === 'create' ? 'Create advance' : 'Save changes' }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
 </div>

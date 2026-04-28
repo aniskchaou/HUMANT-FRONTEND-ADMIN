@@ -1,3 +1,9 @@
+:host {
+    display: block;
+    --ops-accent: #205c3b;
+    --ops-accent-alt: #4f9d69;
+    --ops-accent-soft: rgba(32, 92, 59, 0.12);
+}
 .btn{
     margin: 5px;
 }

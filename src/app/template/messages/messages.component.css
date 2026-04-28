@@ -1,0 +1,46 @@
+.topbar-empty-state {
+	color: #6d624e;
+	font-size: 0.92rem;
+	padding: 1rem 1.1rem;
+}
+
+.topbar-list-item {
+	align-items: center;
+}
+
+.topbar-list-item.is-read {
+	opacity: 0.72;
+}
+
+.topbar-list-type {
+	color: #8b6b2d;
+	display: block;
+	font-size: 0.72rem;
+	font-weight: 700;
+	letter-spacing: 0.08em;
+	margin-bottom: 0.2rem;
+	text-transform: uppercase;
+}
+
+.topbar-footer-link {
+	color: #2f2415;
+	font-weight: 700;
+	padding: 0.95rem 1.1rem;
+}
+
+.dropdown-footer-block {
+	border-top: 1px solid rgba(55, 47, 34, 0.08);
+	margin-top: 0.35rem;
+}
+
+.accent-orange {
+	background: linear-gradient(180deg, #f29c52, #f4bf7a);
+}
+
+.accent-green {
+	background: linear-gradient(180deg, #4ba96d, #8ccf9f);
+}
+
+.accent-red {
+	background: linear-gradient(180deg, #cf5c5c, #ef9d9d);
+}

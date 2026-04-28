@@ -1,0 +1,253 @@
+<div class="document-shell">
+  <section class="document-hero">
+    <div>
+      <p class="eyebrow">People &amp; Structure</p>
+      <h1>Document Management</h1>
+      <p class="hero-copy">
+        Upload and store employee documents, categorize contracts, IDs, and certificates,
+        control versions, and keep secure access visible from one workspace.
+      </p>
+    </div>
+
+    <div class="hero-controls">
+      <label class="hero-control">
+        <span>Search library</span>
+        <input #searchInput type="text" [value]="searchTerm" (input)="onSearchTermChange(searchInput.value)" />
+      </label>
+
+      <div class="hero-filter-grid">
+        <label class="hero-control">
+          <span>Category</span>
+          <select #categoryFilter [value]="selectedCategory" (change)="onCategoryChange(categoryFilter.value)">
+            <option value="all">All categories</option>
+            <option *ngFor="let option of categoryOptions" [value]="option">{{ toDisplayLabel(option) }}</option>
+          </select>
+        </label>
+
+        <label class="hero-control">
+          <span>Access</span>
+          <select #accessFilter [value]="selectedAccess" (change)="onAccessChange(accessFilter.value)">
+            <option value="all">All access</option>
+            <option *ngFor="let option of accessOptions" [value]="option">{{ toDisplayLabel(option) }}</option>
+          </select>
+        </label>
+
+        <label class="hero-control span-2">
+          <span>Employee</span>
+          <select #employeeFilter [value]="selectedEmployee" (change)="onEmployeeChange(employeeFilter.value)">
+            <option value="all">All employees</option>
+            <option *ngFor="let employee of employees; trackBy: trackByEmployeeId" [value]="employee.id">
+              {{ employee.name }}
+            </option>
+          </select>
+        </label>
+      </div>
+
+      <button type="button" class="hero-refresh" (click)="refreshWorkspace()">Refresh library</button>
+    </div>
+  </section>
+
+  <section class="stats-grid">
+    <article class="stat-card tone-strong">
+      <span class="stat-label">Latest files</span>
+      <strong class="stat-value">{{ latestDocumentsCount }}</strong>
+      <p>Current employee document sets that represent the latest stored version.</p>
+    </article>
+
+    <article class="stat-card tone-critical">
+      <span class="stat-label">Protected files</span>
+      <strong class="stat-value">{{ protectedDocumentsCount }}</strong>
+      <p>Files currently marked for admin-only access.</p>
+    </article>
+
+    <article class="stat-card tone-warning">
+      <span class="stat-label">Archived versions</span>
+      <strong class="stat-value">{{ archivedDocumentsCount }}</strong>
+      <p>Older revisions kept in the library instead of being overwritten.</p>
+    </article>
+
+    <article class="stat-card tone-medium">
+      <span class="stat-label">Versioned sets</span>
+      <strong class="stat-value">{{ versionedCollectionsCount }}</strong>
+      <p>Document groups with two or more retained versions.</p>
+    </article>
+  </section>
+
+  <section *ngIf="loadError" class="workspace-alert">{{ loadError }}</section>
+
+  <section *ngIf="loading" class="loading-grid">
+    <article *ngFor="let placeholder of loadingPlaceholders" class="loading-card"></article>
+  </section>
+
+  <ng-container *ngIf="!loading">
+    <section class="workspace-section">
+      <div class="section-head">
+        <div>
+          <p class="section-kicker">Store</p>
+          <h2>Upload &amp; secure metadata</h2>
+        </div>
+        <button type="button" class="section-action" (click)="startCreate()">New upload</button>
+      </div>
+
+      <div class="workspace-grid two-column">
+        <article class="editor-card">
+          <h3>{{ editorTitle }}</h3>
+          <p class="editor-copy">{{ editorCopy }}</p>
+
+          <form [formGroup]="documentForm" (ngSubmit)="saveDocument()" class="editor-form">
+            <div class="form-grid">
+              <label>
+                <span>Employee</span>
+                <select formControlName="employeeId">
+                  <option value="">Select employee</option>
+                  <option *ngFor="let employee of employees; trackBy: trackByEmployeeId" [value]="employee.id">
+                    {{ employee.name }}
+                  </option>
+                </select>
+              </label>
+
+              <label>
+                <span>Document category</span>
+                <select formControlName="documentCategory">
+                  <option *ngFor="let option of categoryOptions" [value]="option">{{ toDisplayLabel(option) }}</option>
+                </select>
+              </label>
+
+              <label class="span-2">
+                <span>Document name</span>
+                <input type="text" formControlName="documentName" placeholder="Employment contract, passport, safety certificate" />
+              </label>
+
+              <label>
+                <span>Secure access</span>
+                <select formControlName="accessLevel">
+                  <option *ngFor="let option of accessOptions" [value]="option">{{ toDisplayLabel(option) }}</option>
+                </select>
+              </label>
+
+              <label class="file-picker">
+                <span>Stored file</span>
+                <input type="file" (change)="onFileSelected($event)" />
+              </label>
+
+              <label class="span-2">
+                <span>Notes</span>
+                <textarea rows="4" formControlName="notes" placeholder="Capture retention notes, renewal details, or review guidance."></textarea>
+              </label>
+            </div>
+
+            <p class="form-hint">{{ fileHint }}</p>
+            <p *ngIf="submitted && (documentForm.invalid || (requiresFile() && !selectedFile))" class="form-hint error-text">
+              Select an employee, complete the document details, and attach a file for uploads or new versions.
+            </p>
+
+            <div class="editor-actions">
+              <button type="button" class="ghost-button" (click)="startCreate()">Reset</button>
+              <button type="submit" class="primary-button" [disabled]="saving">{{ saveLabel }}</button>
+            </div>
+          </form>
+        </article>
+
+        <article class="list-card-shell">
+          <div class="list-head">
+            <div>
+              <h3>Latest document library</h3>
+              <p>{{ latestDocuments.length }} current document records match the active filters.</p>
+            </div>
+          </div>
+
+          <div *ngIf="!latestDocuments.length" class="empty-state">
+            No current document records match the selected filters yet.
+          </div>
+
+          <div class="stack-list">
+            <article *ngFor="let doc of latestDocuments; trackBy: trackByDocumentId" class="record-card" [ngClass]="'tone-' + doc.tone">
+              <div class="record-topline">
+                <span class="pill">{{ doc.categoryLabel }}</span>
+                <span>{{ doc.accessLabel }}</span>
+              </div>
+
+              <h4>{{ doc.documentName }}</h4>
+              <p>{{ doc.summary }}</p>
+
+              <div class="metric-grid">
+                <div>
+                  <span class="metric-label">Employee</span>
+                  <strong>{{ doc.employeeName }}</strong>
+                </div>
+                <div>
+                  <span class="metric-label">Version</span>
+                  <strong>v{{ doc.versionNumber }}</strong>
+                </div>
+                <div>
+                  <span class="metric-label">File</span>
+                  <strong>{{ doc.originalFileName }}</strong>
+                </div>
+                <div>
+                  <span class="metric-label">Size</span>
+                  <strong>{{ doc.fileSizeLabel }}</strong>
+                </div>
+              </div>
+
+              <div class="record-footer">
+                <span>{{ doc.uploadedAtLabel }} by {{ doc.uploadedBy }}</span>
+                <div class="card-actions">
+                  <button type="button" class="ghost-button" (click)="downloadDocument(doc)">Download</button>
+                  <button type="button" class="ghost-button" (click)="startEdit(doc)">Edit</button>
+                  <button type="button" class="ghost-button" (click)="startVersionUpload(doc)">Next version</button>
+                  <button type="button" class="ghost-button danger-button" [disabled]="deletingId === doc.id" (click)="deleteDocument(doc)">
+                    {{ deletingId === doc.id ? 'Deleting...' : 'Delete' }}
+                  </button>
+                </div>
+              </div>
+            </article>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="workspace-section history-section">
+      <div class="section-head">
+        <div>
+          <p class="section-kicker">Track</p>
+          <h2>Version history</h2>
+        </div>
+      </div>
+
+      <div *ngIf="!filteredDocuments.length" class="empty-state">
+        No document versions match the current filters.
+      </div>
+
+      <div *ngIf="filteredDocuments.length" class="history-table-wrap">
+        <table class="history-table">
+          <thead>
+            <tr>
+              <th>Employee</th>
+              <th>Document</th>
+              <th>Category</th>
+              <th>Access</th>
+              <th>Version</th>
+              <th>Status</th>
+              <th>Uploaded</th>
+              <th>File</th>
+              <th>Notes</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let doc of filteredDocuments; trackBy: trackByDocumentId" [ngClass]="'tone-' + doc.tone">
+              <td>{{ doc.employeeName }}</td>
+              <td>{{ doc.documentName }}</td>
+              <td>{{ doc.categoryLabel }}</td>
+              <td>{{ doc.accessLabel }}</td>
+              <td>v{{ doc.versionNumber }}</td>
+              <td>{{ doc.activeVersion ? 'Latest' : 'Archived' }}</td>
+              <td>{{ doc.uploadedAtLabel }}</td>
+              <td>{{ doc.originalFileName }}</td>
+              <td>{{ doc.notes || 'No notes added.' }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </ng-container>
+</div>

@@ -1,9 +1,240 @@
-<button
-  type="button"
-  class="btn btn-success btn-sm"
-  data-bs-toggle="modal"
-  data-bs-target="#add"
->
-  <i class="fas fa-plus-square"></i>
-</button>
-<app-add-user></app-add-user>
+<div class="account-shell">
+  <section class="account-hero">
+    <div class="account-hero-copy">
+      <span class="account-eyebrow">Access Control</span>
+      <h1>Create login accounts, assign workspace roles, and control who can reach what.</h1>
+      <p>
+        Manage authentication accounts for admins, HR partners, managers, and
+        employees from one permission-aware control surface.
+      </p>
+    </div>
+
+    <div class="account-stat-grid">
+      <article class="account-stat-card tone-admin">
+        <span>Accounts</span>
+        <strong>{{ totalUsersCount }}</strong>
+        <small>Total login accounts currently stored in the backend.</small>
+      </article>
+
+      <article class="account-stat-card tone-hr">
+        <span>Active</span>
+        <strong>{{ activeUsersCount }}</strong>
+        <small>Accounts that can authenticate into the workspace.</small>
+      </article>
+
+      <article class="account-stat-card tone-manager">
+        <span>Admins</span>
+        <strong>{{ adminUsersCount }}</strong>
+        <small>Accounts with full administrative control.</small>
+      </article>
+
+      <article class="account-stat-card tone-employee">
+        <span>Recruiters</span>
+        <strong>{{ recruiterUsersCount }}</strong>
+        <small>Talent-facing accounts handling recruiting and onboarding flows.</small>
+      </article>
+    </div>
+  </section>
+
+  <section class="account-alert" *ngIf="loadError">
+    {{ loadError }}
+  </section>
+
+  <section class="account-grid">
+    <article class="account-panel list-panel">
+      <div class="account-panel-head">
+        <div>
+          <span class="account-eyebrow">Account Directory</span>
+          <h2>{{ filteredResultsLabel }}</h2>
+        </div>
+        <div class="account-panel-actions">
+          <button type="button" class="btn btn-outline-secondary" (click)="refreshWorkspace()" [disabled]="loading">
+            Refresh
+          </button>
+          <button type="button" class="btn btn-primary" (click)="openCreateEditor()">
+            New account
+          </button>
+        </div>
+      </div>
+
+      <div class="account-filter-grid">
+        <label class="account-field">
+          <span>Search</span>
+          <input
+            type="text"
+            [ngModel]="searchTerm"
+            (ngModelChange)="onSearchTermChange($event)"
+            placeholder="Search username, display name, or role"
+          />
+        </label>
+
+        <label class="account-field">
+          <span>Role</span>
+          <select [ngModel]="activeRoleFilter" (ngModelChange)="onRoleFilterChange($event)">
+            <option value="all">All roles</option>
+            <option *ngFor="let profile of roleProfiles" [value]="profile.value">
+              {{ profile.label }}
+            </option>
+          </select>
+        </label>
+
+        <label class="account-field">
+          <span>Status</span>
+          <select [ngModel]="activeStatusFilter" (ngModelChange)="onStatusFilterChange($event)">
+            <option value="all">All statuses</option>
+            <option value="active">Active only</option>
+            <option value="inactive">Inactive only</option>
+          </select>
+        </label>
+      </div>
+
+      <div class="account-state" *ngIf="loading">Loading user accounts...</div>
+      <div class="account-state" *ngIf="!loading && !filteredUsers.length">No user accounts match the current filters.</div>
+
+      <div class="account-list" *ngIf="!loading && filteredUsers.length">
+        <article
+          class="account-card"
+          *ngFor="let item of filteredUsers; trackBy: trackByUserId"
+          [class.is-active]="featuredUser && item.id === featuredUser.id"
+          (click)="selectUser(item)"
+        >
+          <div class="account-card-main">
+            <div>
+              <span class="account-role-pill" [ngClass]="resolveRoleAccent(item.role)">
+                {{ item.roleLabel }}
+              </span>
+              <h3>{{ item.displayName }}</h3>
+              <p>@{{ item.username }}</p>
+              <small>{{ item.companyName }}</small>
+            </div>
+            <span class="account-status-pill" [class.is-inactive]="!item.active">
+              {{ item.statusLabel }}
+            </span>
+          </div>
+
+          <p class="account-card-summary">{{ item.summary }}</p>
+
+          <div class="account-card-actions">
+            <button type="button" class="btn btn-outline-secondary btn-sm" (click)="openEditEditor(item); $event.stopPropagation()">
+              Edit
+            </button>
+            <button
+              type="button"
+              class="btn btn-outline-danger btn-sm"
+              (click)="deleteUser(item); $event.stopPropagation()"
+              [disabled]="deletingId === item.id"
+            >
+              {{ deletingId === item.id ? 'Removing...' : 'Delete' }}
+            </button>
+          </div>
+        </article>
+      </div>
+    </article>
+
+    <article class="account-panel editor-panel">
+      <div class="account-panel-head">
+        <div>
+          <span class="account-eyebrow">Account Editor</span>
+          <h2>{{ editorTitle }}</h2>
+        </div>
+        <span class="account-role-pill" [ngClass]="selectedRoleProfile.accentClass">{{ selectedRoleProfile.label }}</span>
+      </div>
+
+      <p class="editor-copy">{{ editorSubtitle }}</p>
+
+      <form class="account-form" [formGroup]="userForm" (ngSubmit)="saveUser()">
+        <label class="account-field">
+          <span>Username</span>
+          <input type="text" formControlName="username" placeholder="manager.smith" />
+        </label>
+
+        <label class="account-field">
+          <span>Display name</span>
+          <input type="text" formControlName="displayName" placeholder="Jordan Smith" />
+        </label>
+
+        <div class="account-field-row">
+          <label class="account-field">
+            <span>Role</span>
+            <select formControlName="role">
+              <option *ngFor="let profile of roleProfiles" [value]="profile.value">
+                {{ profile.label }}
+              </option>
+            </select>
+          </label>
+
+          <label class="account-field">
+            <span>Company</span>
+            <select formControlName="companyId">
+              <option *ngFor="let company of companies" [value]="company.id">
+                {{ company.name }}
+              </option>
+            </select>
+          </label>
+        </div>
+
+        <div class="account-field-row">
+          <label class="account-field">
+            <span>Status</span>
+            <select formControlName="active">
+              <option value="true">Active</option>
+              <option value="false">Inactive</option>
+            </select>
+          </label>
+        </div>
+
+        <label class="account-field">
+          <span>{{ modalMode === 'create' ? 'Password' : 'New password' }}</span>
+          <input
+            type="password"
+            formControlName="password"
+            [placeholder]="modalMode === 'create' ? 'Enter a password' : 'Leave blank to keep the current password'"
+          />
+        </label>
+
+        <div class="account-form-preview" [ngClass]="selectedRoleProfile.accentClass">
+          <strong>{{ selectedRoleProfile.label }}</strong>
+          <span>{{ selectedStatusLabel }}</span>
+          <p>{{ selectedRoleProfile.summary }}</p>
+        </div>
+
+        <div class="account-form-actions">
+          <button type="submit" class="btn btn-primary" [disabled]="saving">
+            {{ saving ? 'Saving...' : modalMode === 'create' ? 'Create account' : 'Save changes' }}
+          </button>
+          <button type="button" class="btn btn-outline-secondary" (click)="resetPassword()" *ngIf="modalMode === 'edit'">
+            Reset password
+          </button>
+          <button type="button" class="btn btn-outline-secondary" (click)="openCreateEditor()">
+            Reset editor
+          </button>
+        </div>
+
+        <p class="account-validation" *ngIf="submitted && userForm.invalid">
+          Username, display name, role, and company are required. New accounts also need a password.
+        </p>
+        <p class="account-reset-result" *ngIf="passwordResetResult">{{ passwordResetResult }}</p>
+      </form>
+
+      <div class="account-permission-preview">
+        <span class="account-eyebrow">Permission preview</span>
+        <ul>
+          <li *ngFor="let permission of selectedRoleProfile.permissions">{{ permission }}</li>
+        </ul>
+      </div>
+    </article>
+  </section>
+
+  <section class="permission-grid">
+    <article class="permission-card" *ngFor="let profile of roleProfiles" [ngClass]="profile.accentClass">
+      <div class="permission-card-head">
+        <h3>{{ profile.label }}</h3>
+        <span>{{ profile.value }}</span>
+      </div>
+      <p>{{ profile.summary }}</p>
+      <ul>
+        <li *ngFor="let permission of profile.permissions">{{ permission }}</li>
+      </ul>
+    </article>
+  </section>
+</div>

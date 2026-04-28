@@ -5,6 +5,7 @@ import {
   Router,
   RouterStateSnapshot,
 } from '@angular/router';
+import { AccessControlService } from './access-control.service';
 import { AuthentificationService } from './authentification.service';
 
 @Injectable({
@@ -13,14 +14,22 @@ import { AuthentificationService } from './authentification.service';
 export class AuthguardService implements CanActivate {
   constructor(
     private router: Router,
-    private authService: AuthentificationService
+    private authService: AuthentificationService,
+    private accessControlService: AccessControlService
   ) {}
 
   canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot) {
     if (this.authService.isUserLoggedIn()) {
-      return true;
+      if (this.accessControlService.canAccessRoute(state.url || route.routeConfig?.path || '')) {
+        return true;
+      }
+
+      this.router.navigateByUrl(this.accessControlService.getDefaultRoute());
+      return false;
     } else {
-      this.router.navigate(['login']);
+      this.router.navigate(['login'], {
+        queryParams: { returnUrl: state.url || '/dashboard' },
+      });
       return false;
     }
   }

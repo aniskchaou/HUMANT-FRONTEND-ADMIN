@@ -1,3 +1,251 @@
-button{
-  margin:4px;
+:host {
+  display: block;
+  --ops-accent: #1c4e80;
+  --ops-accent-alt: #1d7874;
+  --ops-accent-soft: rgba(28, 78, 128, 0.12);
+}
+
+.departement-side-actions {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.departement-assignment-board {
+  margin-top: 1.5rem;
+}
+
+.departement-insight-grid {
+  display: grid;
+  gap: 1.5rem;
+  margin-top: 1.5rem;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+}
+
+.departement-insight-card {
+  min-height: 100%;
+}
+
+.departement-org-chart-card,
+.departement-team-board-card {
+  grid-column: 1 / -1;
+}
+
+.departement-board-copy {
+  margin: 0 0 1rem;
+  color: #52607a;
+}
+
+.departement-rich-list {
+  display: grid;
+  gap: 0.85rem;
+}
+
+.departement-rich-list-item,
+.departement-org-node,
+.departement-drop-lane,
+.departement-team-lane,
+.departement-tree-card {
+  padding: 0.9rem 1rem;
+  border-radius: 16px;
+  background: rgba(28, 78, 128, 0.06);
+  border: 1px solid rgba(28, 78, 128, 0.1);
+}
+
+.departement-rich-list-item {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.departement-rich-list-item strong,
+.departement-org-head strong {
+  display: block;
+  color: #0f172a;
+}
+
+.departement-rich-list-item span,
+.departement-org-head span,
+.departement-rich-list-item small,
+.departement-org-head small {
+  color: #52607a;
+}
+
+.departement-inline-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.departement-lane-grid,
+.departement-team-board {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+}
+
+.departement-drop-lane,
+.departement-team-lane {
+  display: grid;
+  gap: 0.85rem;
+  align-content: flex-start;
+  min-height: 260px;
+  padding: 1rem;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(28, 78, 128, 0.06));
+  transition: border-color 160ms ease, transform 160ms ease, box-shadow 160ms ease;
+}
+
+.departement-drop-lane.is-active {
+  border-color: rgba(29, 120, 116, 0.35);
+  box-shadow: 0 18px 40px rgba(28, 78, 128, 0.08);
+}
+
+.departement-drop-lane.is-drop-target,
+.departement-team-lane:hover {
+  border-color: rgba(28, 78, 128, 0.24);
+}
+
+.departement-drop-lane.is-readonly {
+  background: linear-gradient(180deg, rgba(245, 247, 250, 0.98), rgba(148, 163, 184, 0.08));
+}
+
+.departement-lane-head,
+.departement-tree-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.departement-lane-head strong,
+.departement-tree-head strong {
+  display: block;
+  color: #0f172a;
+}
+
+.departement-lane-head span,
+.departement-tree-head span,
+.departement-lane-head small,
+.departement-tree-head small {
+  color: #52607a;
+}
+
+.departement-lane-summary {
+  margin: 0;
+  color: #52607a;
+  font-size: 0.92rem;
+}
+
+.departement-drop-employee {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.85rem 0.9rem;
+  border-radius: 14px;
+  background: #ffffff;
+  border: 1px solid rgba(28, 78, 128, 0.12);
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.04);
+  cursor: grab;
+}
+
+.departement-drop-employee:active {
+  cursor: grabbing;
+}
+
+.departement-drop-employee.is-moving {
+  opacity: 0.55;
+}
+
+.departement-drop-employee strong {
+  display: block;
+  color: #0f172a;
+}
+
+.departement-drop-employee span,
+.departement-drop-employee small {
+  color: #52607a;
+}
+
+.departement-org-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
+}
+
+.departement-empty-copy {
+  margin: 0;
+  color: #52607a;
+}
+
+.departement-org-chart {
+  display: grid;
+  gap: 1rem;
+}
+
+.departement-org-chart-root {
+  overflow-x: auto;
+  padding-bottom: 0.25rem;
+}
+
+.departement-tree-node {
+  position: relative;
+  display: grid;
+  gap: 0.85rem;
+  margin-left: calc(var(--tree-depth, 0) * 1.25rem);
+}
+
+.departement-tree-node.is-child::before {
+  content: '';
+  position: absolute;
+  top: -0.9rem;
+  left: -1rem;
+  width: 0.85rem;
+  height: 2rem;
+  border-left: 2px solid rgba(28, 78, 128, 0.24);
+  border-bottom: 2px solid rgba(28, 78, 128, 0.24);
+  border-bottom-left-radius: 14px;
+}
+
+.departement-tree-card {
+  padding: 1rem;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(29, 120, 116, 0.08));
+}
+
+.departement-tree-meta {
+  margin: 0.5rem 0 0;
+  color: #52607a;
+  font-size: 0.92rem;
+}
+
+.departement-tree-children {
+  display: grid;
+  gap: 0.85rem;
+  margin-left: 1.25rem;
+  padding-left: 1.25rem;
+  border-left: 2px dashed rgba(28, 78, 128, 0.18);
+}
+
+@media (max-width: 768px) {
+  .departement-org-chart-card,
+  .departement-team-board-card {
+    grid-column: auto;
+  }
+
+  .departement-drop-lane,
+  .departement-team-lane {
+    min-height: 0;
+  }
+
+  .departement-tree-node {
+    margin-left: calc(var(--tree-depth, 0) * 0.75rem);
+  }
+
+  .departement-tree-children {
+    margin-left: 0.75rem;
+    padding-left: 0.75rem;
+  }
 }

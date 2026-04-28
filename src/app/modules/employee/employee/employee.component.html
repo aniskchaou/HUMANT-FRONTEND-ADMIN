@@ -1,122 +1,1112 @@
-<div class="page-heading">
-  <section class="section">
-    <div class="card">
-      <div class="card-header">
-        <h2>Employees</h2>
-      </div>
-      <div class="card-body">
-        <div class="dataTable-container">
+<div class="page-heading employees-page">
+  <section class="employees-shell">
+    <article class="card employees-hero">
+      <div class="employees-hero-copy">
+        <span class="employees-eyebrow">People directory</span>
+        <h2>Operate the employee directory like a premium people ops workspace.</h2>
+        <p>
+          Review employee records, spot profile gaps quickly, and keep assignments,
+          contact details, and employment context current from one clean surface.
+        </p>
+
+        <div class="employees-hero-actions">
           <button
             type="button"
-            data-bs-target="#add"
-            role="button"
+            class="btn btn-primary"
             data-bs-toggle="modal"
-            class="btn btn-success btn-sm"
+            data-bs-target="#employeeCrudModal"
+            (click)="openCreateModal()"
           >
-            <i class="fas fa-plus"></i> Create
+            <i class="bi bi-person-plus-fill"></i>
+            Create employee
           </button>
-          <table
-            id="table"
-            cellpadding="0"
-            cellspacing="0"
-            border="0"
-            class="datatable-1 table table-bordered table-striped display"
-            width="100%"
+          <button
+            type="button"
+            class="btn btn-light"
+            (click)="refreshEmployees()"
+            [disabled]="loading"
           >
-            <thead>
-              <tr>
-                <th>Name</th>
-                <th>Telephone</th>
-                <th>BirthDate</th>
-
-                <th>Gender</th>
-                <th>Address</th>
-
-                <th></th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr class="odd gradeX" *ngFor="let item of employees$">
-                <td>{{ item.fullName }}</td>
-                <td>{{ item.phone }}</td>
-                <td class="center">{{ item.birthDay }}</td>
-
-                <td class="center">{{ item.gender }}</td>
-                <td class="center">{{ item.presentAddress }}</td>
-
-                <td>
-                  <!--  <button
-                    type="button"
-                    data-bs-toggle="modal"
-                    (click)="edit(item.id)"
-                    data-bs-target="#edit"
-                    class="btn btn-warning btn-sm"
-                  >
-                    <i class="fas fa-edit"></i>
-                  </button> -->
-                  <button
-                    type="button"
-                    class="btn btn-danger btn-sm"
-                    (click)="delete(item.id)"
-                  >
-                    <i class="fas fa-trash-alt"></i>
-                  </button>
-                </td>
-              </tr>
-            </tbody>
-            <tfoot>
-              <tr>
-                <th>Name</th>
-                <th>Telephone</th>
-                <th>BirthDate</th>
-
-                <th>Gender</th>
-                <th>Address</th>
-
-                <th></th>
-              </tr>
-            </tfoot>
-          </table>
+            <i class="bi bi-arrow-repeat"></i>
+            Refresh
+          </button>
         </div>
-        <!-- 
-        <div
-          class="modal fade text-left"
-          id="edit"
-          tabindex="-1"
-          aria-labelledby="myModalLabel1"
-          style="display: none"
-          aria-hidden="true"
-        >
-          <div
-            class="modal-dialog modal-dialog-scrollable modal-lg"
-            role="document"
-          >
-            <div class="modal-content">
-              <div class="modal-header">
-                <h5 class="modal-title" id="myModalLabel1">Edit</h5>
+
+        <div class="employees-hero-notice" *ngIf="loadError">
+          {{ loadError }}
+        </div>
+      </div>
+
+      <div class="employees-hero-panel">
+        <span class="employees-panel-kicker">Directory health</span>
+        <h3>Current employee profile pulse</h3>
+
+        <div class="employees-hero-metrics">
+          <div>
+            <strong>{{ totalEmployeesCount }}</strong>
+            <span>Total employees</span>
+          </div>
+          <div>
+            <strong>{{ profileReadyCount }}</strong>
+            <span>Ready profiles</span>
+          </div>
+          <div>
+            <strong>{{ assignedEmployeesCount }}</strong>
+            <span>Assigned employees</span>
+          </div>
+          <div>
+            <strong>{{ photoCoverage }}%</strong>
+            <span>Portrait coverage</span>
+          </div>
+        </div>
+
+        <div class="employees-coverage-block">
+          <div class="employees-coverage-top">
+            <span>Profile coverage</span>
+            <strong>{{ profileCoverage }}%</strong>
+          </div>
+          <div class="employees-coverage-track">
+            <span [style.width.%]="profileCoverage"></span>
+          </div>
+          <p>
+            {{ averageProfileScore }} average profile score across the current employee directory with {{ photoReadyCount }} portraits linked.
+          </p>
+        </div>
+      </div>
+    </article>
+
+    <div class="employees-stat-grid">
+      <article class="card employees-stat-card tone-navy">
+        <span>Employee base</span>
+        <strong>{{ totalEmployeesCount }}</strong>
+        <p>Total employee profiles currently tracked in the backend.</p>
+      </article>
+
+      <article class="card employees-stat-card tone-teal">
+        <span>Ready profiles</span>
+        <strong>{{ profileCoverage }}%</strong>
+        <p>Profiles with strong enough data quality for directory and admin use.</p>
+      </article>
+
+      <article class="card employees-stat-card tone-gold">
+        <span>Assignment coverage</span>
+        <strong>{{ assignmentCoverage }}%</strong>
+        <p>Employees already tied to a department and job record.</p>
+      </article>
+
+      <article class="card employees-stat-card tone-coral">
+        <span>Needs attention</span>
+        <strong>{{ contactGapCount }}</strong>
+        <p>Profiles that still need core contact or emergency information.</p>
+      </article>
+    </div>
+
+    <article class="card employees-toolbar-card">
+      <div class="employees-toolbar">
+        <label class="employees-search-field">
+          <i class="bi bi-search"></i>
+          <input
+            type="text"
+            [ngModel]="searchTerm"
+            (ngModelChange)="onSearchTermChange($event)"
+            placeholder="Search employees, departments, roles, or addresses"
+          />
+        </label>
+
+        <div class="employees-toolbar-controls">
+          <label>
+            <span>Filter</span>
+            <select
+              [ngModel]="activeFilter"
+              (ngModelChange)="onFilterChange($event)"
+            >
+              <option value="all">All employees</option>
+              <option value="ready">Ready profiles</option>
+              <option value="missing-contact">Missing contact</option>
+              <option value="missing-assignment">Missing assignment</option>
+            </select>
+          </label>
+
+          <label>
+            <span>Sort</span>
+            <select
+              [ngModel]="activeSort"
+              (ngModelChange)="onSortChange($event)"
+            >
+              <option value="quality">Profile quality</option>
+              <option value="name-asc">Name A-Z</option>
+              <option value="latest-join">Latest join date</option>
+            </select>
+          </label>
+        </div>
+      </div>
+
+      <div class="employees-toolbar-footer">
+        <span>{{ filteredResultsLabel }}</span>
+        <span *ngIf="!loading">
+          {{ featuredEmployee ? featuredEmployee.fullName : 'No employee selected' }}
+        </span>
+      </div>
+    </article>
+
+    <div class="employees-layout">
+      <div class="employees-main">
+        <div class="employees-loading-grid" *ngIf="loading; else employeesReady">
+          <div class="employees-skeleton-card" *ngFor="let item of loadingPlaceholders"></div>
+        </div>
+
+        <ng-template #employeesReady>
+          <div class="employees-grid" *ngIf="filteredEmployees.length; else employeesEmpty">
+            <article
+              class="card employees-card"
+              *ngFor="let employee of filteredEmployees; trackBy: trackByEmployeeId"
+              [class.is-active]="featuredEmployee?.id === employee.id"
+              tabindex="0"
+              role="button"
+              aria-label="Open employee details"
+              (click)="openDetailsModal(employee)"
+              (keydown.enter)="openDetailsModal(employee)"
+              (keydown.space)="$event.preventDefault(); openDetailsModal(employee)"
+            >
+              <div class="employees-card-head">
+                <div class="employees-card-identity">
+                  <div class="employees-avatar employees-avatar-sm" [class.has-photo]="!!employee.photoUrl">
+                    <img *ngIf="employee.photoUrl" [src]="employee.photoUrl" [alt]="employee.fullName + ' portrait'" />
+                    <span *ngIf="!employee.photoUrl">{{ getEmployeeInitials(employee.fullName) }}</span>
+                  </div>
+
+                  <div>
+                    <span class="employees-card-kicker">Employee profile</span>
+                    <h3>{{ employee.fullName }}</h3>
+                    <small>{{ employee.roleSummary }}</small>
+                  </div>
+                </div>
+                <span class="employees-status" [ngClass]="'tone-' + employee.profileTone">
+                  {{ employee.profileLabel }}
+                </span>
+              </div>
+
+              <p>{{ employee.excerpt }}</p>
+
+              <div class="employees-card-progress">
+                <div class="employees-card-progress-top">
+                  <span>Profile strength</span>
+                  <strong>{{ employee.profileScore }}%</strong>
+                </div>
+                <div class="employees-progress-track">
+                  <span [style.width.%]="employee.profileScore"></span>
+                </div>
+              </div>
+
+              <div class="employees-card-meta">
+                <span>{{ employee.gender }}</span>
+                <span>{{ employee.phone || 'No phone' }}</span>
+                <span>{{ employee.joiningDateLabel }}</span>
+              </div>
+
+              <div class="employees-card-view">
+                <span>Click to view details</span>
+                <i class="bi bi-arrow-up-right"></i>
+              </div>
+
+              <div class="employees-card-actions">
                 <button
                   type="button"
-                  class="close rounded-pill"
-                  data-bs-dismiss="modal"
-                  aria-label="Close"
+                  class="btn btn-light btn-sm"
+                  data-bs-toggle="modal"
+                  data-bs-target="#employeeCrudModal"
+                  (click)="openEditModal(employee); $event.stopPropagation()"
                 >
-                  <i data-feather="x"></i>
+                  <i class="bi bi-pencil-square"></i>
+                  Edit
+                </button>
+                <button
+                  type="button"
+                  class="btn btn-light btn-sm employees-delete-btn"
+                  (click)="delete(employee); $event.stopPropagation()"
+                  [disabled]="deletingId === employee.id"
+                >
+                  <i class="bi bi-trash3"></i>
+                  {{ deletingId === employee.id ? 'Deleting...' : 'Delete' }}
                 </button>
               </div>
-              <div class="modal-body">
-                <app-edit-employee></app-edit-employee>
+            </article>
+          </div>
+        </ng-template>
+
+        <ng-template #employeesEmpty>
+          <article class="card employees-empty-card">
+            <span class="employees-empty-kicker">No matching employees</span>
+            <h3>Nothing matches the current search or filter.</h3>
+            <p>
+              Adjust the directory filters or create a new employee record to grow the people workspace.
+            </p>
+            <button
+              type="button"
+              class="btn btn-primary"
+              data-bs-toggle="modal"
+              data-bs-target="#employeeCrudModal"
+              (click)="openCreateModal()"
+            >
+              <i class="bi bi-person-plus-fill"></i>
+              Create employee
+            </button>
+          </article>
+        </ng-template>
+      </div>
+
+      <aside class="employees-side">
+        <article class="card employees-feature-card" *ngIf="featuredEmployee; else noFeaturedEmployee">
+          <div class="employees-feature-head">
+            <div class="employees-feature-identity">
+              <div class="employees-avatar employees-avatar-md" [class.has-photo]="!!featuredEmployee.photoUrl">
+                <img *ngIf="featuredEmployee.photoUrl" [src]="featuredEmployee.photoUrl" [alt]="featuredEmployee.fullName + ' portrait'" />
+                <span *ngIf="!featuredEmployee.photoUrl">{{ getEmployeeInitials(featuredEmployee.fullName) }}</span>
               </div>
-              <div class="modal-footer">
-                <button type="button" class="btn" data-bs-dismiss="modal">
-                  <i class="bx bx-x d-block d-sm-none"></i>
-                  <span class="d-none d-sm-block">Close</span>
-                </button>
+
+              <div>
+                <span>Selected employee</span>
+                <h3>{{ featuredEmployee.fullName }}</h3>
+                <small>{{ featuredEmployee.roleSummary }}</small>
               </div>
             </div>
+            <span class="employees-status" [ngClass]="'tone-' + featuredEmployee.profileTone">
+              {{ featuredEmployee.profileLabel }}
+            </span>
           </div>
-        </div> -->
-        <app-modal-employee></app-modal-employee>
-      </div>
+
+          <div class="employees-feature-pills">
+            <span>{{ featuredEmployee.photoUrl ? 'Portrait ready' : 'Portrait missing' }}</span>
+            <span>{{ featuredEmployee.phone || 'No phone' }}</span>
+            <span>{{ featuredEmployee.contractTypeName }}</span>
+            <span>{{ featuredEmployee.salaryName }}</span>
+          </div>
+
+          <p>{{ featuredEmployee.note || featuredEmployee.excerpt }}</p>
+
+          <div class="employees-feature-metrics">
+            <div>
+              <span>Profile score</span>
+              <strong>{{ featuredEmployee.profileScore }}%</strong>
+            </div>
+            <div>
+              <span>Documents</span>
+              <strong>{{ featuredEmployee.documentCount }}</strong>
+            </div>
+          </div>
+
+          <div class="employees-side-note">
+            <h4>Recommendation</h4>
+            <p>{{ featuredRecommendation }}</p>
+          </div>
+
+          <div class="employees-side-note accent-soft">
+            <h4>Next action</h4>
+            <p>{{ featuredNextAction }}</p>
+          </div>
+
+          <button
+            type="button"
+            class="btn btn-primary"
+            data-bs-toggle="modal"
+            data-bs-target="#employeeCrudModal"
+            (click)="openEditModal(featuredEmployee)"
+          >
+            <i class="bi bi-pencil-square"></i>
+            Edit selected employee
+          </button>
+        </article>
+
+        <ng-template #noFeaturedEmployee>
+          <article class="card employees-feature-card employees-feature-empty">
+            <span class="employees-empty-kicker">Employee preview</span>
+            <h3>Select an employee to inspect the profile here.</h3>
+            <p>
+              The side panel highlights profile quality, assignment context, and the next update that would improve the record.
+            </p>
+          </article>
+        </ng-template>
+      </aside>
     </div>
   </section>
+</div>
+
+<div
+  class="modal fade text-left"
+  id="employeeDetailsModal"
+  tabindex="-1"
+  aria-labelledby="employeeDetailsModalLabel"
+  aria-hidden="true"
+>
+  <div class="modal-dialog modal-dialog-scrollable modal-xl" role="document">
+    <div class="modal-content employees-modal-content employees-details-modal" *ngIf="featuredEmployee">
+      <div class="modal-header employees-modal-header employees-details-header">
+        <div class="employees-details-headline">
+          <div class="employees-details-profile">
+            <div class="employees-avatar employees-avatar-lg" [class.has-photo]="!!featuredEmployee.photoUrl">
+              <img *ngIf="featuredEmployee.photoUrl" [src]="featuredEmployee.photoUrl" [alt]="featuredEmployee.fullName + ' portrait'" />
+              <span *ngIf="!featuredEmployee.photoUrl">{{ getEmployeeInitials(featuredEmployee.fullName) }}</span>
+            </div>
+
+            <div class="employees-details-profile-copy">
+              <span class="employees-eyebrow">Employee details</span>
+              <h5 class="modal-title" id="employeeDetailsModalLabel">
+                {{ featuredEmployee.fullName }}
+              </h5>
+              <p>
+                Review the full employee profile, assignment context, contact details,
+                and supporting documents in one place.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="employees-details-actions">
+          <span class="employees-status" [ngClass]="'tone-' + featuredEmployee.profileTone">
+            {{ featuredEmployee.profileLabel }}
+          </span>
+          <button
+            type="button"
+            class="close rounded-pill employees-modal-close"
+            data-bs-dismiss="modal"
+            aria-label="Close"
+          >
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="modal-body employees-modal-body">
+        <div class="employees-details-layout">
+          <div class="employees-details-main">
+            <section class="employees-details-section">
+              <span class="employees-panel-kicker">Profile summary</span>
+              <h6>Employee note</h6>
+              <p class="employees-details-copy">
+                {{ featuredEmployee.note || featuredEmployee.excerpt }}
+              </p>
+            </section>
+
+            <div class="employees-details-metrics">
+              <article class="employees-details-metric">
+                <span>Personal info</span>
+                <strong>{{ featuredPersonalDetailCount }}/{{ featuredPersonalDetails.length }}</strong>
+              </article>
+              <article class="employees-details-metric">
+                <span>Job history events</span>
+                <strong>{{ featuredTimeline.length }}</strong>
+              </article>
+              <article class="employees-details-metric">
+                <span>Comp changes</span>
+                <strong>{{ featuredCompensationRecords.length }}</strong>
+              </article>
+              <article class="employees-details-metric">
+                <span>Tracked documents</span>
+                <strong>{{ featuredTrackedDocumentCount }}</strong>
+              </article>
+            </div>
+
+            <section class="employees-details-section">
+              <span class="employees-panel-kicker">Personal info</span>
+              <h6>Core personal and contact details</h6>
+              <div class="employees-details-list">
+                <div *ngFor="let item of featuredPersonalDetails" [class.is-missing]="item.isMissing">
+                  <strong>{{ item.label }}</strong>
+                  <span>{{ item.value }}</span>
+                </div>
+              </div>
+            </section>
+
+            <section class="employees-details-section accent-soft">
+              <span class="employees-panel-kicker">Current assignment</span>
+              <h6>Role, reporting line, and employment context</h6>
+              <div class="employees-details-list">
+                <div>
+                  <strong>Business role</strong>
+                  <span>{{ featuredEmployee.roleName || 'Role pending' }}</span>
+                </div>
+                <div>
+                  <strong>Job position</strong>
+                  <span>{{ featuredEmployee.jobName || 'Not assigned' }}</span>
+                </div>
+                <div>
+                  <strong>Manager</strong>
+                  <span>{{ featuredEmployee.managerName || 'Manager not assigned' }}</span>
+                </div>
+                <div>
+                  <strong>Direct reports</strong>
+                  <span>{{ featuredEmployee.directReportCount || 0 }}</span>
+                </div>
+                <div>
+                  <strong>Contract type</strong>
+                  <span>{{ featuredEmployee.contractTypeName || 'Pending' }}</span>
+                </div>
+                <div>
+                  <strong>Salary plan</strong>
+                  <span>
+                    {{ featuredEmployee.salaryName || 'Pending' }}
+                    <small *ngIf="featuredEmployee.salaryTotal">{{ featuredEmployee.salaryTotal }}</small>
+                  </span>
+                </div>
+              </div>
+            </section>
+
+            <section class="employees-details-section accent-soft">
+              <span class="employees-panel-kicker">Documents</span>
+              <h6>Upload and track ID, contract, CV, and supporting files</h6>
+
+              <div class="employees-upload-grid">
+                <label class="employees-upload-card" *ngFor="let action of documentUploadActions">
+                  <span class="employees-panel-kicker">{{ action.label }}</span>
+                  <strong>{{ action.label }}</strong>
+                  <p>{{ action.description }}</p>
+                  <input
+                    type="file"
+                    [accept]="action.accept"
+                    [disabled]="uploadingDocumentField === action.key"
+                    (change)="uploadEmployeeDocument(action, $event)"
+                  />
+                  <small>
+                    {{ uploadingDocumentField === action.key ? 'Registering document...' : 'Choose file' }}
+                  </small>
+                </label>
+              </div>
+
+              <div class="employees-document-grid">
+                <article
+                  class="employees-document-card"
+                  *ngFor="let document of featuredTrackedDocuments"
+                  [class.is-missing]="document.isMissing"
+                >
+                  <div class="employees-document-card-head">
+                    <strong>{{ document.label }}</strong>
+                    <span class="employees-document-status" [class.is-missing]="document.isMissing">
+                      {{ document.isMissing ? 'Missing' : 'Tracked' }}
+                    </span>
+                  </div>
+                  <p>{{ document.documentName }}</p>
+                  <small>{{ document.filePath || 'Upload this document to register it on the employee profile.' }}</small>
+                  <span class="employees-document-meta">{{ document.uploadedAtLabel }}</span>
+                </article>
+              </div>
+            </section>
+
+            <section class="employees-details-section accent-soft">
+              <span class="employees-panel-kicker">Compensation history</span>
+              <h6>Recorded salary and bonus changes</h6>
+              <div class="employees-details-list" *ngIf="featuredCompensationRecords.length; else emptyCompHistory">
+                <div *ngFor="let record of featuredCompensationRecords">
+                  <strong>{{ record.effectiveDateLabel }}</strong>
+                  <span>
+                    Salary {{ record.salary || 'Pending' }}
+                    <small *ngIf="record.bonus">Bonus {{ record.bonus }}</small>
+                    <small *ngIf="record.notes">{{ record.notes }}</small>
+                  </span>
+                </div>
+              </div>
+              <ng-template #emptyCompHistory>
+                <p class="employees-section-empty">
+                  No compensation changes have been recorded for this employee yet.
+                </p>
+              </ng-template>
+            </section>
+
+            <section class="employees-details-section accent-soft" *ngIf="featuredTimeline.length">
+              <span class="employees-panel-kicker">Job history</span>
+              <h6>Role changes and transfer timeline</h6>
+              <div class="employees-details-list">
+                <div *ngFor="let item of featuredTimeline">
+                  <strong>{{ item.title }}</strong>
+                  <span>
+                    {{ item.description }}
+                    <small>{{ item.stamp }}</small>
+                  </span>
+                </div>
+              </div>
+            </section>
+          </div>
+
+          <aside class="employees-details-side">
+            <section class="employees-details-facts">
+              <span class="employees-panel-kicker">Quick facts</span>
+              <h6>Employment overview</h6>
+
+              <div class="employees-details-fact">
+                <strong>Role</strong>
+                <span>{{ featuredEmployee.roleName || featuredEmployee.jobName }}</span>
+              </div>
+              <div class="employees-details-fact">
+                <strong>Manager</strong>
+                <span>{{ featuredEmployee.managerName || 'Pending' }}</span>
+              </div>
+              <div class="employees-details-fact">
+                <strong>Portrait</strong>
+                <span>{{ featuredEmployee.photoUrl ? 'Linked' : 'Missing' }}</span>
+              </div>
+              <div class="employees-details-fact">
+                <strong>Department</strong>
+                <span>{{ featuredEmployee.departmentName }}</span>
+              </div>
+              <div class="employees-details-fact">
+                <strong>Contract</strong>
+                <span>{{ featuredEmployee.contractTypeName }}</span>
+              </div>
+              <div class="employees-details-fact">
+                <strong>Documents</strong>
+                <span>{{ featuredEmployee.documentCount }}</span>
+              </div>
+              <div class="employees-details-fact">
+                <strong>Comp changes</strong>
+                <span>{{ featuredEmployee.compensationHistoryCount }}</span>
+              </div>
+              <div class="employees-details-fact">
+                <strong>Transfers</strong>
+                <span>{{ featuredEmployee.transferHistoryCount }}</span>
+              </div>
+              <div class="employees-details-fact">
+                <strong>Reports</strong>
+                <span>{{ featuredEmployee.directReportCount }}</span>
+              </div>
+              <div class="employees-details-fact">
+                <strong>Salary</strong>
+                <span>
+                  {{ featuredEmployee.salaryName }}
+                  <small *ngIf="featuredEmployee.salaryTotal">
+                    {{ featuredEmployee.salaryTotal }}
+                  </small>
+                </span>
+              </div>
+              <div class="employees-details-fact">
+                <strong>Joined</strong>
+                <span>{{ featuredEmployee.joiningDateLabel }}</span>
+              </div>
+              <div class="employees-details-fact">
+                <strong>Birthday</strong>
+                <span>{{ featuredEmployee.birthDayLabel }}</span>
+              </div>
+              <div class="employees-details-fact">
+                <strong>Gender</strong>
+                <span>{{ featuredEmployee.gender }}</span>
+              </div>
+              <div class="employees-details-fact">
+                <strong>Children</strong>
+                  <span>{{ featuredEmployee.numberOfChildren != null ? featuredEmployee.numberOfChildren : 0 }}</span>
+              </div>
+              <div class="employees-details-fact">
+                <strong>Marital status</strong>
+                <span>{{ featuredEmployee.maritalStatus || 'Not set' }}</span>
+              </div>
+            </section>
+          </aside>
+        </div>
+      </div>
+
+      <div class="modal-footer employees-modal-footer">
+        <button type="button" class="btn btn-light" data-bs-dismiss="modal">
+          Close
+        </button>
+        <button
+          type="button"
+          class="btn btn-primary"
+          data-bs-dismiss="modal"
+          data-bs-toggle="modal"
+          data-bs-target="#employeeCrudModal"
+          (click)="openEditModal(featuredEmployee)"
+        >
+          <i class="bi bi-pencil-square"></i>
+          Edit employee
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div
+  class="modal fade text-left"
+  id="employeeCrudModal"
+  tabindex="-1"
+  aria-labelledby="employeeCrudModalLabel"
+  aria-hidden="true"
+>
+  <div class="modal-dialog modal-dialog-scrollable modal-xl" role="document">
+    <form class="modal-content employees-modal-content" [formGroup]="employeeForm" (ngSubmit)="saveEmployee()">
+      <div class="modal-header employees-modal-header">
+        <div>
+          <span class="employees-eyebrow">{{ modalMode === 'create' ? 'Create' : 'Refine' }}</span>
+          <h5 class="modal-title" id="employeeCrudModalLabel">{{ modalTitle }}</h5>
+          <p>{{ modalSubtitle }}</p>
+        </div>
+        <button
+          type="button"
+          class="close rounded-pill employees-modal-close"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+          (click)="resetEditor()"
+        >
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+
+      <div class="modal-body employees-modal-body">
+        <div class="employees-form-layout">
+          <div class="employees-form-sections">
+            <section class="employees-form-section">
+              <span class="employees-panel-kicker">Portrait</span>
+              <h6>Employee image</h6>
+
+              <div class="employees-form-photo-grid">
+                <div class="employees-photo-preview" [class.has-photo]="!!draftPhotoUrl">
+                  <img *ngIf="draftPhotoUrl" [src]="draftPhotoUrl" [alt]="draftName + ' portrait preview'" />
+                  <span *ngIf="!draftPhotoUrl">{{ getEmployeeInitials(draftName) }}</span>
+                </div>
+
+                <div class="employees-form-photo-controls">
+                  <div class="employees-form-field full-span">
+                    <label for="employeePhoto">Photo path or URL</label>
+                    <input
+                      id="employeePhoto"
+                      type="text"
+                      class="form-control"
+                      formControlName="photo"
+                      placeholder="assets/images/faces/1.jpg or /files/employees/name.jpg"
+                    />
+                    <small class="employees-field-hint">
+                      Choose a bundled portrait below or paste a backend file path / remote image URL.
+                    </small>
+                  </div>
+
+                  <div class="employees-photo-preset-list">
+                    <button
+                      type="button"
+                      class="employees-photo-preset"
+                      *ngFor="let preset of photoPresets"
+                      [class.is-active]="employeeForm.value.photo === preset"
+                      (click)="applyPhotoPreset(preset)"
+                    >
+                      <img [src]="preset" alt="Employee portrait preset" />
+                    </button>
+                  </div>
+
+                  <div class="employees-photo-actions">
+                    <button
+                      type="button"
+                      class="btn btn-light btn-sm"
+                      (click)="clearPhoto()"
+                      [disabled]="!employeeForm.value.photo"
+                    >
+                      <i class="bi bi-x-circle"></i>
+                      Clear image
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <section class="employees-form-section">
+              <span class="employees-panel-kicker">Identity</span>
+              <h6>Core employee profile</h6>
+              <div class="employees-form-grid">
+                <div class="employees-form-field full-span">
+                  <label for="employeeFullName">Full name</label>
+                  <input
+                    id="employeeFullName"
+                    type="text"
+                    class="form-control"
+                    formControlName="fullName"
+                    placeholder="Example: Sarah Connor"
+                  />
+                  <small class="employees-field-error" *ngIf="submitted && formControls.fullName.errors?.required">
+                    Full name is required.
+                  </small>
+                </div>
+
+                <div class="employees-form-field">
+                  <label for="employeePhone">Primary phone</label>
+                  <input
+                    id="employeePhone"
+                    type="text"
+                    class="form-control"
+                    formControlName="phone"
+                    placeholder="Employee phone"
+                  />
+                </div>
+
+                <div class="employees-form-field">
+                  <label for="employeeBirthDay">Birthday</label>
+                  <input
+                    id="employeeBirthDay"
+                    type="date"
+                    class="form-control"
+                    formControlName="birthDay"
+                  />
+                </div>
+
+                <div class="employees-form-field">
+                  <label for="employeeGender">Gender</label>
+                  <select id="employeeGender" class="form-control" formControlName="gender">
+                    <option value="">Not specified</option>
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </div>
+
+                <div class="employees-form-field">
+                  <label for="employeeMaritalStatus">Marital status</label>
+                  <input
+                    id="employeeMaritalStatus"
+                    type="text"
+                    class="form-control"
+                    formControlName="maritalStatus"
+                    placeholder="Example: Married"
+                  />
+                </div>
+
+                <div class="employees-form-field">
+                  <label for="employeeChildren">Children</label>
+                  <input
+                    id="employeeChildren"
+                    type="number"
+                    min="0"
+                    class="form-control"
+                    formControlName="numberOfChildren"
+                    placeholder="0"
+                  />
+                </div>
+              </div>
+            </section>
+
+            <section class="employees-form-section">
+              <span class="employees-panel-kicker">Assignment</span>
+              <h6>Employment context</h6>
+              <div class="employees-form-grid">
+                <div class="employees-form-field">
+                  <label for="employeeDepartment">Department</label>
+                  <select id="employeeDepartment" class="form-control" formControlName="departmentId">
+                    <option value="">No department</option>
+                    <option *ngFor="let department of departments" [value]="department.id">
+                      {{ department.name }}
+                    </option>
+                  </select>
+                </div>
+
+                <div class="employees-form-field">
+                  <label for="employeeRole">Business role</label>
+                  <select id="employeeRole" class="form-control" formControlName="roleId">
+                    <option value="">No business role</option>
+                    <option *ngFor="let role of roles" [value]="role.id">
+                      {{ role.name }}
+                    </option>
+                  </select>
+                </div>
+
+                <div class="employees-form-field">
+                  <label for="employeeJob">Job role</label>
+                  <select id="employeeJob" class="form-control" formControlName="jobId">
+                    <option value="">No role</option>
+                    <option *ngFor="let job of jobs" [value]="job.id">
+                      {{ job.name }}
+                    </option>
+                  </select>
+                </div>
+
+                <div class="employees-form-field">
+                  <label for="employeeManager">Reporting manager</label>
+                  <select id="employeeManager" class="form-control" formControlName="managerId">
+                    <option value="">No manager assigned</option>
+                    <option *ngFor="let manager of managers" [value]="manager.id">
+                      {{ manager.name }}
+                    </option>
+                  </select>
+                </div>
+
+                <div class="employees-form-field">
+                  <label for="employeeSalary">Salary</label>
+                  <select id="employeeSalary" class="form-control" formControlName="salaryId">
+                    <option value="">No salary</option>
+                    <option *ngFor="let salary of salaries" [value]="salary.id">
+                      {{ salary.salaryName }}<span *ngIf="salary.totalSalary"> - {{ salary.totalSalary }}</span>
+                    </option>
+                  </select>
+                </div>
+
+                <div class="employees-form-field">
+                  <label for="employeeContractType">Contract type</label>
+                  <select id="employeeContractType" class="form-control" formControlName="contractTypeId">
+                    <option value="">No contract type</option>
+                    <option *ngFor="let contractType of contractTypes" [value]="contractType.id">
+                      {{ contractType.name }}
+                    </option>
+                  </select>
+                </div>
+
+                <div class="employees-form-field">
+                  <label for="employeeJoiningDate">Joining date</label>
+                  <input
+                    id="employeeJoiningDate"
+                    type="date"
+                    class="form-control"
+                    formControlName="joiningDate"
+                  />
+                </div>
+              </div>
+            </section>
+
+            <section class="employees-form-section">
+              <span class="employees-panel-kicker">Contact</span>
+              <h6>Reachability and address</h6>
+              <div class="employees-form-grid">
+                <div class="employees-form-field">
+                  <label for="employeeEmergency">Emergency contact</label>
+                  <input
+                    id="employeeEmergency"
+                    type="text"
+                    class="form-control"
+                    formControlName="emergencyContactNumber"
+                    placeholder="Emergency phone"
+                  />
+                </div>
+
+                <div class="employees-form-field">
+                  <label for="employeeAltContact">Alternative contact</label>
+                  <input
+                    id="employeeAltContact"
+                    type="text"
+                    class="form-control"
+                    formControlName="contactNumber"
+                    placeholder="Secondary phone"
+                  />
+                </div>
+
+                <div class="employees-form-field full-span">
+                  <label for="employeePresentAddress">Present address</label>
+                  <input
+                    id="employeePresentAddress"
+                    type="text"
+                    class="form-control"
+                    formControlName="presentAddress"
+                    placeholder="Current address"
+                  />
+                </div>
+
+                <div class="employees-form-field full-span">
+                  <label for="employeePermanentAddress">Permanent address</label>
+                  <input
+                    id="employeePermanentAddress"
+                    type="text"
+                    class="form-control"
+                    formControlName="permanentAddress"
+                    placeholder="Permanent address"
+                  />
+                </div>
+
+                <div class="employees-form-field full-span">
+                  <label for="employeeContactNote">Contact note</label>
+                  <textarea
+                    id="employeeContactNote"
+                    rows="3"
+                    class="form-control"
+                    formControlName="contactNote"
+                    placeholder="Add any important contact or availability note"
+                  ></textarea>
+                </div>
+              </div>
+            </section>
+
+            <section class="employees-form-section">
+              <span class="employees-panel-kicker">Documents</span>
+              <h6>Supporting records and notes</h6>
+              <div class="employees-form-grid">
+                <div class="employees-form-field">
+                  <label for="employeeIdentityProof">Identity proof</label>
+                  <input
+                    id="employeeIdentityProof"
+                    type="text"
+                    class="form-control"
+                    formControlName="identityProof"
+                    placeholder="Document reference"
+                  />
+                  <small class="employees-field-hint">
+                    Paste a path or choose a file to suggest a backend-style reference.
+                  </small>
+                  <input
+                    type="file"
+                    class="form-control mt-2"
+                    accept=".pdf,.doc,.docx,.png,.jpg,.jpeg"
+                    (change)="useSelectedDocument('identityProof', $event)"
+                  />
+                  <button
+                    type="button"
+                    class="btn btn-light btn-sm mt-2"
+                    (click)="clearDocumentField('identityProof')"
+                    [disabled]="!employeeForm.value.identityProof"
+                  >
+                    Clear reference
+                  </button>
+                </div>
+
+                <div class="employees-form-field">
+                  <label for="employeeResume">Resume</label>
+                  <input
+                    id="employeeResume"
+                    type="text"
+                    class="form-control"
+                    formControlName="resume"
+                    placeholder="Resume reference"
+                  />
+                  <small class="employees-field-hint">
+                    Link the candidate CV or select a file to generate a reference path.
+                  </small>
+                  <input
+                    type="file"
+                    class="form-control mt-2"
+                    accept=".pdf,.doc,.docx"
+                    (change)="useSelectedDocument('resume', $event)"
+                  />
+                  <button
+                    type="button"
+                    class="btn btn-light btn-sm mt-2"
+                    (click)="clearDocumentField('resume')"
+                    [disabled]="!employeeForm.value.resume"
+                  >
+                    Clear reference
+                  </button>
+                </div>
+
+                <div class="employees-form-field">
+                  <label for="employeeOfferLetter">Offer letter</label>
+                  <input
+                    id="employeeOfferLetter"
+                    type="text"
+                    class="form-control"
+                    formControlName="offerLetter"
+                    placeholder="Offer letter reference"
+                  />
+                </div>
+
+                <div class="employees-form-field">
+                  <label for="employeeJoiningLetter">Joining letter</label>
+                  <input
+                    id="employeeJoiningLetter"
+                    type="text"
+                    class="form-control"
+                    formControlName="joiningLetter"
+                    placeholder="Joining letter reference"
+                  />
+                </div>
+
+                <div class="employees-form-field full-span">
+                  <label for="employeeContractAgreement">Contract agreement</label>
+                  <input
+                    id="employeeContractAgreement"
+                    type="text"
+                    class="form-control"
+                    formControlName="contractAgreement"
+                    placeholder="Contract agreement reference"
+                  />
+                  <small class="employees-field-hint">
+                    Store the contract path or select a file to fill a standard /files/... reference.
+                  </small>
+                  <input
+                    type="file"
+                    class="form-control mt-2"
+                    accept=".pdf,.doc,.docx"
+                    (change)="useSelectedDocument('contractAgreement', $event)"
+                  />
+                  <button
+                    type="button"
+                    class="btn btn-light btn-sm mt-2"
+                    (click)="clearDocumentField('contractAgreement')"
+                    [disabled]="!employeeForm.value.contractAgreement"
+                  >
+                    Clear reference
+                  </button>
+                </div>
+
+                <div class="employees-form-field full-span">
+                  <label for="employeeNote">Profile note</label>
+                  <textarea
+                    id="employeeNote"
+                    rows="4"
+                    class="form-control"
+                    formControlName="note"
+                    placeholder="Summarize responsibilities, onboarding status, or any relevant employee context."
+                  ></textarea>
+                </div>
+              </div>
+            </section>
+          </div>
+
+          <aside class="employees-form-preview">
+            <span class="employees-panel-kicker">Live preview</span>
+            <div class="employees-preview-identity">
+              <div class="employees-avatar employees-avatar-xl" [class.has-photo]="!!draftPhotoUrl">
+                <img *ngIf="draftPhotoUrl" [src]="draftPhotoUrl" [alt]="draftName + ' live portrait preview'" />
+                <span *ngIf="!draftPhotoUrl">{{ getEmployeeInitials(draftName) }}</span>
+              </div>
+
+              <div>
+                <h4>{{ draftName }}</h4>
+                <span class="employees-status" [ngClass]="'tone-' + draftProfileQuality.tone">
+                  {{ draftProfileQuality.label }}
+                </span>
+              </div>
+            </div>
+            <p>{{ draftRoleSummary }}</p>
+
+            <div class="employees-card-progress compact">
+              <div class="employees-card-progress-top">
+                <span>Profile strength</span>
+                <strong>{{ draftProfileQuality.score }}%</strong>
+              </div>
+              <div class="employees-progress-track">
+                <span [style.width.%]="draftProfileQuality.score"></span>
+              </div>
+            </div>
+
+            <div class="employees-feature-metrics compact">
+              <div>
+                <span>Department</span>
+                <strong>{{ lookupOptionName(departments, employeeForm.value.departmentId) || 'Pending' }}</strong>
+              </div>
+              <div>
+                <span>Role</span>
+                <strong>
+                  {{ lookupOptionName(roles, employeeForm.value.roleId) || lookupOptionName(jobs, employeeForm.value.jobId) || 'Pending' }}
+                </strong>
+              </div>
+              <div>
+                <span>Manager</span>
+                <strong>{{ lookupOptionName(managers, employeeForm.value.managerId) || 'Pending' }}</strong>
+              </div>
+              <div>
+                <span>Portrait</span>
+                <strong>{{ draftPhotoUrl ? 'Ready' : 'Pending' }}</strong>
+              </div>
+            </div>
+
+            <div class="employees-side-note">
+              <h4>Preview note</h4>
+              <p>{{ draftNote }}</p>
+            </div>
+          </aside>
+        </div>
+      </div>
+
+      <div class="modal-footer employees-modal-footer">
+        <button
+          type="button"
+          class="btn btn-light"
+          id="employeeCrudModalClose"
+          data-bs-dismiss="modal"
+          (click)="resetEditor()"
+        >
+          Cancel
+        </button>
+        <button type="submit" class="btn btn-primary" [disabled]="saving">
+          <i class="bi bi-check2-circle"></i>
+          {{ saving ? 'Saving...' : modalMode === 'create' ? 'Create employee' : 'Save changes' }}
+        </button>
+      </div>
+    </form>
+  </div>
 </div>

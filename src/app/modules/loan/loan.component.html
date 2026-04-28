@@ -1,14 +1,431 @@
-<div class="page-heading">
-  <section class="section">
-    <div class="card">
-      <div class="card-header">
-        <h2>Résilliations</h2>
+<div class="page-heading ops-page">
+  <section class="ops-shell">
+    <article class="card ops-hero">
+      <div class="ops-hero-copy">
+        <span class="ops-eyebrow">Loan</span>
+        <h2>Track employee lending with clearer amount, channel, and exposure details.</h2>
+        <p>
+          Manage loan records, financing routes, and follow-up notes from a dedicated routed workspace instead of legacy child screens.
+        </p>
+
+        <div class="ops-hero-actions">
+          <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#loanCrudModal" (click)="openCreateModal()">
+            <i class="bi bi-plus-square-fill"></i>
+            Create loan
+          </button>
+          <button type="button" class="btn btn-light" (click)="refreshLoans()" [disabled]="loading">
+            <i class="bi bi-arrow-repeat"></i>
+            Refresh
+          </button>
+        </div>
+
+        <div class="ops-hero-notice" *ngIf="loadError">{{ loadError }}</div>
       </div>
-      <div class="card-body">
-        <div class="dataTable-container">
-          <app-termination-list></app-termination-list>
+
+      <div class="ops-hero-panel">
+        <span class="ops-panel-kicker">Lending pulse</span>
+        <h3>Loan demand, channel mix, and documentation quality</h3>
+
+        <div class="ops-metric-grid">
+          <div class="ops-metric-card">
+            <span>High-value loans</span>
+            <strong>{{ highValueLoanCount }}</strong>
+            <p>Loan records at the stronger funding threshold.</p>
+          </div>
+          <div class="ops-metric-card">
+            <span>Bank-backed</span>
+            <strong>{{ bankLoanCount }}</strong>
+            <p>Requests currently routed through bank financing.</p>
+          </div>
         </div>
       </div>
+    </article>
+
+    <div class="ops-stat-grid">
+      <article class="card ops-stat-card tone-primary">
+        <span>Loans</span>
+        <strong>{{ totalLoansCount }}</strong>
+        <p>Total employee loan records currently tracked.</p>
+      </article>
+      <article class="card ops-stat-card tone-secondary">
+        <span>Bank channel</span>
+        <strong>{{ bankLoanCount }}</strong>
+        <p>Loans flowing through a bank-based receive type.</p>
+      </article>
+      <article class="card ops-stat-card tone-warning">
+        <span>High-value</span>
+        <strong>{{ highValueLoanCount }}</strong>
+        <p>Loans that need closer financial monitoring.</p>
+      </article>
+      <article class="card ops-stat-card tone-danger">
+        <span>Documented</span>
+        <strong>{{ documentedLoanCount }}</strong>
+        <p>Loan records that already include adequate remarks.</p>
+      </article>
+    </div>
+
+    <article class="card ops-toolbar-card">
+      <div class="ops-toolbar">
+        <label class="ops-search-field">
+          <i class="bi bi-search"></i>
+          <input type="text" [ngModel]="searchTerm" (ngModelChange)="onSearchTermChange($event)" placeholder="Search loans, employees, or channel names" />
+        </label>
+
+        <div class="ops-toolbar-controls">
+          <label>
+            <span>Filter</span>
+            <select [ngModel]="activeFilter" (ngModelChange)="onFilterChange($event)">
+              <option value="all">All loans</option>
+              <option value="bank">Bank channel</option>
+              <option value="high-value">High-value</option>
+              <option value="needs-note">Needs note</option>
+            </select>
+          </label>
+
+          <label>
+            <span>Sort</span>
+            <select [ngModel]="activeSort" (ngModelChange)="onSortChange($event)">
+              <option value="latest-apply">Latest apply date</option>
+              <option value="amount-desc">Highest amount</option>
+              <option value="employee-asc">Employee A-Z</option>
+            </select>
+          </label>
+        </div>
+      </div>
+
+      <div class="ops-toolbar-footer">
+        <span>{{ filteredResultsLabel }}</span>
+        <span>{{ featuredLoan ? featuredLoan.employeeName : 'No loan selected' }}</span>
+      </div>
+    </article>
+
+    <div class="ops-layout">
+      <div class="ops-main">
+        <div class="ops-loading-grid" *ngIf="loading; else loanReady">
+          <div class="ops-skeleton-card" *ngFor="let item of loadingPlaceholders"></div>
+        </div>
+
+        <ng-template #loanReady>
+          <div class="ops-grid" *ngIf="filteredLoans.length; else loanEmpty">
+            <article
+              class="card ops-card"
+              *ngFor="let item of filteredLoans; trackBy: trackByLoanId"
+              [class.is-active]="featuredLoan ? featuredLoan.id === item.id : false"
+              (click)="openDetailsModal(item)"
+              (keydown.enter)="openDetailsModal(item)"
+              (keydown.space)="$event.preventDefault(); openDetailsModal(item)"
+              tabindex="0"
+              role="button"
+              aria-label="Open loan details"
+            >
+              <div class="ops-card-head">
+                <div>
+                  <span class="ops-panel-kicker">Loan record</span>
+                  <h3>{{ item.loanName }}</h3>
+                </div>
+                <span class="ops-status" [ngClass]="'tone-' + item.qualityTone">{{ item.qualityLabel }}</span>
+              </div>
+
+              <p>{{ item.summary }}</p>
+
+              <div class="ops-progress-wrap">
+                <div class="ops-progress-top">
+                  <span>Record readiness</span>
+                  <strong>{{ item.qualityScore }}%</strong>
+                </div>
+                <div class="ops-progress-track">
+                  <span [style.width.%]="item.qualityScore"></span>
+                </div>
+              </div>
+
+              <div class="ops-chip-row">
+                <span class="ops-chip">{{ item.employeeName }}</span>
+                <span class="ops-chip">{{ item.loanAmount | number:'1.0-0' }}</span>
+              </div>
+
+              <div class="ops-card-view">
+                <span>Click to view details</span>
+                <i class="bi bi-arrow-up-right"></i>
+              </div>
+
+              <div class="ops-card-actions">
+                <button type="button" class="btn btn-light btn-sm" data-bs-toggle="modal" data-bs-target="#loanCrudModal" (click)="openEditModal(item); $event.stopPropagation()">
+                  <i class="bi bi-pencil-square"></i>
+                  Edit
+                </button>
+                <button type="button" class="btn btn-light btn-sm" (click)="deleteLoan(item); $event.stopPropagation()" [disabled]="deletingId === item.id">
+                  <i class="bi bi-trash3"></i>
+                  {{ deletingId === item.id ? 'Deleting...' : 'Delete' }}
+                </button>
+              </div>
+            </article>
+          </div>
+        </ng-template>
+
+        <ng-template #loanEmpty>
+          <article class="card ops-empty-card">
+            <span class="ops-empty-kicker">No matching loans</span>
+            <h3>The current search or filter does not match any loan record.</h3>
+            <p>Reset the filters or create a loan to rebuild the lending workspace.</p>
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#loanCrudModal" (click)="openCreateModal()">
+              <i class="bi bi-plus-square-fill"></i>
+              Create loan
+            </button>
+          </article>
+        </ng-template>
+      </div>
+
+      <aside class="ops-side">
+        <article class="card ops-panel-card" *ngIf="featuredLoan; else emptyLoanPanel">
+          <div class="ops-panel-head">
+            <div>
+              <span>Selected loan</span>
+              <h3>{{ featuredLoan.loanName }}</h3>
+            </div>
+            <span class="ops-status" [ngClass]="'tone-' + featuredLoan.qualityTone">{{ featuredLoan.qualityLabel }}</span>
+          </div>
+
+          <p>{{ featuredLoan.summary }}</p>
+
+          <div class="ops-fact-grid">
+            <div>
+              <span class="ops-detail-label">Employee</span>
+              <strong>{{ featuredLoan.employeeName }}</strong>
+            </div>
+            <div>
+              <span class="ops-detail-label">Apply date</span>
+              <strong>{{ featuredLoan.applyDateLabel }}</strong>
+            </div>
+            <div>
+              <span class="ops-detail-label">Interest</span>
+              <strong>{{ featuredLoan.interestPercentage }}%</strong>
+            </div>
+            <div>
+              <span class="ops-detail-label">Estimated interest</span>
+              <strong>{{ featuredLoan.estimatedInterest | number:'1.0-0' }}</strong>
+            </div>
+          </div>
+
+          <div class="ops-note-card">
+            <h4>Recommendation</h4>
+            <p>{{ featuredRecommendation }}</p>
+          </div>
+
+          <div class="ops-note-card accent-soft">
+            <h4>Next action</h4>
+            <p>{{ featuredNextAction }}</p>
+          </div>
+
+          <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#loanCrudModal" (click)="openEditModal(featuredLoan)">
+            <i class="bi bi-pencil-square"></i>
+            Edit selected loan
+          </button>
+        </article>
+
+        <ng-template #emptyLoanPanel>
+          <article class="card ops-panel-card">
+            <span class="ops-empty-kicker">Loan preview</span>
+            <h3>Select a loan to inspect it here.</h3>
+            <p>The side panel highlights exposure, financing route, and the current note quality.</p>
+          </article>
+        </ng-template>
+      </aside>
     </div>
   </section>
+</div>
+
+<div class="modal fade text-left" id="loanDetailsModal" tabindex="-1" aria-labelledby="loanDetailsModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content ops-modal-content" *ngIf="featuredLoan">
+      <div class="ops-modal-header">
+        <div>
+          <span class="ops-eyebrow">Loan details</span>
+          <h5 class="modal-title ops-modal-title" id="loanDetailsModalLabel">{{ featuredLoan.loanName }}</h5>
+          <p class="ops-modal-copy">Review the amount, channel, interest exposure, and employee context for the selected loan record.</p>
+        </div>
+
+        <div class="ops-details-actions">
+          <span class="ops-status" [ngClass]="'tone-' + featuredLoan.qualityTone">{{ featuredLoan.qualityLabel }}</span>
+          <button type="button" class="ops-modal-close" data-bs-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="ops-modal-body">
+        <div class="ops-details-layout">
+          <div class="ops-details-main">
+            <section class="ops-details-section">
+              <span class="ops-panel-kicker">Loan summary</span>
+              <h6>Funding overview</h6>
+              <p class="ops-detail-copy">{{ featuredLoan.summary }}</p>
+            </section>
+
+            <div class="ops-details-metrics">
+              <article class="ops-details-metric">
+                <span class="ops-detail-label">Loan amount</span>
+                <strong>{{ featuredLoan.loanAmount | number:'1.0-0' }}</strong>
+              </article>
+              <article class="ops-details-metric">
+                <span class="ops-detail-label">Interest</span>
+                <strong>{{ featuredLoan.interestPercentage }}%</strong>
+              </article>
+              <article class="ops-details-metric">
+                <span class="ops-detail-label">Estimated exposure</span>
+                <strong>{{ featuredLoan.estimatedInterest | number:'1.0-0' }}</strong>
+              </article>
+            </div>
+
+            <section class="ops-details-section">
+              <span class="ops-panel-kicker">Remarks</span>
+              <h6>Follow-up context</h6>
+              <p class="ops-detail-copy">{{ featuredLoan.remarks || 'No remarks have been recorded for this loan yet.' }}</p>
+            </section>
+
+            <section class="ops-details-section accent-soft">
+              <span class="ops-panel-kicker">Recommendation</span>
+              <h6>Finance follow-up</h6>
+              <p>{{ featuredRecommendation }}</p>
+            </section>
+          </div>
+
+          <aside class="ops-details-side">
+            <section class="ops-details-facts">
+              <span class="ops-panel-kicker">Quick facts</span>
+              <h6>Loan overview</h6>
+
+              <div class="ops-details-fact">
+                <strong>Employee</strong>
+                <span>{{ featuredLoan.employeeName }}</span>
+              </div>
+              <div class="ops-details-fact">
+                <strong>Channel</strong>
+                <span>{{ featuredLoan.receiveType }}</span>
+              </div>
+              <div class="ops-details-fact">
+                <strong>Apply date</strong>
+                <span>{{ featuredLoan.applyDateLabel }}</span>
+              </div>
+              <div class="ops-details-fact">
+                <strong>Record ID</strong>
+                <span>#{{ featuredLoan.id }}</span>
+              </div>
+            </section>
+          </aside>
+        </div>
+      </div>
+
+      <div class="ops-modal-footer">
+        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary" data-bs-dismiss="modal" data-bs-toggle="modal" data-bs-target="#loanCrudModal" (click)="openEditModal(featuredLoan)">
+          <i class="bi bi-pencil-square"></i>
+          Edit loan
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade text-left" id="loanCrudModal" tabindex="-1" aria-labelledby="loanCrudModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content ops-modal-content">
+      <div class="ops-modal-header">
+        <div>
+          <span class="ops-eyebrow">Loan editor</span>
+          <h5 class="modal-title ops-modal-title" id="loanCrudModalLabel">{{ modalTitle }}</h5>
+          <p class="ops-modal-copy">{{ modalSubtitle }}</p>
+        </div>
+        <button type="button" class="ops-modal-close" data-bs-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+
+      <div class="ops-modal-body">
+        <form [formGroup]="loanForm" (ngSubmit)="saveLoan()">
+          <div class="ops-form-grid">
+            <section class="ops-form-section">
+              <span class="ops-panel-kicker">Loan setup</span>
+              <h6>Core loan information</h6>
+
+              <div class="ops-form-field">
+                <label for="loanName">Loan name</label>
+                <input id="loanName" type="text" formControlName="loanName" placeholder="Example: Car Loan" />
+                <div class="ops-field-error" *ngIf="submitted && loanForm.get('loanName').invalid">Loan name is required.</div>
+              </div>
+
+              <div class="ops-form-split">
+                <div class="ops-form-field">
+                  <label for="loanReceiveType">Receive type</label>
+                  <input id="loanReceiveType" type="text" formControlName="receiveType" placeholder="Example: Bank" />
+                  <div class="ops-field-error" *ngIf="submitted && loanForm.get('receiveType').invalid">Receive type is required.</div>
+                </div>
+
+                <div class="ops-form-field">
+                  <label for="loanEmployeeId">Employee</label>
+                  <select id="loanEmployeeId" formControlName="employeeId">
+                    <option value="">Select employee</option>
+                    <option *ngFor="let option of employees" [value]="option.id">{{ option.name }}</option>
+                  </select>
+                  <div class="ops-field-error" *ngIf="submitted && loanForm.get('employeeId').invalid">Employee is required.</div>
+                </div>
+              </div>
+
+              <div class="ops-form-split">
+                <div class="ops-form-field">
+                  <label for="loanInterest">Interest percentage</label>
+                  <input id="loanInterest" type="number" min="0" formControlName="interestPercentage" placeholder="Example: 5" />
+                </div>
+
+                <div class="ops-form-field">
+                  <label for="loanAmount">Loan amount</label>
+                  <input id="loanAmount" type="number" min="0" formControlName="loanAmount" placeholder="Example: 10000" />
+                  <div class="ops-field-error" *ngIf="submitted && loanForm.get('loanAmount').invalid">Loan amount is required.</div>
+                </div>
+              </div>
+
+              <div class="ops-form-field">
+                <label for="loanApplyDate">Apply date</label>
+                <input id="loanApplyDate" type="date" formControlName="applyDate" />
+                <div class="ops-field-error" *ngIf="submitted && loanForm.get('applyDate').invalid">Apply date is required.</div>
+              </div>
+
+              <div class="ops-form-field">
+                <label for="loanRemarks">Remarks</label>
+                <textarea id="loanRemarks" rows="4" formControlName="remarks" placeholder="Add purpose, approval context, or repayment notes."></textarea>
+              </div>
+            </section>
+
+            <aside class="ops-form-preview">
+              <span class="ops-panel-kicker">Live preview</span>
+              <h4>{{ draftEmployeeName || 'Employee pending' }}</h4>
+              <p>Projected interest exposure {{ draftInterestExposure | number:'1.0-0' }} on a {{ draftLoanAmount | number:'1.0-0' }} loan.</p>
+
+              <div class="ops-progress-wrap">
+                <div class="ops-progress-top">
+                  <span>Readiness</span>
+                  <strong>{{ draftQuality.score }}%</strong>
+                </div>
+                <div class="ops-progress-track">
+                  <span [style.width.%]="draftQuality.score"></span>
+                </div>
+              </div>
+
+              <div class="ops-chip-row">
+                <span class="ops-chip">{{ draftQuality.label }}</span>
+                <span class="ops-chip">{{ draftInterestPercentage }}% interest</span>
+              </div>
+            </aside>
+          </div>
+
+          <div class="ops-modal-actions">
+            <button type="button" class="btn btn-light" data-bs-dismiss="modal" id="loanCrudModalClose">Cancel</button>
+            <button type="submit" class="btn btn-primary" [disabled]="saving">
+              <i class="bi" [ngClass]="saving ? 'bi-arrow-repeat' : 'bi-check2-circle'"></i>
+              {{ saving ? 'Saving...' : modalMode === 'create' ? 'Create loan' : 'Save changes' }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
 </div>

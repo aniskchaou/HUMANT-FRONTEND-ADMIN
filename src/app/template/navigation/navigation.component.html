@@ -1,209 +1,88 @@
 <div id="sidebar" class="active">
   <div class="sidebar-wrapper active">
     <div class="sidebar-header">
-      <div class="d-flex justify-content-between">
-        <div>
-          <a routerLink="/dashboard">
-            <img src="assets/images/logo.png" />
+      <div class="d-flex justify-content-between align-items-start gap-3">
+        <a routerLink="/dashboard" class="sidebar-brand-link">
+          <span class="sidebar-brand-mark">H</span>
+          <span class="sidebar-brand-copy">
+            <strong>Humant</strong>
+            <small>Premium HR workspace</small>
+          </span>
+        </a>
+        <div class="toggler">
+          <a href="#" class="sidebar-hide d-xl-none d-block">
+            <i class="bi bi-x bi-middle"></i>
           </a>
         </div>
-        <div class="toggler">
-          <a href="#" class="sidebar-hide d-xl-none d-block"
-            ><i class="bi bi-x bi-middle"></i
-          ></a>
+      </div>
+
+      <div class="sidebar-overview">
+        <div>
+          <span>Modules</span>
+          <strong>{{ visibleModuleCount }}</strong>
+        </div>
+        <div>
+          <span>Mode</span>
+          <strong>Live</strong>
         </div>
       </div>
     </div>
+
     <div class="sidebar-menu active">
       <ul class="menu">
-        <li class="sidebar-item">
+        <li class="menu-caption">Overview</li>
+        <li class="sidebar-item" *ngIf="accessControlService.canAccessRoute('/dashboard')" [class.active]="isRouteActive('/dashboard')">
           <a routerLink="/dashboard" class="sidebar-link">
             <i class="bi bi-grid-fill"></i>
-            <span>Dashboard</span>
+            <span>Executive Dashboard</span>
           </a>
         </li>
 
-        <li class="sidebar-item has-sub">
-          <a href="#" class="sidebar-link">
-            <i class="bi bi-egg-fill"></i>
-            <span>Leave</span>
+        <li class="menu-caption">Operations</li>
+        <li
+          class="sidebar-item has-sub"
+          *ngFor="let section of visibleSections"
+          [class.active]="isSectionActive(section)"
+          [class.open]="isSectionOpen(section)"
+        >
+          <a
+            href=""
+            class="sidebar-link"
+            role="button"
+            [attr.aria-expanded]="isSectionOpen(section)"
+            (click)="toggleSection(section, $event)"
+          >
+            <i [class]="section.icon"></i>
+            <span>{{ section.label }}</span>
           </a>
-          <ul class="submenu">
-            <li class="submenu-item">
-              <a routerLink="/termination">Terminations</a>
-            </li>
-            <li class="submenu-item">
-              <a routerLink="/resign">Resignations</a>
-            </li>
-          </ul>
-        </li>
-
-        <li class="sidebar-item has-sub">
-          <a href="#" class="sidebar-link">
-            <i class="bi bi-map-fill"></i>
-            <span>Events</span>
-          </a>
-          <ul class="submenu">
-            <li class="submenu-item">
-              <a routerLink="/announcement">Announcements</a>
-            </li>
-            <!--   <li class="submenu-item">
-              <a routerLink="/holiday">Holiday</a>
-            </li>
-            <li class="submenu-item">
-              <a routerLink="/notice">Notice</a>
-            </li> -->
-          </ul>
-        </li>
-
-        <li class="sidebar-item has-sub">
-          <a href="#" class="sidebar-link">
-            <i class="bi bi-basket-fill"></i>
-            <span>Employees</span>
-          </a>
-          <ul class="submenu">
-            <li class="submenu-item">
-              <a routerLink="/employee">Employees</a>
-            </li>
-            <li class="submenu-item">
-              <a routerLink="/education-level">Educations Levels</a>
-            </li>
-            <li class="submenu-item">
-              <a routerLink="/complain">Complains</a>
-            </li>
-            <!-- <li class="submenu-item">
-              <a routerLink="/departement">Departements</a>
-            </li> -->
-          </ul>
-        </li>
-
-        <li class="sidebar-item has-sub">
-          <a href="#" class="sidebar-link">
-            <i class="bi bi-person-badge-fill"></i>
-            <span>Salary</span>
-          </a>
-          <ul class="submenu">
-            <li class="submenu-item">
-              <a routerLink="/salary">Salaries</a>
-            </li>
-            <!--    <li class="submenu-item">
-              <a routerLink="/advance">Advance Salary!</a>
-            </li> -->
-            <!-- <li class="submenu-item">
-              <a routerLink="/award">Awards</a>
-            </li> -->
-            <!-- <li class="submenu-item">
-              <a routerLink="/lauch-plan">launch plan !</a>
-            </li>
-            <li class="submenu-item">
-              <a routerLink="/pay-slip">pay slip !</a>
-            </li> -->
-          </ul>
-        </li>
-
-        <li class="sidebar-item has-sub">
-          <a href="#" class="sidebar-link">
-            <i class="bi bi-stack"></i>
-            <span>Job</span>
-          </a>
-          <ul class="submenu">
-            <li class="submenu-item">
-              <a routerLink="/job">Jobs</a>
-            </li>
-            <!-- <li class="submenu-item">
-              <a routerLink="/jobapplication">Job Applications</a>
-            </li> -->
-          </ul>
-        </li>
-
-        <li class="sidebar-item has-sub">
-          <a href="#" class="sidebar-link">
-            <i class="bi bi-cloud-arrow-up-fill"></i>
-            <span>Contract</span>
-          </a>
-          <ul class="submenu">
-            <li class="submenu-item">
-              <a routerLink="/contract">Contracts</a>
-            </li>
-            <li class="submenu-item">
-              <a routerLink="/contract-type">Contracts Types</a>
-            </li>
-          </ul>
-        </li>
-
-        <li class="sidebar-item has-sub">
-          <a href="#" class="sidebar-link">
-            <i class="bi bi-life-preserver"></i>
-            <span>Training</span>
-          </a>
-          <ul class="submenu">
-            <li class="submenu-item">
-              <a routerLink="/training">Trainings</a>
-            </li>
-            <li class="submenu-item">
-              <a routerLink="/training-type"> Trainings Types</a>
-            </li>
-          </ul>
-        </li>
-
-        <li class="sidebar-item has-sub">
-          <a href="#" class="sidebar-link">
-            <i class="bi bi-pentagon-fill"></i>
-            <span>Award</span>
-          </a>
-          <ul class="submenu">
-            <li class="submenu-item">
-              <a routerLink="/award">Awards</a>
-            </li>
-            <li class="submenu-item">
-              <a routerLink="/award-type"> Awards Types</a>
-            </li>
-          </ul>
-        </li>
-
-        <li class="sidebar-item has-sub">
-          <a href="#" class="sidebar-link">
-            <i class="bi bi-cloud-arrow-up-fill"></i>
-            <span>General Settings</span>
-          </a>
-          <ul class="submenu" style="display: none">
-            <li class="submenu-item">
-              <a routerLink="/city">Cities</a>
-            </li>
-            <!--   <li class="submenu-item">
-              <a routerLink="/country">Countries</a>
-            </li> -->
-
-            <!-- <li class="submenu-item">
-              <a routerLink="/user">Users</a>
-            </li>
-            <li class="submenu-item">
-              <a routerLink="/loan">Loans</a>
-            </li>-->
-            <!--  <li class="submenu-item">
-              <a routerLink="/pay-slip">Work Entry !</a>
-            </li>
-            <li class="submenu-item">
-              <a routerLink="/pay-slip">Meetings !</a>
-            </li>
-            <li class="submenu-item">
-              <a routerLink="/pay-slip">Work Permits !</a>
-            </li> -->
-            <!--  <li class="submenu-item">
-              <a routerLink="/pay-slip">Work Locations </a>
-            </li> -->
-            <li class="submenu-item">
-              <a
-                routerLinkActive="active"
-                class="sidebar-link"
-                routerLink="/departement"
-                >Departements</a
-              >
+          <ul class="submenu" [class.active]="isSectionOpen(section)">
+            <li
+              class="submenu-item"
+              *ngFor="let item of section.items"
+              [class.active]="isRouteActive(item.route)"
+            >
+              <a [routerLink]="item.route">{{ item.label }}</a>
             </li>
           </ul>
         </li>
       </ul>
     </div>
-    <button class="sidebar-toggler btn x"><i data-feather="x"></i></button>
+
+    <div class="sidebar-footer">
+      <div class="sidebar-support-card">
+        <span class="support-badge">Premium Refresh</span>
+        <h6>Designed for real admin teams</h6>
+        <p>
+          Sharper hierarchy, cleaner navigation, and a stronger first
+          impression for commercial delivery.
+        </p>
+        <div class="support-actions">
+          <a routerLink="/profile" class="btn btn-primary btn-sm">Profile</a>
+          <a routerLink="/configuration" class="btn btn-light btn-sm">
+            Settings
+          </a>
+        </div>
+      </div>
+    </div>
   </div>
 </div>

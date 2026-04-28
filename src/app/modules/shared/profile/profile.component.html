@@ -1,12 +1,244 @@
-<div class="module">
-    <div class="module-head">
-        <h3>Mon profile</h3>
-    </div>
-    <div class="module-body">
-        <b>Email</b> admin@example.com <br>
-        <b>IP Address</b> 162.158.154.20 <br>
-        <b>Last Login</b> 2020-12-15 04:51:38 <br>
-        <b>Last Logout</b> 2020-12-15 03:38:12 <br>
+<div class="page-heading ops-page">
+    <section class="ops-shell">
+        <article class="card ops-hero">
+            <div class="ops-hero-copy">
+                <span class="ops-eyebrow">Profile</span>
+                <h2>Manage your profile from a real workspace instead of a static account shell.</h2>
+                <p>
+                    Identity, contact details, and workspace preferences are editable here. When a linked employee record is available, shared profile fields sync through the backend as well.
+                </p>
 
-    </div>
+                <div class="ops-hero-actions">
+                    <button type="button" class="btn btn-primary" (click)="saveProfile()" [disabled]="saving">
+                        <i class="bi" [ngClass]="saving ? 'bi-arrow-repeat' : 'bi-check2-circle'"></i>
+                        {{ saving ? 'Saving...' : 'Save profile' }}
+                    </button>
+                    <button type="button" class="btn btn-light" (click)="resetProfile()">
+                        <i class="bi bi-arrow-counterclockwise"></i>
+                        Reset profile
+                    </button>
+                </div>
+            </div>
+
+            <div class="ops-hero-panel ops-profile-panel">
+                <div class="ops-profile-avatar" [class.has-photo]="hasProfilePhoto">
+                    <img *ngIf="hasProfilePhoto" [src]="profilePhoto" [alt]="(profileForm.value.displayName || 'Profile') + ' portrait'" />
+                    <span *ngIf="!hasProfilePhoto">{{ initials }}</span>
+                </div>
+                <span class="ops-panel-kicker">Session identity</span>
+                <h3>{{ profileForm.value.displayName || 'Profile pending' }}</h3>
+                <p>{{ workspaceName }} • @{{ sessionUsername }}</p>
+                <strong class="ops-profile-headline">{{ profileHeadline }}</strong>
+            </div>
+        </article>
+
+        <div class="ops-stat-grid">
+            <article class="card ops-stat-card tone-primary">
+                <span>Profile score</span>
+                <strong>{{ completionScore }}%</strong>
+                <p>Coverage across identity, role, contact, and bio fields.</p>
+            </article>
+            <article class="card ops-stat-card tone-secondary">
+                <span>Status</span>
+                <strong>{{ profileStatus }}</strong>
+                <p>How complete the current profile is for the signed-in workspace user.</p>
+            </article>
+            <article class="card ops-stat-card tone-warning">
+                <span>Workspace</span>
+                <strong>{{ workspaceName }}</strong>
+                <p>Current organization label inherited from configuration when available.</p>
+            </article>
+            <article class="card ops-stat-card tone-danger">
+                <span>Last saved</span>
+                <strong>{{ formatSavedAt(lastSavedAt) }}</strong>
+                <p>Most recent time this profile was persisted for the current session user.</p>
+            </article>
+        </div>
+
+        <div class="ops-layout singleton-layout">
+            <div class="ops-main">
+                <article class="card ops-panel-card">
+                    <div class="ops-panel-head">
+                        <div>
+                            <span>Profile editor</span>
+                            <h3>Workspace-facing identity</h3>
+                        </div>
+                        <span class="ops-status tone-strong">{{ profileStatus }}</span>
+                    </div>
+
+                    <form [formGroup]="profileForm" (ngSubmit)="saveProfile()" class="ops-form-stack">
+                        <div class="ops-form-grid">
+                            <section class="ops-form-section ops-photo-section">
+                                <span class="ops-panel-kicker">Portrait</span>
+                                <h6>Profile image</h6>
+
+                                <div class="ops-avatar-editor">
+                                    <div class="ops-avatar-preview" [class.has-photo]="hasProfilePhoto">
+                                        <img *ngIf="hasProfilePhoto" [src]="profilePhoto" [alt]="(profileForm.value.displayName || 'Profile') + ' portrait'" />
+                                        <span *ngIf="!hasProfilePhoto">{{ initials }}</span>
+                                    </div>
+
+                                    <div class="ops-avatar-editor-copy">
+                                        <p>Choose a bundled portrait or upload a personal image. Uploaded portraits are stored locally for the signed-in workspace user.</p>
+
+                                        <div class="ops-avatar-actions">
+                                            <label class="btn btn-light btn-sm ops-avatar-upload" for="profilePhotoUpload">
+                                                <i class="bi bi-upload"></i>
+                                                Upload image
+                                            </label>
+                                            <input id="profilePhotoUpload" type="file" accept="image/*" class="ops-avatar-input" (change)="onAvatarSelected($event)" />
+
+                                            <button type="button" class="btn btn-light btn-sm" (click)="clearAvatar()" [disabled]="!hasProfilePhoto">
+                                                <i class="bi bi-x-circle"></i>
+                                                Remove image
+                                            </button>
+                                        </div>
+
+                                        <div class="ops-avatar-presets">
+                                            <button
+                                                type="button"
+                                                class="ops-avatar-preset"
+                                                *ngFor="let preset of avatarPresets"
+                                                [class.is-active]="profilePhoto === preset"
+                                                (click)="applyAvatarPreset(preset)"
+                                            >
+                                                <img [src]="preset" alt="Profile portrait preset" />
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </section>
+
+                            <section class="ops-form-section">
+                                <span class="ops-panel-kicker">Identity</span>
+                                <h6>Visible profile details</h6>
+
+                                <div class="ops-form-field">
+                                    <label for="displayName">Display name</label>
+                                    <input id="displayName" type="text" formControlName="displayName" placeholder="Enter display name" />
+                                    <div class="ops-field-error" *ngIf="submitted && profileForm.get('displayName').invalid">Display name is required.</div>
+                                </div>
+
+                                <div class="ops-form-field">
+                                    <label for="email">Email</label>
+                                    <input id="email" type="email" formControlName="email" placeholder="name@example.com" />
+                                    <div class="ops-field-error" *ngIf="submitted && profileForm.get('email').invalid">A valid email is required.</div>
+                                </div>
+
+                                <div class="ops-form-field">
+                                    <label for="jobTitle">Job title</label>
+                                    <input id="jobTitle" type="text" formControlName="jobTitle" placeholder="HR Workspace Lead" />
+                                    <div class="ops-field-error" *ngIf="submitted && profileForm.get('jobTitle').invalid">Job title is required.</div>
+                                </div>
+
+                                <div class="ops-form-field">
+                                    <label for="department">Department</label>
+                                    <input id="department" type="text" formControlName="department" placeholder="Operations" />
+                                    <div class="ops-field-error" *ngIf="submitted && profileForm.get('department').invalid">Department is required.</div>
+                                </div>
+                            </section>
+
+                            <section class="ops-form-section">
+                                <span class="ops-panel-kicker">Presence</span>
+                                <h6>Contact and context</h6>
+
+                                <div class="ops-form-field">
+                                    <label for="phone">Phone</label>
+                                    <input id="phone" type="text" formControlName="phone" placeholder="Optional phone number" />
+                                </div>
+
+                                <div class="ops-form-field">
+                                    <label for="location">Location</label>
+                                    <input id="location" type="text" formControlName="location" placeholder="Office or region" />
+                                </div>
+
+                                <div class="ops-form-field">
+                                    <label for="profileTimezone">Timezone</label>
+                                    <select id="profileTimezone" formControlName="timezone">
+                                        <option value="">Select timezone</option>
+                                        <option value="UTC">UTC</option>
+                                        <option value="Europe/Paris">Europe/Paris</option>
+                                        <option value="Africa/Casablanca">Africa/Casablanca</option>
+                                        <option value="America/New_York">America/New_York</option>
+                                    </select>
+                                    <div class="ops-field-error" *ngIf="submitted && profileForm.get('timezone').invalid">Timezone is required.</div>
+                                </div>
+
+                                <div class="ops-form-field">
+                                    <label for="bio">Bio</label>
+                                    <textarea id="bio" rows="4" formControlName="bio" placeholder="Describe the responsibilities attached to this profile."></textarea>
+                                </div>
+                            </section>
+                        </div>
+
+                        <div class="ops-modal-actions inline-actions">
+                            <button type="button" class="btn btn-light" (click)="resetProfile()">Reset profile</button>
+                            <button type="submit" class="btn btn-primary" [disabled]="saving">
+                                <i class="bi" [ngClass]="saving ? 'bi-arrow-repeat' : 'bi-check2-circle'"></i>
+                                {{ saving ? 'Saving...' : 'Save profile' }}
+                            </button>
+                        </div>
+                    </form>
+                </article>
+            </div>
+
+            <aside class="ops-side">
+                <article class="card ops-panel-card">
+                    <div class="ops-panel-head">
+                        <div>
+                            <span>Profile preview</span>
+                            <h3>{{ profileForm.value.displayName || 'Profile pending' }}</h3>
+                        </div>
+                        <span class="ops-status tone-medium">{{ completionScore }}%</span>
+                    </div>
+
+                    <div class="ops-profile-preview-avatar" [class.has-photo]="hasProfilePhoto">
+                        <img *ngIf="hasProfilePhoto" [src]="profilePhoto" [alt]="(profileForm.value.displayName || 'Profile') + ' preview portrait'" />
+                        <span *ngIf="!hasProfilePhoto">{{ initials }}</span>
+                    </div>
+
+                    <p>{{ profileForm.value.bio || 'Add a short profile bio to give this workspace presence more context.' }}</p>
+
+                    <div class="ops-fact-grid">
+                        <div>
+                            <span class="ops-detail-label">Email</span>
+                            <strong>{{ profileForm.value.email || 'Pending' }}</strong>
+                        </div>
+                        <div>
+                            <span class="ops-detail-label">Department</span>
+                            <strong>{{ profileForm.value.department || 'Pending' }}</strong>
+                        </div>
+                        <div>
+                            <span class="ops-detail-label">Location</span>
+                            <strong>{{ profileForm.value.location || 'Pending' }}</strong>
+                        </div>
+                        <div>
+                            <span class="ops-detail-label">Timezone</span>
+                            <strong>{{ profileForm.value.timezone || 'Pending' }}</strong>
+                        </div>
+                        <div>
+                            <span class="ops-detail-label">Headline</span>
+                            <strong>{{ profileHeadline }}</strong>
+                        </div>
+                    </div>
+
+                    <div class="ops-note-card">
+                        <h4>Security context</h4>
+                        <p>Signed in as @{{ sessionUsername }} through the active backend-authenticated session.</p>
+
+                        <div class="ops-fact-grid compact-facts">
+                            <div>
+                                <span class="ops-detail-label">Username</span>
+                                <strong>{{ sessionUsername }}</strong>
+                            </div>
+                            <div>
+                                <span class="ops-detail-label">Auth mode</span>
+                                <strong>{{ maskedPassword }}</strong>
+                            </div>
+                        </div>
+                    </div>
+                </article>
+            </aside>
+        </div>
+    </section>
 </div>

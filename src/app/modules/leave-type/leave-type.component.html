@@ -1,14 +1,420 @@
-<div class="page-heading">
-  <section class="section">
-    <div class="card">
-      <div class="card-header">
-        <h2>Résilliations</h2>
+<div class="page-heading ops-page">
+  <section class="ops-shell">
+    <article class="card ops-hero">
+      <div class="ops-hero-copy">
+        <span class="ops-eyebrow">Leave policies</span>
+        <h2>Keep leave categories explicit so approvals and planning stay predictable.</h2>
+        <p>
+          Manage every leave type as a reusable policy with a clear entitlement window and a visible
+          detail panel for quick review.
+        </p>
+
+        <div class="ops-hero-actions">
+          <button
+            type="button"
+            class="btn btn-primary"
+            data-bs-toggle="modal"
+            data-bs-target="#leaveTypeCrudModal"
+            (click)="openCreateModal()"
+          >
+            <i class="bi bi-plus-square-fill"></i>
+            Create leave type
+          </button>
+          <button
+            type="button"
+            class="btn btn-light"
+            (click)="refreshLeaveTypes()"
+            [disabled]="loading"
+          >
+            <i class="bi bi-arrow-repeat"></i>
+            Refresh
+          </button>
+        </div>
+
+        <div class="ops-hero-notice" *ngIf="loadError">{{ loadError }}</div>
       </div>
-      <div class="card-body">
-        <div class="dataTable-container">
-          <app-termination-list></app-termination-list>
+
+      <div class="ops-hero-panel">
+        <span class="ops-panel-kicker">Policy pulse</span>
+        <h3>How balanced the current leave catalog looks</h3>
+
+        <div class="ops-metric-grid">
+          <div class="ops-metric-card">
+            <span>Total types</span>
+            <strong>{{ totalLeaveTypesCount }}</strong>
+            <p>All leave categories available to HR and managers.</p>
+          </div>
+          <div class="ops-metric-card">
+            <span>Average duration</span>
+            <strong>{{ averageDays }}d</strong>
+            <p>Average entitlement across the leave policy library.</p>
+          </div>
         </div>
       </div>
+    </article>
+
+    <div class="ops-stat-grid">
+      <article class="card ops-stat-card tone-primary">
+        <span>Leave types</span>
+        <strong>{{ totalLeaveTypesCount }}</strong>
+        <p>Available policies currently managed in the workspace.</p>
+      </article>
+
+      <article class="card ops-stat-card tone-secondary">
+        <span>Extended</span>
+        <strong>{{ extendedTypesCount }}</strong>
+        <p>Policies with at least twenty available days.</p>
+      </article>
+
+      <article class="card ops-stat-card tone-warning">
+        <span>Short</span>
+        <strong>{{ shortTypesCount }}</strong>
+        <p>Policies designed for brief absence windows.</p>
+      </article>
+
+      <article class="card ops-stat-card tone-danger">
+        <span>Average</span>
+        <strong>{{ averageDays }}d</strong>
+        <p>Typical leave entitlement across the current setup.</p>
+      </article>
+    </div>
+
+    <article class="card ops-toolbar-card">
+      <div class="ops-toolbar">
+        <label class="ops-search-field">
+          <i class="bi bi-search"></i>
+          <input
+            type="text"
+            [ngModel]="searchTerm"
+            (ngModelChange)="onSearchTermChange($event)"
+            placeholder="Search leave types"
+          />
+        </label>
+
+        <div class="ops-toolbar-controls">
+          <label>
+            <span>Filter</span>
+            <select [ngModel]="activeFilter" (ngModelChange)="onFilterChange($event)">
+              <option value="all">All types</option>
+              <option value="extended">Extended</option>
+              <option value="standard">Standard</option>
+              <option value="short">Short</option>
+            </select>
+          </label>
+
+          <label>
+            <span>Sort</span>
+            <select [ngModel]="activeSort" (ngModelChange)="onSortChange($event)">
+              <option value="days-desc">Longest duration</option>
+              <option value="quality">Readiness</option>
+              <option value="name-asc">Name A-Z</option>
+            </select>
+          </label>
+        </div>
+      </div>
+
+      <div class="ops-toolbar-footer">
+        <span>{{ filteredResultsLabel }}</span>
+        <span>{{ featuredLeaveType ? featuredLeaveType.name : 'No leave type selected' }}</span>
+      </div>
+    </article>
+
+    <div class="ops-layout">
+      <div class="ops-main">
+        <div class="ops-loading-grid" *ngIf="loading; else leaveTypeReady">
+          <div class="ops-skeleton-card" *ngFor="let item of loadingPlaceholders"></div>
+        </div>
+
+        <ng-template #leaveTypeReady>
+          <div class="ops-grid" *ngIf="filteredLeaveTypes.length; else leaveTypeEmpty">
+            <article
+              class="card ops-card"
+              *ngFor="let item of filteredLeaveTypes; trackBy: trackByLeaveTypeId"
+              [class.is-active]="featuredLeaveType ? featuredLeaveType.id === item.id : false"
+              (click)="openDetailsModal(item)"
+              (keydown.enter)="openDetailsModal(item)"
+              (keydown.space)="$event.preventDefault(); openDetailsModal(item)"
+              tabindex="0"
+              role="button"
+              aria-label="Open leave type details"
+            >
+              <div class="ops-card-head">
+                <div>
+                  <span class="ops-panel-kicker">Leave type</span>
+                  <h3>{{ item.name }}</h3>
+                </div>
+                <span class="ops-status" [ngClass]="'tone-' + item.qualityTone">
+                  {{ item.qualityLabel }}
+                </span>
+              </div>
+
+              <p>{{ item.summary }}</p>
+
+              <div class="ops-progress-wrap">
+                <div class="ops-progress-top">
+                  <span>Policy readiness</span>
+                  <strong>{{ item.qualityScore }}%</strong>
+                </div>
+                <div class="ops-progress-track">
+                  <span [style.width.%]="item.qualityScore"></span>
+                </div>
+              </div>
+
+              <div class="ops-chip-row">
+                <span class="ops-chip">{{ item.daysLabel }}</span>
+                <span class="ops-chip">{{ item.extended ? 'Extended policy' : item.short ? 'Short leave' : 'Standard policy' }}</span>
+              </div>
+
+              <div class="ops-card-view">
+                <span>Click to view details</span>
+                <i class="bi bi-arrow-up-right"></i>
+              </div>
+
+              <div class="ops-card-actions">
+                <button
+                  type="button"
+                  class="btn btn-light btn-sm"
+                  data-bs-toggle="modal"
+                  data-bs-target="#leaveTypeCrudModal"
+                  (click)="openEditModal(item); $event.stopPropagation()"
+                >
+                  <i class="bi bi-pencil-square"></i>
+                  Edit
+                </button>
+                <button
+                  type="button"
+                  class="btn btn-light btn-sm"
+                  (click)="deleteLeaveType(item); $event.stopPropagation()"
+                  [disabled]="deletingId === item.id"
+                >
+                  <i class="bi bi-trash3"></i>
+                  {{ deletingId === item.id ? 'Deleting...' : 'Delete' }}
+                </button>
+              </div>
+            </article>
+          </div>
+        </ng-template>
+
+        <ng-template #leaveTypeEmpty>
+          <article class="card ops-empty-card">
+            <span class="ops-empty-kicker">No matching leave types</span>
+            <h3>The current search or filter does not match any leave type.</h3>
+            <p>Reset the filters or create a new policy so the leave catalog stays usable.</p>
+            <button
+              type="button"
+              class="btn btn-primary"
+              data-bs-toggle="modal"
+              data-bs-target="#leaveTypeCrudModal"
+              (click)="openCreateModal()"
+            >
+              <i class="bi bi-plus-square-fill"></i>
+              Create leave type
+            </button>
+          </article>
+        </ng-template>
+      </div>
+
+      <aside class="ops-side">
+        <article class="card ops-panel-card" *ngIf="featuredLeaveType; else emptyLeaveTypePanel">
+          <div class="ops-panel-head">
+            <div>
+              <span>Selected policy</span>
+              <h3>{{ featuredLeaveType.name }}</h3>
+            </div>
+            <span class="ops-status" [ngClass]="'tone-' + featuredLeaveType.qualityTone">
+              {{ featuredLeaveType.qualityLabel }}
+            </span>
+          </div>
+
+          <p>{{ featuredLeaveType.summary }}</p>
+
+          <div class="ops-fact-grid">
+            <div>
+              <span class="ops-detail-label">Duration</span>
+              <strong>{{ featuredLeaveType.daysLabel }}</strong>
+            </div>
+            <div>
+              <span class="ops-detail-label">Profile</span>
+              <strong>{{ featuredLeaveType.extended ? 'Extended' : featuredLeaveType.short ? 'Short' : 'Standard' }}</strong>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            class="btn btn-primary"
+            data-bs-toggle="modal"
+            data-bs-target="#leaveTypeCrudModal"
+            (click)="openEditModal(featuredLeaveType)"
+          >
+            <i class="bi bi-pencil-square"></i>
+            Edit selected policy
+          </button>
+        </article>
+
+        <ng-template #emptyLeaveTypePanel>
+          <article class="card ops-panel-card">
+            <span class="ops-empty-kicker">Policy preview</span>
+            <h3>Select a leave type to inspect it here.</h3>
+            <p>The side panel shows the current entitlement window and policy position for the selected leave type.</p>
+          </article>
+        </ng-template>
+      </aside>
     </div>
   </section>
+</div>
+
+<div class="modal fade text-left" id="leaveTypeDetailsModal" tabindex="-1" aria-labelledby="leaveTypeDetailsModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content ops-modal-content" *ngIf="featuredLeaveType">
+      <div class="ops-modal-header">
+        <div>
+          <span class="ops-eyebrow">Leave type details</span>
+          <h5 class="modal-title ops-modal-title" id="leaveTypeDetailsModalLabel">{{ featuredLeaveType.name }}</h5>
+          <p class="ops-modal-copy">Review the entitlement window, policy profile, and readiness of the selected leave category.</p>
+        </div>
+
+        <div class="ops-details-actions">
+          <span class="ops-status" [ngClass]="'tone-' + featuredLeaveType.qualityTone">{{ featuredLeaveType.qualityLabel }}</span>
+          <button type="button" class="ops-modal-close" data-bs-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="ops-modal-body">
+        <div class="ops-details-layout">
+          <div class="ops-details-main">
+            <section class="ops-details-section">
+              <span class="ops-panel-kicker">Policy summary</span>
+              <h6>How this leave type is used</h6>
+              <p class="ops-detail-copy">{{ featuredLeaveType.summary }}</p>
+            </section>
+
+            <div class="ops-details-metrics">
+              <article class="ops-details-metric">
+                <span class="ops-detail-label">Days</span>
+                <strong>{{ featuredLeaveType.daysLabel }}</strong>
+              </article>
+              <article class="ops-details-metric">
+                <span class="ops-detail-label">Profile</span>
+                <strong>{{ featuredLeaveType.extended ? 'Extended' : featuredLeaveType.short ? 'Short' : 'Standard' }}</strong>
+              </article>
+              <article class="ops-details-metric">
+                <span class="ops-detail-label">Readiness</span>
+                <strong>{{ featuredLeaveType.qualityScore }}%</strong>
+              </article>
+            </div>
+
+            <section class="ops-details-section">
+              <span class="ops-panel-kicker">Policy guidance</span>
+              <h6>Operational note</h6>
+              <p class="ops-detail-copy">
+                {{ featuredLeaveType.extended ? 'This leave type supports longer planned absences and should stay visible during capacity planning.' : featuredLeaveType.short ? 'This leave type works best for short absence windows and fast approval flows.' : 'This leave type fits standard entitlement tracking and regular approval workflows.' }}
+              </p>
+            </section>
+          </div>
+
+          <aside class="ops-details-side">
+            <section class="ops-details-facts">
+              <span class="ops-panel-kicker">Quick facts</span>
+              <h6>Policy overview</h6>
+
+              <div class="ops-details-fact">
+                <strong>Status</strong>
+                <span>{{ featuredLeaveType.qualityLabel }}</span>
+              </div>
+              <div class="ops-details-fact">
+                <strong>Duration</strong>
+                <span>{{ featuredLeaveType.daysLabel }}</span>
+              </div>
+              <div class="ops-details-fact">
+                <strong>Catalog fit</strong>
+                <span>{{ filteredResultsLabel }}</span>
+              </div>
+              <div class="ops-details-fact">
+                <strong>Record ID</strong>
+                <span>#{{ featuredLeaveType.id }}</span>
+              </div>
+            </section>
+          </aside>
+        </div>
+      </div>
+
+      <div class="ops-modal-footer">
+        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary" data-bs-dismiss="modal" data-bs-toggle="modal" data-bs-target="#leaveTypeCrudModal" (click)="openEditModal(featuredLeaveType)">
+          <i class="bi bi-pencil-square"></i>
+          Edit leave type
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade text-left" id="leaveTypeCrudModal" tabindex="-1" aria-labelledby="leaveTypeCrudModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content ops-modal-content">
+      <div class="ops-modal-header">
+        <div>
+          <span class="ops-eyebrow">Leave type editor</span>
+          <h5 class="modal-title ops-modal-title" id="leaveTypeCrudModalLabel">{{ modalTitle }}</h5>
+          <p class="ops-modal-copy">{{ modalSubtitle }}</p>
+        </div>
+        <button type="button" class="ops-modal-close" data-bs-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+
+      <div class="ops-modal-body">
+        <form [formGroup]="leaveTypeForm" (ngSubmit)="saveLeaveType()">
+          <div class="ops-form-grid">
+            <section class="ops-form-section">
+              <span class="ops-panel-kicker">Policy setup</span>
+              <h6>Core information</h6>
+
+              <div class="ops-form-field">
+                <label for="leaveTypeName">Type name</label>
+                <input id="leaveTypeName" type="text" formControlName="name" placeholder="Example: Sick leave" />
+                <div class="ops-field-error" *ngIf="submitted && leaveTypeForm.get('name').invalid">Leave type name is required.</div>
+              </div>
+
+              <div class="ops-form-field">
+                <label for="leaveTypeDays">Days</label>
+                <input id="leaveTypeDays" type="number" min="1" formControlName="days" placeholder="Example: 10" />
+                <div class="ops-field-error" *ngIf="submitted && leaveTypeForm.get('days').invalid">Duration in days is required.</div>
+              </div>
+            </section>
+
+            <aside class="ops-form-preview">
+              <span class="ops-panel-kicker">Live preview</span>
+              <h4>{{ draftName }}</h4>
+              <p>{{ draftDaysLabel }}</p>
+
+              <div class="ops-progress-wrap">
+                <div class="ops-progress-top">
+                  <span>Readiness</span>
+                  <strong>{{ draftQuality.score }}%</strong>
+                </div>
+                <div class="ops-progress-track">
+                  <span [style.width.%]="draftQuality.score"></span>
+                </div>
+              </div>
+
+              <div class="ops-chip-row">
+                <span class="ops-chip">{{ draftQuality.label }}</span>
+              </div>
+            </aside>
+          </div>
+
+          <div class="ops-modal-actions">
+            <button type="button" class="btn btn-light" data-bs-dismiss="modal" id="leaveTypeCrudModalClose">Cancel</button>
+            <button type="submit" class="btn btn-primary" [disabled]="saving">
+              <i class="bi" [ngClass]="saving ? 'bi-arrow-repeat' : 'bi-check2-circle'"></i>
+              {{ saving ? 'Saving...' : modalMode === 'create' ? 'Create leave type' : 'Save changes' }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
 </div>

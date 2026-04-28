@@ -1,23 +1,425 @@
-<div class="page-heading">
-  <section class="section">
-    <div class="card">
-      <div class="card-header">
-        <h2>Transferts</h2>
-      </div>
-      <div class="card-body">
-        <div class="dataTable-container">
-          <app-transfert-list></app-transfert-list>
-          <button
-            type="button"
-            class="btn btn-success btn-sm"
-            data-bs-toggle="modal"
-            data-bs-target="#add"
-          >
-            <i class="fas fa-plus-square"></i>
+<div class="page-heading ops-page">
+  <section class="ops-shell">
+    <article class="card ops-hero">
+      <div class="ops-hero-copy">
+        <span class="ops-eyebrow">Transfers</span>
+        <h2>Track department movement with enough timing and route detail to manage handoffs cleanly.</h2>
+        <p>
+          Keep employee transfers visible from notice through effective date with a persistent route detail panel.
+        </p>
+
+        <div class="ops-hero-actions">
+          <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#transferCrudModal" (click)="openCreateModal()">
+            <i class="bi bi-plus-square-fill"></i>
+            Create transfer
           </button>
-          <app-add-transfert></app-add-transfert>
+          <button type="button" class="btn btn-light" (click)="refreshTransfers()" [disabled]="loading">
+            <i class="bi bi-arrow-repeat"></i>
+            Refresh
+          </button>
+        </div>
+
+        <div class="ops-hero-notice" *ngIf="loadError">{{ loadError }}</div>
+      </div>
+
+      <div class="ops-hero-panel">
+        <span class="ops-panel-kicker">Movement pulse</span>
+        <h3>Scheduled and completed employee transfers</h3>
+
+        <div class="ops-metric-grid">
+          <div class="ops-metric-card">
+            <span>Total transfers</span>
+            <strong>{{ totalTransfersCount }}</strong>
+            <p>Transfer records currently tracked in the workspace.</p>
+          </div>
+          <div class="ops-metric-card">
+            <span>Scheduled</span>
+            <strong>{{ scheduledTransfersCount }}</strong>
+            <p>Upcoming moves that still need coordination before the effective date.</p>
+          </div>
         </div>
       </div>
+    </article>
+
+    <div class="ops-stat-grid">
+      <article class="card ops-stat-card tone-primary">
+        <span>Transfers</span>
+        <strong>{{ totalTransfersCount }}</strong>
+        <p>All employee movement records currently managed by HR.</p>
+      </article>
+      <article class="card ops-stat-card tone-secondary">
+        <span>Scheduled</span>
+        <strong>{{ scheduledTransfersCount }}</strong>
+        <p>Transfers still ahead on the calendar.</p>
+      </article>
+      <article class="card ops-stat-card tone-warning">
+        <span>Completed</span>
+        <strong>{{ completedTransfersCount }}</strong>
+        <p>Transfers whose effective date has already passed.</p>
+      </article>
+      <article class="card ops-stat-card tone-danger">
+        <span>Documented</span>
+        <strong>{{ documentedTransfersCount }}</strong>
+        <p>Records that already include supporting transfer context.</p>
+      </article>
+    </div>
+
+    <article class="card ops-toolbar-card">
+      <div class="ops-toolbar">
+        <label class="ops-search-field">
+          <i class="bi bi-search"></i>
+          <input type="text" [ngModel]="searchTerm" (ngModelChange)="onSearchTermChange($event)" placeholder="Search employees, departments, or transfer notes" />
+        </label>
+
+        <div class="ops-toolbar-controls">
+          <label>
+            <span>Filter</span>
+            <select [ngModel]="activeFilter" (ngModelChange)="onFilterChange($event)">
+              <option value="all">All transfers</option>
+              <option value="scheduled">Scheduled</option>
+              <option value="completed">Completed</option>
+              <option value="needs-detail">Needs detail</option>
+            </select>
+          </label>
+
+          <label>
+            <span>Sort</span>
+            <select [ngModel]="activeSort" (ngModelChange)="onSortChange($event)">
+              <option value="latest-transfer">Latest transfer</option>
+              <option value="employee-asc">Employee A-Z</option>
+              <option value="quality">Readiness</option>
+            </select>
+          </label>
+        </div>
+      </div>
+
+      <div class="ops-toolbar-footer">
+        <span>{{ filteredResultsLabel }}</span>
+        <span>{{ featuredTransfer ? featuredTransfer.employeeName : 'No transfer selected' }}</span>
+      </div>
+    </article>
+
+    <div class="ops-layout">
+      <div class="ops-main">
+        <div class="ops-loading-grid" *ngIf="loading; else transferReady">
+          <div class="ops-skeleton-card" *ngFor="let item of loadingPlaceholders"></div>
+        </div>
+
+        <ng-template #transferReady>
+          <div class="ops-grid" *ngIf="filteredTransfers.length; else transferEmpty">
+            <article
+              class="card ops-card"
+              *ngFor="let item of filteredTransfers; trackBy: trackByTransferId"
+              [class.is-active]="featuredTransfer ? featuredTransfer.id === item.id : false"
+              (click)="openDetailsModal(item)"
+              (keydown.enter)="openDetailsModal(item)"
+              (keydown.space)="$event.preventDefault(); openDetailsModal(item)"
+              tabindex="0"
+              role="button"
+              aria-label="Open transfer details"
+            >
+              <div class="ops-card-head">
+                <div>
+                  <span class="ops-panel-kicker">Transfer</span>
+                  <h3>{{ item.employeeName || 'Employee pending' }}</h3>
+                </div>
+                <span class="ops-status" [ngClass]="'tone-' + item.qualityTone">{{ item.qualityLabel }}</span>
+              </div>
+
+              <p>{{ item.summary }}</p>
+
+              <div class="ops-progress-wrap">
+                <div class="ops-progress-top">
+                  <span>Transfer readiness</span>
+                  <strong>{{ item.qualityScore }}%</strong>
+                </div>
+                <div class="ops-progress-track">
+                  <span [style.width.%]="item.qualityScore"></span>
+                </div>
+              </div>
+
+              <div class="ops-chip-row">
+                <span class="ops-chip">{{ item.routeLabel }}</span>
+                <span class="ops-chip">{{ item.timelineLabel }}</span>
+              </div>
+
+              <div class="ops-card-view">
+                <span>Click to view details</span>
+                <i class="bi bi-arrow-up-right"></i>
+              </div>
+
+              <div class="ops-card-actions">
+                <button type="button" class="btn btn-light btn-sm" data-bs-toggle="modal" data-bs-target="#transferCrudModal" (click)="openEditModal(item); $event.stopPropagation()">
+                  <i class="bi bi-pencil-square"></i>
+                  Edit
+                </button>
+                <button type="button" class="btn btn-light btn-sm" (click)="deleteTransfer(item); $event.stopPropagation()" [disabled]="deletingId === item.id">
+                  <i class="bi bi-trash3"></i>
+                  {{ deletingId === item.id ? 'Deleting...' : 'Delete' }}
+                </button>
+              </div>
+            </article>
+          </div>
+        </ng-template>
+
+        <ng-template #transferEmpty>
+          <article class="card ops-empty-card">
+            <span class="ops-empty-kicker">No matching transfers</span>
+            <h3>The current search or filter does not match any transfer record.</h3>
+            <p>Reset the filters or create a transfer to rebuild the movement schedule.</p>
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#transferCrudModal" (click)="openCreateModal()">
+              <i class="bi bi-plus-square-fill"></i>
+              Create transfer
+            </button>
+          </article>
+        </ng-template>
+      </div>
+
+      <aside class="ops-side">
+        <article class="card ops-panel-card" *ngIf="featuredTransfer; else emptyTransferPanel">
+          <div class="ops-panel-head">
+            <div>
+              <span>Selected transfer</span>
+              <h3>{{ featuredTransfer.employeeName }}</h3>
+            </div>
+            <span class="ops-status" [ngClass]="'tone-' + featuredTransfer.qualityTone">{{ featuredTransfer.qualityLabel }}</span>
+          </div>
+
+          <p>{{ featuredTransfer.summary }}</p>
+
+          <div class="ops-fact-grid">
+            <div>
+              <span class="ops-detail-label">Route</span>
+              <strong>{{ featuredTransfer.routeLabel }}</strong>
+            </div>
+            <div>
+              <span class="ops-detail-label">Effective</span>
+              <strong>{{ featuredTransfer.transferDateLabel }}</strong>
+            </div>
+            <div>
+              <span class="ops-detail-label">Notice</span>
+              <strong>{{ featuredTransfer.noticeDateLabel }}</strong>
+            </div>
+            <div>
+              <span class="ops-detail-label">Role</span>
+              <strong>{{ featuredTransfer.designation || 'Not specified' }}</strong>
+            </div>
+          </div>
+
+          <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#transferCrudModal" (click)="openEditModal(featuredTransfer)">
+            <i class="bi bi-pencil-square"></i>
+            Edit selected transfer
+          </button>
+        </article>
+
+        <ng-template #emptyTransferPanel>
+          <article class="card ops-panel-card">
+            <span class="ops-empty-kicker">Transfer preview</span>
+            <h3>Select a transfer to inspect it here.</h3>
+            <p>The side panel shows the route, timing, and description for the selected transfer record.</p>
+          </article>
+        </ng-template>
+      </aside>
     </div>
   </section>
+</div>
+
+<div class="modal fade text-left" id="transferDetailsModal" tabindex="-1" aria-labelledby="transferDetailsModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content ops-modal-content" *ngIf="featuredTransfer">
+      <div class="ops-modal-header">
+        <div>
+          <span class="ops-eyebrow">Transfer details</span>
+          <h5 class="modal-title ops-modal-title" id="transferDetailsModalLabel">{{ featuredTransfer.employeeName || 'Employee pending' }}</h5>
+          <p class="ops-modal-copy">Review the transfer route, effective timing, and handoff context for the selected employee movement.</p>
+        </div>
+
+        <div class="ops-details-actions">
+          <span class="ops-status" [ngClass]="'tone-' + featuredTransfer.qualityTone">{{ featuredTransfer.qualityLabel }}</span>
+          <button type="button" class="ops-modal-close" data-bs-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="ops-modal-body">
+        <div class="ops-details-layout">
+          <div class="ops-details-main">
+            <section class="ops-details-section">
+              <span class="ops-panel-kicker">Transfer summary</span>
+              <h6>Movement context</h6>
+              <p class="ops-detail-copy">{{ featuredTransfer.summary }}</p>
+            </section>
+
+            <div class="ops-details-metrics">
+              <article class="ops-details-metric">
+                <span class="ops-detail-label">Route</span>
+                <strong>{{ featuredTransfer.routeLabel }}</strong>
+              </article>
+              <article class="ops-details-metric">
+                <span class="ops-detail-label">Effective date</span>
+                <strong>{{ featuredTransfer.transferDateLabel }}</strong>
+              </article>
+              <article class="ops-details-metric">
+                <span class="ops-detail-label">Readiness</span>
+                <strong>{{ featuredTransfer.qualityScore }}%</strong>
+              </article>
+            </div>
+
+            <section class="ops-details-section">
+              <span class="ops-panel-kicker">Handoff notes</span>
+              <h6>Operational guidance</h6>
+              <p class="ops-detail-copy">{{ featuredTransfer.description || 'No extra transfer description has been added yet.' }}</p>
+            </section>
+          </div>
+
+          <aside class="ops-details-side">
+            <section class="ops-details-facts">
+              <span class="ops-panel-kicker">Quick facts</span>
+              <h6>Transfer overview</h6>
+
+              <div class="ops-details-fact">
+                <strong>From</strong>
+                <span>{{ featuredTransfer.fromDepartementName || 'Pending' }}</span>
+              </div>
+              <div class="ops-details-fact">
+                <strong>To</strong>
+                <span>{{ featuredTransfer.toDepartementName || 'Pending' }}</span>
+              </div>
+              <div class="ops-details-fact">
+                <strong>Notice</strong>
+                <span>{{ featuredTransfer.noticeDateLabel }}</span>
+              </div>
+              <div class="ops-details-fact">
+                <strong>Role</strong>
+                <span>{{ featuredTransfer.designation || 'Not specified' }}</span>
+              </div>
+              <div class="ops-details-fact">
+                <strong>Record ID</strong>
+                <span>#{{ featuredTransfer.id }}</span>
+              </div>
+            </section>
+          </aside>
+        </div>
+      </div>
+
+      <div class="ops-modal-footer">
+        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary" data-bs-dismiss="modal" data-bs-toggle="modal" data-bs-target="#transferCrudModal" (click)="openEditModal(featuredTransfer)">
+          <i class="bi bi-pencil-square"></i>
+          Edit transfer
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade text-left" id="transferCrudModal" tabindex="-1" aria-labelledby="transferCrudModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content ops-modal-content">
+      <div class="ops-modal-header">
+        <div>
+          <span class="ops-eyebrow">Transfer editor</span>
+          <h5 class="modal-title ops-modal-title" id="transferCrudModalLabel">{{ modalTitle }}</h5>
+          <p class="ops-modal-copy">{{ modalSubtitle }}</p>
+        </div>
+        <button type="button" class="ops-modal-close" data-bs-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+
+      <div class="ops-modal-body">
+        <form [formGroup]="transferForm" (ngSubmit)="saveTransfer()">
+          <div class="ops-form-grid">
+            <section class="ops-form-section">
+              <span class="ops-panel-kicker">Transfer setup</span>
+              <h6>Core information</h6>
+
+              <div class="ops-form-field">
+                <label for="transferEmployeeId">Employee</label>
+                <select id="transferEmployeeId" formControlName="employeeId">
+                  <option value="">Select employee</option>
+                  <option *ngFor="let option of employees" [value]="option.id">{{ option.name }}</option>
+                </select>
+                <div class="ops-field-error" *ngIf="submitted && transferForm.get('employeeId').invalid">Employee is required.</div>
+              </div>
+
+              <div class="ops-form-split">
+                <div class="ops-form-field">
+                  <label for="transferFromDepartementId">From department</label>
+                  <select id="transferFromDepartementId" formControlName="fromDepartementId">
+                    <option value="">Select department</option>
+                    <option *ngFor="let option of departements" [value]="option.id">{{ option.name }}</option>
+                  </select>
+                  <div class="ops-field-error" *ngIf="submitted && transferForm.get('fromDepartementId').invalid">Origin department is required.</div>
+                </div>
+
+                <div class="ops-form-field">
+                  <label for="transferToDepartementId">To department</label>
+                  <select id="transferToDepartementId" formControlName="toDepartementId">
+                    <option value="">Select department</option>
+                    <option *ngFor="let option of departements" [value]="option.id">{{ option.name }}</option>
+                  </select>
+                  <div class="ops-field-error" *ngIf="submitted && transferForm.get('toDepartementId').invalid">Destination department is required.</div>
+                </div>
+              </div>
+
+              <div class="ops-form-field">
+                <label for="transferDesignation">Designation</label>
+                <input id="transferDesignation" type="text" formControlName="designation" placeholder="Example: HR Operations Lead" />
+              </div>
+
+              <div class="ops-form-split">
+                <div class="ops-form-field">
+                  <label for="transferNoticeDate">Notice date</label>
+                  <input id="transferNoticeDate" type="date" formControlName="noticeDate" />
+                </div>
+
+                <div class="ops-form-field">
+                  <label for="transferTransferDate">Transfer date</label>
+                  <input id="transferTransferDate" type="date" formControlName="transferDate" />
+                  <div class="ops-field-error" *ngIf="submitted && transferForm.get('transferDate').invalid">Transfer date is required.</div>
+                </div>
+              </div>
+
+              <div class="ops-form-field">
+                <label for="transferDescription">Description</label>
+                <textarea id="transferDescription" rows="5" formControlName="description" placeholder="Explain the move, ownership transition, or context for the handoff."></textarea>
+              </div>
+            </section>
+
+            <aside class="ops-form-preview">
+              <span class="ops-panel-kicker">Live preview</span>
+              <h4>{{ draftEmployeeName || 'Employee pending' }}</h4>
+              <p>
+                {{ draftFromDepartementName || 'Origin pending' }} → {{ draftToDepartementName || 'Destination pending' }}
+              </p>
+
+              <div class="ops-progress-wrap">
+                <div class="ops-progress-top">
+                  <span>Readiness</span>
+                  <strong>{{ draftQuality.score }}%</strong>
+                </div>
+                <div class="ops-progress-track">
+                  <span [style.width.%]="draftQuality.score"></span>
+                </div>
+              </div>
+
+              <div class="ops-chip-row">
+                <span class="ops-chip">{{ draftQuality.label }}</span>
+              </div>
+            </aside>
+          </div>
+
+          <div class="ops-modal-actions">
+            <button type="button" class="btn btn-light" data-bs-dismiss="modal" id="transferCrudModalClose">Cancel</button>
+            <button type="submit" class="btn btn-primary" [disabled]="saving">
+              <i class="bi" [ngClass]="saving ? 'bi-arrow-repeat' : 'bi-check2-circle'"></i>
+              {{ saving ? 'Saving...' : modalMode === 'create' ? 'Create transfer' : 'Save changes' }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
 </div>

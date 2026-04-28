@@ -1,66 +1,549 @@
-<div class="page-heading">
-  <section class="section">
-    <div class="card">
-      <div class="card-header">
-        <h2>Jobs</h2>
-      </div>
-      <div class="card-body">
-        <div class="dataTable-container">
+<div class="page-heading jobs-page">
+  <section class="jobs-shell">
+    <article class="card jobs-hero">
+      <div class="jobs-hero-copy">
+        <span class="jobs-eyebrow">Role architecture</span>
+        <h2>Build a clearer, stronger jobs library for hiring and internal operations.</h2>
+        <p>
+          Create polished role briefs, keep descriptions current, and quickly spot
+          which positions are ready to publish versus which ones still need context.
+        </p>
+
+        <div class="jobs-hero-actions">
           <button
             type="button"
-            class="btn btn-success btn-sm"
+            class="btn btn-primary"
             data-bs-toggle="modal"
-            data-bs-target="#add"
+            data-bs-target="#jobCrudModal"
+            (click)="openCreateModal()"
           >
-            <i class="fas fa-plus-square"></i> Create
+            <i class="bi bi-plus-square-fill"></i>
+            Create role
           </button>
-
-          <table
-            class="table table-bordered"
-            id="table"
-            width="100%"
-            cellspacing="0"
+          <button
+            type="button"
+            class="btn btn-light"
+            (click)="refreshJobs()"
+            [disabled]="loading"
           >
-            <thead>
-              <tr>
-                <th>Name</th>
-                <th></th>
-              </tr>
-            </thead>
-            <tfoot>
-              <tr>
-                <th>Name</th>
-                <th></th>
-              </tr>
-            </tfoot>
-            <tbody *ngIf="jobs$.length > 0">
-              <tr *ngFor="let c of jobs$">
-                <td>{{ c.name }}</td>
-                <td>
-                  <!--   <button
-                    type="button"
-                    data-toggle="modal"
-                    (click)="edit(c.id)"
-                    data-target="#edit"
-                    class="btn btn-warning btn-sm"
-                  >
-                    <i class="fas fa-edit"></i>
-                  </button> -->
-                  <button
-                    type="button"
-                    class="btn btn-danger btn-sm"
-                    (click)="delete(c.id)"
-                  >
-                    <i class="fas fa-trash-alt"></i>
-                  </button>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+            <i class="bi bi-arrow-repeat"></i>
+            Refresh
+          </button>
+        </div>
 
-          <app-job-modal></app-job-modal>
+        <div class="jobs-hero-notice" *ngIf="loadError">
+          {{ loadError }}
         </div>
       </div>
+
+      <div class="jobs-hero-panel">
+        <span class="jobs-panel-kicker">Collection health</span>
+        <h3>Current role documentation pulse</h3>
+
+        <div class="jobs-hero-metrics">
+          <div>
+            <strong>{{ totalJobsCount }}</strong>
+            <span>Total roles</span>
+          </div>
+          <div>
+            <strong>{{ documentedJobsCount }}</strong>
+            <span>Documented briefs</span>
+          </div>
+          <div>
+            <strong>{{ readyJobsCount }}</strong>
+            <span>Ready to publish</span>
+          </div>
+          <div>
+            <strong>{{ needsAttentionCount }}</strong>
+            <span>Need attention</span>
+          </div>
+        </div>
+
+        <div class="jobs-coverage-block">
+          <div class="jobs-coverage-top">
+            <span>Coverage</span>
+            <strong>{{ documentationCoverage }}%</strong>
+          </div>
+          <div class="jobs-coverage-track">
+            <span [style.width.%]="documentationCoverage"></span>
+          </div>
+          <p>
+            {{ averageBriefLength }} average characters per role brief across the
+            current jobs library.
+          </p>
+        </div>
+      </div>
+    </article>
+
+    <div class="jobs-stat-grid">
+      <article class="card jobs-stat-card tone-navy">
+        <span>Jobs catalog</span>
+        <strong>{{ totalJobsCount }}</strong>
+        <p>Total roles currently tracked in the backend.</p>
+      </article>
+
+      <article class="card jobs-stat-card tone-teal">
+        <span>Documentation coverage</span>
+        <strong>{{ documentationCoverage }}%</strong>
+        <p>Roles that already contain at least one written brief.</p>
+      </article>
+
+      <article class="card jobs-stat-card tone-gold">
+        <span>Strong briefs</span>
+        <strong>{{ readyJobsCount }}</strong>
+        <p>Roles with enough detail for recruiting and approval reviews.</p>
+      </article>
+
+      <article class="card jobs-stat-card tone-coral">
+        <span>Needs rewrite</span>
+        <strong>{{ needsAttentionCount }}</strong>
+        <p>Roles that still need a fuller description or first brief.</p>
+      </article>
+    </div>
+
+    <article class="card jobs-toolbar-card">
+      <div class="jobs-toolbar">
+        <label class="jobs-search-field">
+          <i class="bi bi-search"></i>
+          <input
+            type="text"
+            [ngModel]="searchTerm"
+            (ngModelChange)="onSearchTermChange($event)"
+            placeholder="Search roles or description text"
+          />
+        </label>
+
+        <div class="jobs-toolbar-controls">
+          <label>
+            <span>Filter</span>
+            <select
+              [ngModel]="activeFilter"
+              (ngModelChange)="onFilterChange($event)"
+            >
+              <option value="all">All roles</option>
+              <option value="ready">Ready briefs</option>
+              <option value="needs-attention">Needs attention</option>
+              <option value="missing-brief">Missing brief</option>
+            </select>
+          </label>
+
+          <label>
+            <span>Sort</span>
+            <select
+              [ngModel]="activeSort"
+              (ngModelChange)="onSortChange($event)"
+            >
+              <option value="quality">Brief quality</option>
+              <option value="name-asc">Name A-Z</option>
+              <option value="name-desc">Name Z-A</option>
+            </select>
+          </label>
+        </div>
+      </div>
+
+      <div class="jobs-toolbar-footer">
+        <span>{{ filteredResultsLabel }}</span>
+        <span *ngIf="!loading">
+          {{ featuredJob ? featuredJob.name : 'No role selected' }}
+        </span>
+      </div>
+    </article>
+
+    <div class="jobs-layout">
+      <div class="jobs-main">
+        <div class="jobs-loading-grid" *ngIf="loading; else jobsReady">
+          <div class="jobs-skeleton-card" *ngFor="let item of loadingPlaceholders"></div>
+        </div>
+
+        <ng-template #jobsReady>
+          <div class="jobs-grid" *ngIf="filteredJobs.length; else jobsEmpty">
+            <article
+              class="card jobs-card"
+              *ngFor="let job of filteredJobs; trackBy: trackByJobId"
+              [class.is-active]="featuredJob?.id === job.id"
+              tabindex="0"
+              role="button"
+              aria-label="Open job details"
+              (click)="openDetailsModal(job)"
+              (keydown.enter)="openDetailsModal(job)"
+              (keydown.space)="$event.preventDefault(); openDetailsModal(job)"
+            >
+              <div class="jobs-card-head">
+                <div>
+                  <span class="jobs-card-kicker">Role brief</span>
+                  <h3>{{ job.name }}</h3>
+                </div>
+                <span class="jobs-status" [ngClass]="'tone-' + job.readinessTone">
+                  {{ job.readinessLabel }}
+                </span>
+              </div>
+
+              <p>{{ job.excerpt }}</p>
+
+              <div class="jobs-card-progress">
+                <div class="jobs-card-progress-top">
+                  <span>Documentation strength</span>
+                  <strong>{{ job.documentationScore }}%</strong>
+                </div>
+                <div class="jobs-progress-track">
+                  <span [style.width.%]="job.documentationScore"></span>
+                </div>
+              </div>
+
+              <div class="jobs-card-meta">
+                <span>{{ job.briefLength }} characters</span>
+                <span>{{ job.documented ? 'Brief available' : 'Brief missing' }}</span>
+              </div>
+
+              <div class="jobs-card-view">
+                <span>Click to view details</span>
+                <i class="bi bi-arrow-up-right"></i>
+              </div>
+
+              <div class="jobs-card-actions">
+                <button
+                  type="button"
+                  class="btn btn-light btn-sm"
+                  data-bs-toggle="modal"
+                  data-bs-target="#jobCrudModal"
+                  (click)="openEditModal(job); $event.stopPropagation()"
+                >
+                  <i class="bi bi-pencil-square"></i>
+                  Edit
+                </button>
+                <button
+                  type="button"
+                  class="btn btn-light btn-sm jobs-delete-btn"
+                  (click)="delete(job); $event.stopPropagation()"
+                  [disabled]="deletingId === job.id"
+                >
+                  <i class="bi bi-trash3"></i>
+                  {{ deletingId === job.id ? 'Deleting...' : 'Delete' }}
+                </button>
+              </div>
+            </article>
+          </div>
+        </ng-template>
+
+        <ng-template #jobsEmpty>
+          <article class="card jobs-empty-card">
+            <span class="jobs-empty-kicker">No matching roles</span>
+            <h3>Nothing matches the current search or filter.</h3>
+            <p>
+              Reset the filters or create a new role to start building the jobs library.
+            </p>
+            <button
+              type="button"
+              class="btn btn-primary"
+              data-bs-toggle="modal"
+              data-bs-target="#jobCrudModal"
+              (click)="openCreateModal()"
+            >
+              <i class="bi bi-plus-square-fill"></i>
+              Create role
+            </button>
+          </article>
+        </ng-template>
+      </div>
+
+      <aside class="jobs-side">
+        <article class="card jobs-feature-card" *ngIf="featuredJob; else noFeaturedJob">
+          <div class="jobs-feature-head">
+            <div>
+              <span>Selected role</span>
+              <h3>{{ featuredJob.name }}</h3>
+            </div>
+            <span class="jobs-status" [ngClass]="'tone-' + featuredJob.readinessTone">
+              {{ featuredJob.readinessLabel }}
+            </span>
+          </div>
+
+          <p>{{ featuredJob.description || featuredJob.excerpt }}</p>
+
+          <div class="jobs-feature-metrics">
+            <div>
+              <span>Brief health</span>
+              <strong>{{ featuredJob.documentationScore }}%</strong>
+            </div>
+            <div>
+              <span>Length</span>
+              <strong>{{ featuredJob.briefLength }} chars</strong>
+            </div>
+          </div>
+
+          <div class="jobs-side-note">
+            <h4>Recommendation</h4>
+            <p>{{ featuredRecommendation }}</p>
+          </div>
+
+          <div class="jobs-side-note accent-soft">
+            <h4>Next action</h4>
+            <p>{{ featuredNextAction }}</p>
+          </div>
+
+          <button
+            type="button"
+            class="btn btn-primary"
+            data-bs-toggle="modal"
+            data-bs-target="#jobCrudModal"
+            (click)="openEditModal(featuredJob)"
+          >
+            <i class="bi bi-pencil-square"></i>
+            Edit selected role
+          </button>
+        </article>
+
+        <ng-template #noFeaturedJob>
+          <article class="card jobs-feature-card jobs-feature-empty">
+            <span class="jobs-empty-kicker">Role preview</span>
+            <h3>Select a role to inspect it here.</h3>
+            <p>
+              The side panel highlights the selected brief quality and the next
+              improvement that would make the role stronger.
+            </p>
+          </article>
+        </ng-template>
+      </aside>
     </div>
   </section>
+</div>
+
+<div
+  class="modal fade text-left"
+  id="jobDetailsModal"
+  tabindex="-1"
+  aria-labelledby="jobDetailsModalLabel"
+  aria-hidden="true"
+>
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content jobs-modal-content jobs-details-modal" *ngIf="featuredJob">
+      <div class="modal-header jobs-modal-header jobs-details-header">
+        <div class="jobs-details-headline">
+          <span class="jobs-eyebrow">Role details</span>
+          <h5 class="modal-title" id="jobDetailsModalLabel">{{ featuredJob.name }}</h5>
+          <p>
+            Review the full role brief, documentation quality, and recommended
+            next step for this position.
+          </p>
+        </div>
+
+        <div class="jobs-details-actions">
+          <span class="jobs-status" [ngClass]="'tone-' + featuredJob.readinessTone">
+            {{ featuredJob.readinessLabel }}
+          </span>
+          <button
+            type="button"
+            class="close rounded-pill jobs-modal-close"
+            data-bs-dismiss="modal"
+            aria-label="Close"
+          >
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="modal-body jobs-modal-body">
+        <div class="jobs-details-layout">
+          <div class="jobs-details-main">
+            <section class="jobs-details-section">
+              <span class="jobs-panel-kicker">Full brief</span>
+              <h6>Role summary</h6>
+              <p class="jobs-details-copy">{{ featuredJob.description || featuredJob.excerpt }}</p>
+            </section>
+
+            <div class="jobs-details-metrics">
+              <article class="jobs-details-metric">
+                <span>Documentation score</span>
+                <strong>{{ featuredJob.documentationScore }}%</strong>
+              </article>
+              <article class="jobs-details-metric">
+                <span>Brief length</span>
+                <strong>{{ featuredJob.briefLength }} chars</strong>
+              </article>
+              <article class="jobs-details-metric">
+                <span>Record ID</span>
+                <strong>#{{ featuredJob.id }}</strong>
+              </article>
+            </div>
+
+            <section class="jobs-details-section">
+              <span class="jobs-panel-kicker">Recommendation</span>
+              <h6>How to strengthen this role</h6>
+              <p>{{ featuredRecommendation }}</p>
+            </section>
+
+            <section class="jobs-details-section accent-soft">
+              <span class="jobs-panel-kicker">Next action</span>
+              <h6>Immediate follow-up</h6>
+              <p>{{ featuredNextAction }}</p>
+            </section>
+          </div>
+
+          <aside class="jobs-details-side">
+            <section class="jobs-details-facts">
+              <span class="jobs-panel-kicker">Quick facts</span>
+              <h6>Role overview</h6>
+
+              <div class="jobs-details-fact">
+                <strong>Status</strong>
+                <span>{{ featuredJob.readinessLabel }}</span>
+              </div>
+              <div class="jobs-details-fact">
+                <strong>Brief availability</strong>
+                <span>{{ featuredJob.documented ? 'Available' : 'Missing' }}</span>
+              </div>
+              <div class="jobs-details-fact">
+                <strong>Publish readiness</strong>
+                <span>{{ featuredJob.ready ? 'Ready' : 'Needs work' }}</span>
+              </div>
+              <div class="jobs-details-fact">
+                <strong>Catalog position</strong>
+                <span>{{ filteredResultsLabel }}</span>
+              </div>
+            </section>
+          </aside>
+        </div>
+      </div>
+
+      <div class="modal-footer jobs-modal-footer">
+        <button
+          type="button"
+          class="btn btn-light"
+          data-bs-dismiss="modal"
+        >
+          Close
+        </button>
+        <button
+          type="button"
+          class="btn btn-primary"
+          data-bs-dismiss="modal"
+          data-bs-toggle="modal"
+          data-bs-target="#jobCrudModal"
+          (click)="openEditModal(featuredJob)"
+        >
+          <i class="bi bi-pencil-square"></i>
+          Edit role
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div
+  class="modal fade text-left"
+  id="jobCrudModal"
+  tabindex="-1"
+  aria-labelledby="jobCrudModalLabel"
+  aria-hidden="true"
+>
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <form class="modal-content jobs-modal-content" [formGroup]="jobForm" (ngSubmit)="saveJob()">
+      <div class="modal-header jobs-modal-header">
+        <div>
+          <span class="jobs-eyebrow">{{ modalMode === 'create' ? 'Create' : 'Refine' }}</span>
+          <h5 class="modal-title" id="jobCrudModalLabel">{{ modalTitle }}</h5>
+          <p>{{ modalSubtitle }}</p>
+        </div>
+        <button
+          type="button"
+          class="close rounded-pill jobs-modal-close"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+          (click)="resetEditor()"
+        >
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+
+      <div class="modal-body jobs-modal-body">
+        <div class="jobs-form-layout">
+          <div class="jobs-form-fields">
+            <div class="jobs-form-field">
+              <label for="jobName">Role name</label>
+              <input
+                id="jobName"
+                type="text"
+                class="form-control"
+                formControlName="name"
+                placeholder="Example: Senior Payroll Analyst"
+              />
+              <small class="jobs-field-hint">Use a clear internal or recruiting title.</small>
+              <small class="jobs-field-error" *ngIf="submitted && formControls.name.errors?.required">
+                Role name is required.
+              </small>
+              <small class="jobs-field-error" *ngIf="submitted && formControls.name.errors?.maxlength">
+                Keep the role name under 120 characters.
+              </small>
+            </div>
+
+            <div class="jobs-form-field">
+              <label for="jobDescription">Role brief</label>
+              <textarea
+                id="jobDescription"
+                rows="8"
+                class="form-control"
+                formControlName="description"
+                placeholder="Summarize responsibilities, expected outcomes, team context, and collaboration points."
+              ></textarea>
+              <div class="jobs-field-inline-meta">
+                <small class="jobs-field-hint">
+                  A stronger brief makes the role easier to review, approve, and publish.
+                </small>
+                <small>{{ draftDescriptionLength }} / 1000</small>
+              </div>
+              <small class="jobs-field-error" *ngIf="submitted && formControls.description.errors?.maxlength">
+                Keep the brief under 1000 characters.
+              </small>
+            </div>
+          </div>
+
+          <aside class="jobs-form-preview">
+            <span class="jobs-panel-kicker">Live preview</span>
+            <h4>{{ draftName }}</h4>
+            <span class="jobs-status" [ngClass]="'tone-' + draftQuality.tone">
+              {{ draftQuality.label }}
+            </span>
+            <p>{{ draftDescription }}</p>
+
+            <div class="jobs-card-progress compact">
+              <div class="jobs-card-progress-top">
+                <span>Brief strength</span>
+                <strong>{{ draftQuality.score }}%</strong>
+              </div>
+              <div class="jobs-progress-track">
+                <span [style.width.%]="draftQuality.score"></span>
+              </div>
+            </div>
+
+            <div class="jobs-feature-metrics compact">
+              <div>
+                <span>Characters</span>
+                <strong>{{ draftDescriptionLength }}</strong>
+              </div>
+              <div>
+                <span>Mode</span>
+                <strong>{{ modalMode === 'create' ? 'New role' : 'Updating' }}</strong>
+              </div>
+            </div>
+          </aside>
+        </div>
+      </div>
+
+      <div class="modal-footer jobs-modal-footer">
+        <button
+          type="button"
+          class="btn btn-light"
+          id="jobCrudModalClose"
+          data-bs-dismiss="modal"
+          (click)="resetEditor()"
+        >
+          Cancel
+        </button>
+        <button type="submit" class="btn btn-primary" [disabled]="saving">
+          <i class="bi bi-check2-circle"></i>
+          {{ saving ? 'Saving...' : modalMode === 'create' ? 'Create role' : 'Save changes' }}
+        </button>
+      </div>
+    </form>
+  </div>
 </div>

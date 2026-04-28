@@ -1,0 +1,388 @@
+:host {
+  display: block;
+}
+
+.communication-shell {
+  --communication-bg: linear-gradient(180deg, #f4efe6 0%, #fbf8f2 48%, #ffffff 100%);
+  --communication-panel: rgba(255, 255, 255, 0.9);
+  --communication-border: rgba(117, 96, 63, 0.16);
+  --communication-copy: #2d2417;
+  --communication-muted: #70614c;
+  --communication-shadow: 0 22px 40px rgba(69, 53, 31, 0.1);
+  background: var(--communication-bg);
+  color: var(--communication-copy);
+  min-height: 100vh;
+  padding: 2rem clamp(1rem, 2vw, 2rem) 3rem;
+}
+
+.communication-hero {
+  display: grid;
+  gap: 1.5rem;
+  grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
+  align-items: flex-start;
+  margin-bottom: 1.5rem;
+}
+
+.communication-hero-copy {
+  background:
+    radial-gradient(circle at top right, rgba(205, 168, 107, 0.24), transparent 38%),
+    rgba(255, 251, 244, 0.86);
+  border: 1px solid var(--communication-border);
+  border-radius: 28px;
+  box-shadow: var(--communication-shadow);
+  padding: clamp(1.5rem, 2vw, 2.25rem);
+}
+
+.communication-eyebrow {
+  color: #8f6a28;
+  display: inline-block;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  margin-bottom: 0.85rem;
+  text-transform: uppercase;
+}
+
+.communication-hero-copy h1 {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: clamp(2rem, 3vw, 3rem);
+  line-height: 1.05;
+  margin: 0 0 0.9rem;
+}
+
+.communication-hero-copy p,
+.spotlight-message,
+.notification-content p,
+.communication-panel p {
+  color: var(--communication-muted);
+  line-height: 1.65;
+  margin: 0;
+}
+
+.communication-stat-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.communication-stat-card,
+.communication-panel,
+.notification-card,
+.feed-state,
+.communication-alert {
+  background: var(--communication-panel);
+  border: 1px solid var(--communication-border);
+  border-radius: 24px;
+  box-shadow: var(--communication-shadow);
+}
+
+.communication-stat-card {
+  padding: 1.2rem;
+}
+
+.communication-stat-card strong {
+  display: block;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 2rem;
+  margin: 0.25rem 0 0.55rem;
+}
+
+.communication-stat-label,
+.meta-label,
+.notification-type {
+  color: var(--communication-muted);
+  display: block;
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.communication-stat-card small,
+.communication-form-summary small,
+.spotlight-footer strong,
+.meta-label,
+.notification-meta-row span,
+.communication-validation {
+  color: var(--communication-muted);
+}
+
+.tone-message {
+  background: linear-gradient(145deg, rgba(255, 244, 219, 0.96), rgba(255, 255, 255, 0.92));
+}
+
+.tone-finance {
+  background: linear-gradient(145deg, rgba(226, 247, 236, 0.96), rgba(255, 255, 255, 0.92));
+}
+
+.tone-broadcast {
+  background: linear-gradient(145deg, rgba(231, 240, 252, 0.96), rgba(255, 255, 255, 0.92));
+}
+
+.tone-focus {
+  background: linear-gradient(145deg, rgba(243, 232, 249, 0.96), rgba(255, 255, 255, 0.92));
+}
+
+.tone-positive {
+  background: linear-gradient(180deg, #51aa74, #6cc48d);
+}
+
+.tone-critical {
+  background: linear-gradient(180deg, #cf5f5f, #e58a8a);
+}
+
+.communication-alert {
+  color: #8b2f2f;
+  margin-bottom: 1.25rem;
+  padding: 1rem 1.1rem;
+}
+
+.communication-grid {
+  display: grid;
+  gap: 1.5rem;
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+  margin-bottom: 1.5rem;
+}
+
+.communication-panel {
+  padding: 1.35rem;
+}
+
+.communication-panel-head {
+  align-items: flex-start;
+  display: flex;
+    align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 1.1rem;
+}
+
+.communication-panel-head h2,
+.notification-content h3 {
+  font-family: Georgia, 'Times New Roman', serif;
+  margin: 0;
+}
+
+.communication-chip,
+.notification-status {
+  align-items: center;
+  border-radius: 999px;
+  display: inline-flex;
+  font-size: 0.78rem;
+  font-weight: 700;
+  gap: 0.4rem;
+  padding: 0.5rem 0.75rem;
+}
+
+.communication-chip {
+  background: #efe0bf;
+  color: #674b11;
+}
+
+.compact-head {
+  align-items: center;
+}
+
+.communication-form,
+.communication-filter-grid {
+  display: grid;
+  gap: 1rem;
+}
+
+.communication-field-row {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.communication-field {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.communication-field span {
+  font-size: 0.88rem;
+  font-weight: 700;
+}
+
+.communication-field input,
+.communication-field select,
+.communication-field textarea {
+  background: rgba(255, 255, 255, 0.96);
+  border: 1px solid rgba(117, 96, 63, 0.18);
+  border-radius: 16px;
+  color: var(--communication-copy);
+  min-height: 3rem;
+  outline: none;
+  padding: 0.8rem 0.95rem;
+  transition: border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+}
+
+.communication-field textarea {
+  min-height: 8.5rem;
+  resize: vertical;
+}
+
+.communication-field input:focus,
+.communication-field select:focus,
+.communication-field textarea:focus {
+  border-color: rgba(162, 116, 36, 0.48);
+  box-shadow: 0 0 0 4px rgba(223, 192, 138, 0.22);
+  transform: translateY(-1px);
+}
+
+.communication-form-summary,
+.spotlight-meta,
+.spotlight-footer,
+.notification-meta-row {
+  display: grid;
+  gap: 0.9rem;
+}
+
+.communication-form-summary,
+.spotlight-meta,
+.spotlight-footer {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.communication-form-summary strong,
+.spotlight-meta strong,
+.spotlight-footer strong {
+  display: block;
+  font-size: 1rem;
+}
+
+.communication-form-actions,
+.spotlight-actions,
+.notification-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.communication-validation {
+  font-size: 0.88rem;
+  margin-top: -0.25rem;
+}
+
+.empty-spotlight {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.filter-panel {
+  margin-bottom: 1.5rem;
+}
+
+.communication-filter-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.communication-feed {
+  display: grid;
+  gap: 1rem;
+}
+
+.notification-card {
+  cursor: pointer;
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: 12px minmax(0, 1fr) auto;
+  overflow: hidden;
+  padding: 0;
+  transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
+}
+
+.notification-card:hover,
+.notification-card.is-active {
+  border-color: rgba(162, 116, 36, 0.28);
+  transform: translateY(-2px);
+}
+
+.notification-accent {
+  min-height: 100%;
+}
+
+.notification-content {
+  padding: 1.2rem 0 1.2rem 0;
+}
+
+.notification-header-row {
+  align-items: start;
+  display: flex;
+  gap: 1rem;
+  justify-content: space-between;
+  margin-bottom: 0.55rem;
+}
+
+.notification-content h3 {
+  font-size: 1.25rem;
+}
+
+.notification-status {
+  background: rgba(228, 218, 199, 0.8);
+  color: #7a5e2e;
+}
+
+.notification-status.is-read {
+  background: rgba(223, 235, 226, 0.9);
+  color: #3a7251;
+}
+
+.notification-meta-row {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin-top: 0.85rem;
+}
+
+.notification-actions {
+  align-items: center;
+  padding: 1.2rem 1.2rem 1.2rem 0;
+}
+
+.feed-state {
+  color: var(--communication-muted);
+  padding: 1rem 1.15rem;
+}
+
+@media (max-width: 1100px) {
+  .communication-hero,
+  .communication-grid,
+  .communication-filter-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .communication-stat-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 760px) {
+  .communication-shell {
+    padding: 1rem 0.75rem 2rem;
+  }
+
+  .communication-stat-grid,
+  .communication-form-summary,
+  .spotlight-meta,
+  .spotlight-footer,
+  .communication-field-row,
+  .notification-meta-row,
+  .notification-card {
+    grid-template-columns: 1fr;
+  }
+
+  .notification-content,
+  .notification-actions {
+    padding-left: 0;
+    padding-right: 0;
+  }
+
+  .notification-card {
+    padding: 0 1rem 1rem;
+  }
+
+  .notification-accent {
+    min-height: 10px;
+    width: 100%;
+  }
+}

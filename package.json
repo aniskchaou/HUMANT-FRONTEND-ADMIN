@@ -4,10 +4,11 @@
   "scripts": {
     "ng": "ng",
     "start": "node server.js",
-    "build": "ng build",
-    "test": "ng test",
+    "serve": "node --openssl-legacy-provider ./node_modules/@angular/cli/bin/ng serve",
+    "build": "node --openssl-legacy-provider ./node_modules/@angular/cli/bin/ng build",
+    "test": "node --openssl-legacy-provider ./node_modules/@angular/cli/bin/ng test",
     "lint": "ng lint",
-    "e2e": "ng e2e"
+    "e2e": "node --openssl-legacy-provider ./node_modules/@angular/cli/bin/ng e2e"
   },
   "private": true,
   "dependencies": {

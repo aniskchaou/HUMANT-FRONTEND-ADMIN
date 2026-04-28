@@ -1,23 +1,436 @@
-<div class="page-heading">
-  <section class="section">
-    <div class="card">
-      <div class="card-header">
-        <h2>Résilliations</h2>
-      </div>
-      <div class="card-body">
-        <div class="dataTable-container">
-          <app-termination-list></app-termination-list>
+<div class="page-heading ops-page">
+  <section class="ops-shell">
+    <article class="card ops-hero">
+      <div class="ops-hero-copy">
+        <span class="ops-eyebrow">Launch coordination</span>
+        <h2>Turn the launch plan stub into a workspace you can actually manage.</h2>
+        <p>
+          Track onboarding launches, rollout plans, or transition initiatives with visible owners,
+          statuses, and timing instead of pointing the module at unrelated data.
+        </p>
+
+        <div class="ops-hero-actions">
           <button
             type="button"
-            class="btn btn-success btn-sm"
+            class="btn btn-primary"
             data-bs-toggle="modal"
-            data-bs-target="#add"
+            data-bs-target="#launchPlanCrudModal"
+            (click)="openCreateModal()"
           >
-            <i class="fas fa-plus-square"></i>
+            <i class="bi bi-plus-square-fill"></i>
+            Create launch plan
           </button>
-          <app-launch-plan-modal></app-launch-plan-modal>
+          <button
+            type="button"
+            class="btn btn-light"
+            (click)="refreshLaunchPlans()"
+            [disabled]="loading"
+          >
+            <i class="bi bi-arrow-repeat"></i>
+            Refresh
+          </button>
+        </div>
+
+        <div class="ops-hero-notice" *ngIf="loadError">{{ loadError }}</div>
+      </div>
+
+      <div class="ops-hero-panel">
+        <span class="ops-panel-kicker">Delivery pulse</span>
+        <h3>Ownership and execution visibility across launch plans</h3>
+
+        <div class="ops-metric-grid">
+          <div class="ops-metric-card">
+            <span>Total plans</span>
+            <strong>{{ totalLaunchPlansCount }}</strong>
+            <p>All launch plans currently tracked through the new backend endpoint.</p>
+          </div>
+          <div class="ops-metric-card">
+            <span>In progress</span>
+            <strong>{{ inProgressCount }}</strong>
+            <p>Plans actively moving through execution right now.</p>
+          </div>
+        </div>
+
+        <div class="ops-progress-wrap">
+          <div class="ops-progress-top">
+            <span>Ownership coverage</span>
+            <strong>{{ ownershipCoverage }}%</strong>
+          </div>
+          <div class="ops-progress-track">
+            <span [style.width.%]="ownershipCoverage"></span>
+          </div>
+          <p>
+            {{ ownerAssignedCount }} of {{ totalLaunchPlansCount }} plan{{ totalLaunchPlansCount === 1 ? '' : 's' }} already have a named owner.
+          </p>
         </div>
       </div>
+    </article>
+
+    <div class="ops-stat-grid">
+      <article class="card ops-stat-card tone-primary">
+        <span>Launch plans</span>
+        <strong>{{ totalLaunchPlansCount }}</strong>
+        <p>All rollout and coordination plans currently managed in the workspace.</p>
+      </article>
+
+      <article class="card ops-stat-card tone-secondary">
+        <span>In progress</span>
+        <strong>{{ inProgressCount }}</strong>
+        <p>Plans currently being executed by owners and stakeholders.</p>
+      </article>
+
+      <article class="card ops-stat-card tone-warning">
+        <span>Completed</span>
+        <strong>{{ completedCount }}</strong>
+        <p>Plans that have already moved through execution and closed out.</p>
+      </article>
+
+      <article class="card ops-stat-card tone-danger">
+        <span>With owner</span>
+        <strong>{{ ownerAssignedCount }}</strong>
+        <p>Plans that already have a visible employee accountable for delivery.</p>
+      </article>
+    </div>
+
+    <article class="card ops-toolbar-card">
+      <div class="ops-toolbar">
+        <label class="ops-search-field">
+          <i class="bi bi-search"></i>
+          <input
+            type="text"
+            [ngModel]="searchTerm"
+            (ngModelChange)="onSearchTermChange($event)"
+            placeholder="Search plans, owners, statuses, or descriptions"
+          />
+        </label>
+
+        <div class="ops-toolbar-controls">
+          <label>
+            <span>Filter</span>
+            <select
+              [ngModel]="activeFilter"
+              (ngModelChange)="onFilterChange($event)"
+            >
+              <option value="all">All plans</option>
+              <option value="in-progress">In progress</option>
+              <option value="completed">Completed</option>
+              <option value="on-hold">On hold</option>
+              <option value="needs-owner">Needs owner</option>
+            </select>
+          </label>
+
+          <label>
+            <span>Sort</span>
+            <select
+              [ngModel]="activeSort"
+              (ngModelChange)="onSortChange($event)"
+            >
+              <option value="timeline">Timeline</option>
+              <option value="status">Status</option>
+              <option value="title-asc">Title A-Z</option>
+            </select>
+          </label>
+        </div>
+      </div>
+
+      <div class="ops-toolbar-footer">
+        <span>{{ filteredResultsLabel }}</span>
+        <span>
+          {{ featuredLaunchPlan ? featuredLaunchPlan.title : 'No launch plan selected' }}
+        </span>
+      </div>
+    </article>
+
+    <div class="ops-layout">
+      <div class="ops-main">
+        <div class="ops-loading-grid" *ngIf="loading; else launchPlanReady">
+          <div
+            class="ops-skeleton-card"
+            *ngFor="let item of loadingPlaceholders"
+          ></div>
+        </div>
+
+        <ng-template #launchPlanReady>
+          <div class="ops-grid" *ngIf="filteredLaunchPlans.length; else launchPlanEmpty">
+            <article
+              class="card ops-card"
+              *ngFor="let item of filteredLaunchPlans; trackBy: trackByLaunchPlanId"
+              [class.is-active]="featuredLaunchPlan ? featuredLaunchPlan.id === item.id : false"
+              (click)="selectLaunchPlan(item)"
+              (keydown.enter)="selectLaunchPlan(item)"
+              (keydown.space)="selectLaunchPlan(item); $event.preventDefault()"
+              tabindex="0"
+              role="button"
+            >
+              <div class="ops-card-head">
+                <div>
+                  <span class="ops-panel-kicker">Launch plan</span>
+                  <h3>{{ item.title }}</h3>
+                </div>
+                <span class="ops-status" [ngClass]="'tone-' + item.statusTone">
+                  {{ item.statusLabel }}
+                </span>
+              </div>
+
+              <p>{{ item.summary }}</p>
+
+              <div class="ops-progress-wrap">
+                <div class="ops-progress-top">
+                  <span>Execution readiness</span>
+                  <strong>{{ item.qualityScore }}%</strong>
+                </div>
+                <div class="ops-progress-track">
+                  <span [style.width.%]="item.qualityScore"></span>
+                </div>
+              </div>
+
+              <div class="ops-chip-row">
+                <span class="ops-chip">{{ item.employeeName || 'Owner pending' }}</span>
+                <span class="ops-chip">{{ item.qualityLabel }}</span>
+              </div>
+
+              <div class="ops-card-actions">
+                <button
+                  type="button"
+                  class="btn btn-light btn-sm"
+                  data-bs-toggle="modal"
+                  data-bs-target="#launchPlanCrudModal"
+                  (click)="openEditModal(item); $event.stopPropagation()"
+                >
+                  <i class="bi bi-pencil-square"></i>
+                  Edit
+                </button>
+                <button
+                  type="button"
+                  class="btn btn-light btn-sm"
+                  (click)="deleteLaunchPlan(item); $event.stopPropagation()"
+                  [disabled]="deletingId === item.id"
+                >
+                  <i class="bi bi-trash3"></i>
+                  {{ deletingId === item.id ? 'Deleting...' : 'Delete' }}
+                </button>
+              </div>
+            </article>
+          </div>
+        </ng-template>
+
+        <ng-template #launchPlanEmpty>
+          <article class="card ops-empty-card">
+            <span class="ops-empty-kicker">No matching launch plans</span>
+            <h3>The current search or filter does not match any launch plan.</h3>
+            <p>
+              Reset the filters or create a new plan to build out the delivery workspace.
+            </p>
+            <button
+              type="button"
+              class="btn btn-primary"
+              data-bs-toggle="modal"
+              data-bs-target="#launchPlanCrudModal"
+              (click)="openCreateModal()"
+            >
+              <i class="bi bi-plus-square-fill"></i>
+              Create launch plan
+            </button>
+          </article>
+        </ng-template>
+      </div>
+
+      <aside class="ops-side">
+        <article class="card ops-panel-card" *ngIf="featuredLaunchPlan; else emptyLaunchPlanPanel">
+          <div class="ops-panel-head">
+            <div>
+              <span>Selected plan</span>
+              <h3>{{ featuredLaunchPlan.title }}</h3>
+            </div>
+            <span class="ops-status" [ngClass]="'tone-' + featuredLaunchPlan.statusTone">
+              {{ featuredLaunchPlan.statusLabel }}
+            </span>
+          </div>
+
+          <p>{{ featuredLaunchPlan.summary }}</p>
+
+          <div class="ops-fact-grid">
+            <div>
+              <span class="ops-detail-label">Owner</span>
+              <strong>{{ featuredLaunchPlan.employeeName || 'Pending' }}</strong>
+            </div>
+            <div>
+              <span class="ops-detail-label">Timeline</span>
+              <strong>{{ featuredLaunchPlan.timelineLabel }}</strong>
+            </div>
+            <div>
+              <span class="ops-detail-label">Start</span>
+              <strong>{{ featuredLaunchPlan.startDateLabel }}</strong>
+            </div>
+            <div>
+              <span class="ops-detail-label">End</span>
+              <strong>{{ featuredLaunchPlan.endDateLabel }}</strong>
+            </div>
+          </div>
+
+          <div class="ops-panel-note accent">
+            <span class="ops-detail-label">Execution note</span>
+            <p>
+              {{ featuredLaunchPlan.description || 'Add a delivery note so the next owner knows what this plan is trying to achieve.' }}
+            </p>
+          </div>
+
+          <button
+            type="button"
+            class="btn btn-primary"
+            data-bs-toggle="modal"
+            data-bs-target="#launchPlanCrudModal"
+            (click)="openEditModal(featuredLaunchPlan)"
+          >
+            <i class="bi bi-pencil-square"></i>
+            Edit selected plan
+          </button>
+        </article>
+
+        <ng-template #emptyLaunchPlanPanel>
+          <article class="card ops-panel-card">
+            <span class="ops-empty-kicker">Launch plan preview</span>
+            <h3>Select a launch plan to inspect it here.</h3>
+            <p>
+              The side panel highlights owner assignment, status, timeline, and the delivery note for the selected plan.
+            </p>
+          </article>
+        </ng-template>
+      </aside>
     </div>
   </section>
+</div>
+
+<div
+  class="modal fade text-left"
+  id="launchPlanCrudModal"
+  tabindex="-1"
+  aria-labelledby="launchPlanCrudModalLabel"
+  aria-hidden="true"
+>
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content ops-modal-content">
+      <div class="ops-modal-header">
+        <div>
+          <span class="ops-eyebrow">Launch plan editor</span>
+          <h5 class="modal-title ops-modal-title" id="launchPlanCrudModalLabel">
+            {{ modalTitle }}
+          </h5>
+          <p class="ops-modal-copy">{{ modalSubtitle }}</p>
+        </div>
+        <button
+          type="button"
+          class="ops-modal-close"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+        >
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+
+      <div class="ops-modal-body">
+        <form [formGroup]="launchPlanForm" (ngSubmit)="saveLaunchPlan()">
+          <div class="ops-form-grid">
+            <section class="ops-form-section">
+              <span class="ops-panel-kicker">Delivery setup</span>
+              <h6>Core information</h6>
+
+              <div class="ops-form-field">
+                <label for="launchPlanTitle">Plan title</label>
+                <input
+                  id="launchPlanTitle"
+                  type="text"
+                  formControlName="title"
+                  placeholder="Example: Onboarding launch plan"
+                />
+                <div class="ops-field-error" *ngIf="submitted && launchPlanForm.get('title').invalid">
+                  Plan title is required.
+                </div>
+              </div>
+
+              <div class="ops-form-field">
+                <label for="launchPlanEmployeeId">Owner</label>
+                <select id="launchPlanEmployeeId" formControlName="employeeId">
+                  <option value="">No owner yet</option>
+                  <option *ngFor="let option of employees" [value]="option.id">
+                    {{ option.name }}
+                  </option>
+                </select>
+              </div>
+
+              <div class="ops-form-split">
+                <div class="ops-form-field">
+                  <label for="launchPlanStartDate">Start date</label>
+                  <input id="launchPlanStartDate" type="date" formControlName="startDate" />
+                </div>
+
+                <div class="ops-form-field">
+                  <label for="launchPlanEndDate">End date</label>
+                  <input id="launchPlanEndDate" type="date" formControlName="endDate" />
+                </div>
+              </div>
+
+              <div class="ops-form-field">
+                <label for="launchPlanStatus">Status</label>
+                <select id="launchPlanStatus" formControlName="status">
+                  <option *ngFor="let option of statusOptions" [value]="option.value">
+                    {{ option.label }}
+                  </option>
+                </select>
+              </div>
+
+              <div class="ops-form-field">
+                <label for="launchPlanDescription">Description</label>
+                <textarea
+                  id="launchPlanDescription"
+                  rows="5"
+                  formControlName="description"
+                  placeholder="Describe the rollout, handoff, or transition actions this plan is coordinating."
+                ></textarea>
+              </div>
+            </section>
+
+            <aside class="ops-form-preview">
+              <span class="ops-panel-kicker">Live preview</span>
+              <h4>{{ normalizeText(launchPlanForm.value.title) || 'Untitled launch plan' }}</h4>
+              <p>
+                {{ draftEmployeeName || 'Owner pending' }}
+                <span *ngIf="launchPlanForm.value.status"> • {{ formatStatusLabel(launchPlanForm.value.status) }}</span>
+              </p>
+
+              <div class="ops-progress-wrap">
+                <div class="ops-progress-top">
+                  <span>Readiness</span>
+                  <strong>{{ draftQuality.score }}%</strong>
+                </div>
+                <div class="ops-progress-track">
+                  <span [style.width.%]="draftQuality.score"></span>
+                </div>
+              </div>
+
+              <div class="ops-chip-row">
+                <span class="ops-chip">{{ draftQuality.label }}</span>
+                <span class="ops-chip">{{ formatStatusLabel(launchPlanForm.value.status || 'NOT_STARTED') }}</span>
+              </div>
+            </aside>
+          </div>
+
+          <div class="ops-modal-actions">
+            <button
+              type="button"
+              class="btn btn-light"
+              data-bs-dismiss="modal"
+              id="launchPlanCrudModalClose"
+            >
+              Cancel
+            </button>
+            <button type="submit" class="btn btn-primary" [disabled]="saving">
+              <i class="bi" [ngClass]="saving ? 'bi-arrow-repeat' : 'bi-check2-circle'"></i>
+              {{ saving ? 'Saving...' : modalMode === 'create' ? 'Create plan' : 'Save changes' }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
 </div>
