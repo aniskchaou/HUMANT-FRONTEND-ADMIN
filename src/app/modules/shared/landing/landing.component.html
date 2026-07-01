@@ -1,0 +1,341 @@
+<!-- ============================================================
+     LANDING PAGE — Humant SaaS HR Platform
+     ============================================================ -->
+
+<div class="lp-root">
+
+  <!-- ── NAVBAR ──────────────────────────────────────────────── -->
+  <header class="lp-nav">
+    <div class="lp-container lp-nav-inner">
+      <a class="lp-logo" (click)="scrollTo('hero')">
+        <span class="lp-logo-mark">H</span>
+        <span class="lp-logo-text">Humant</span>
+      </a>
+
+      <nav class="lp-nav-links" [class.lp-nav-open]="menuOpen">
+        <a (click)="scrollTo('features')">Features</a>
+        <a (click)="scrollTo('pricing')">Pricing</a>
+        <a (click)="scrollTo('about')">About</a>
+        <a (click)="scrollTo('testimonials')">Testimonials</a>
+      </nav>
+
+      <div class="lp-nav-cta">
+        <a class="lp-btn lp-btn-ghost" routerLink="/login">Sign in</a>
+        <a class="lp-btn lp-btn-primary" routerLink="/register">Start free</a>
+      </div>
+
+      <button class="lp-hamburger" (click)="menuOpen = !menuOpen" aria-label="Toggle menu">
+        <i class="bi" [class.bi-list]="!menuOpen" [class.bi-x]="menuOpen"></i>
+      </button>
+    </div>
+  </header>
+
+  <!-- ── HERO ────────────────────────────────────────────────── -->
+  <section id="hero" class="lp-hero">
+    <div class="lp-container lp-hero-inner">
+      <div class="lp-hero-content">
+        <span class="lp-eyebrow">All-in-one HR platform</span>
+        <h1 class="lp-hero-title">
+          Manage your entire<br />
+          workforce from<br />
+          <span class="lp-hero-accent">one workspace</span>
+        </h1>
+        <p class="lp-hero-sub">
+          Humant brings together employee records, payroll, recruitment,
+          leave, training, and compliance into a single modern platform
+          your team will actually enjoy using.
+        </p>
+
+        <div class="lp-hero-actions">
+          <a class="lp-btn lp-btn-primary lp-btn-lg" routerLink="/register">
+            Start free 14-day trial
+          </a>
+          <a class="lp-btn lp-btn-outline lp-btn-lg" (click)="scrollTo('features')">
+            See features →
+          </a>
+        </div>
+
+        <div class="lp-hero-trust">
+          <span>No credit card required</span>
+          <span class="lp-trust-dot">·</span>
+          <span>Setup in 5 minutes</span>
+          <span class="lp-trust-dot">·</span>
+          <span>Cancel anytime</span>
+        </div>
+      </div>
+
+      <div class="lp-hero-visual">
+        <div class="lp-dashboard-preview">
+          <div class="lp-preview-header">
+            <div class="lp-preview-dots">
+              <span></span><span></span><span></span>
+            </div>
+            <span class="lp-preview-title">Humant Workspace</span>
+          </div>
+          <div class="lp-preview-body">
+            <div class="lp-preview-sidebar">
+              <div class="lp-preview-nav-item lp-active">Dashboard</div>
+              <div class="lp-preview-nav-item">Employees</div>
+              <div class="lp-preview-nav-item">Payroll</div>
+              <div class="lp-preview-nav-item">Leave</div>
+              <div class="lp-preview-nav-item">Recruitment</div>
+            </div>
+            <div class="lp-preview-main">
+              <div class="lp-preview-metric-row">
+                <div class="lp-preview-metric">
+                  <strong>248</strong><span>Employees</span>
+                </div>
+                <div class="lp-preview-metric">
+                  <strong>94%</strong><span>Payroll ready</span>
+                </div>
+                <div class="lp-preview-metric">
+                  <strong>12</strong><span>Open roles</span>
+                </div>
+              </div>
+              <div class="lp-preview-chart-bars">
+                <div class="lp-bar" style="height:55%"></div>
+                <div class="lp-bar" style="height:72%"></div>
+                <div class="lp-bar" style="height:48%"></div>
+                <div class="lp-bar" style="height:88%"></div>
+                <div class="lp-bar lp-bar-accent" style="height:95%"></div>
+                <div class="lp-bar" style="height:67%"></div>
+                <div class="lp-bar" style="height:81%"></div>
+              </div>
+              <div class="lp-preview-row-list">
+                <div class="lp-preview-row" *ngFor="let i of [1,2,3]">
+                  <div class="lp-preview-row-avatar"></div>
+                  <div class="lp-preview-row-lines">
+                    <div class="lp-line lp-line-dark"></div>
+                    <div class="lp-line lp-line-light"></div>
+                  </div>
+                  <div class="lp-preview-row-badge"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── STATS ───────────────────────────────────────────────── -->
+  <section class="lp-stats">
+    <div class="lp-container lp-stats-grid">
+      <div class="lp-stat" *ngFor="let stat of stats">
+        <strong>{{ stat.value }}</strong>
+        <span>{{ stat.label }}</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── FEATURES ────────────────────────────────────────────── -->
+  <section id="features" class="lp-features">
+    <div class="lp-container">
+      <div class="lp-section-header">
+        <span class="lp-eyebrow">What's included</span>
+        <h2 class="lp-section-title">Everything your HR team needs</h2>
+        <p class="lp-section-sub">
+          30+ modules covering the full employee lifecycle — from hire to retire.
+        </p>
+      </div>
+
+      <div class="lp-features-grid">
+        <div class="lp-feature-card" *ngFor="let f of features">
+          <div class="lp-feature-icon">
+            <i class="bi {{ f.icon }}"></i>
+          </div>
+          <h3>{{ f.title }}</h3>
+          <p>{{ f.description }}</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── HOW IT WORKS ────────────────────────────────────────── -->
+  <section class="lp-how">
+    <div class="lp-container">
+      <div class="lp-section-header">
+        <span class="lp-eyebrow">Get started in minutes</span>
+        <h2 class="lp-section-title">Up and running in 3 steps</h2>
+      </div>
+
+      <div class="lp-steps">
+        <div class="lp-step">
+          <div class="lp-step-num">01</div>
+          <h3>Register your workspace</h3>
+          <p>Choose a company code, set up your admin account, and your workspace is live instantly.</p>
+        </div>
+        <div class="lp-step-arrow">→</div>
+        <div class="lp-step">
+          <div class="lp-step-num">02</div>
+          <h3>Add your team</h3>
+          <p>Import employees, configure departments and roles, and invite users with the right access levels.</p>
+        </div>
+        <div class="lp-step-arrow">→</div>
+        <div class="lp-step">
+          <div class="lp-step-num">03</div>
+          <h3>Start managing</h3>
+          <p>Run payroll, approve leave, post jobs, and track performance — all from your dashboard.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── PRICING ─────────────────────────────────────────────── -->
+  <section id="pricing" class="lp-pricing">
+    <div class="lp-container">
+      <div class="lp-section-header">
+        <span class="lp-eyebrow">Transparent pricing</span>
+        <h2 class="lp-section-title">Plans for every team size</h2>
+        <p class="lp-section-sub">All plans include a 14-day free trial. No credit card required.</p>
+      </div>
+
+      <div class="lp-pricing-grid">
+        <div
+          class="lp-plan-card"
+          *ngFor="let plan of plans"
+          [class.lp-plan-featured]="plan.highlight"
+        >
+          <div class="lp-plan-badge" *ngIf="plan.badge">{{ plan.badge }}</div>
+          <div class="lp-plan-name">{{ plan.name }}</div>
+          <div class="lp-plan-price">
+            {{ plan.price }}
+            <span class="lp-plan-period">{{ plan.period }}</span>
+          </div>
+          <ul class="lp-plan-features">
+            <li *ngFor="let f of plan.features">
+              <span class="lp-check">✓</span> {{ f }}
+            </li>
+          </ul>
+          <a class="lp-btn lp-btn-primary lp-plan-cta" [routerLink]="plan.route">
+            {{ plan.cta }}
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── TESTIMONIALS ────────────────────────────────────────── -->
+  <section id="testimonials" class="lp-testimonials">
+    <div class="lp-container">
+      <div class="lp-section-header">
+        <span class="lp-eyebrow">What customers say</span>
+        <h2 class="lp-section-title">Trusted by HR teams</h2>
+      </div>
+
+      <div class="lp-testimonials-grid">
+        <div class="lp-testimonial-card" *ngFor="let t of testimonials">
+          <div class="lp-testimonial-stars">★★★★★</div>
+          <p class="lp-testimonial-quote">"{{ t.quote }}"</p>
+          <div class="lp-testimonial-author">
+            <div class="lp-author-avatar">{{ t.author.charAt(0) }}</div>
+            <div>
+              <strong>{{ t.author }}</strong>
+              <span>{{ t.role }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── ABOUT ───────────────────────────────────────────────── -->
+  <section id="about" class="lp-about">
+    <div class="lp-container lp-about-grid">
+      <div class="lp-about-content">
+        <span class="lp-eyebrow">About Humant</span>
+        <h2 class="lp-section-title">Built for modern HR teams</h2>
+        <p>
+          Humant was designed to eliminate the fragmentation that plagues
+          HR departments — spreadsheets for attendance here, a separate tool
+          for recruitment there, and email chains for approval. We brought
+          everything together.
+        </p>
+        <p>
+          Built on Angular and Spring Boot, Humant is a fast, reliable,
+          and customisable platform that adapts to your company's workflows
+          rather than forcing you to adapt to ours.
+        </p>
+        <div class="lp-about-pillars">
+          <div class="lp-pillar">
+            <i class="bi bi-lock-fill"></i>
+            <span>Role-based access control</span>
+          </div>
+          <div class="lp-pillar">
+            <i class="bi bi-gear-fill"></i>
+            <span>Configurable workflows</span>
+          </div>
+          <div class="lp-pillar">
+            <i class="bi bi-graph-up-arrow"></i>
+            <span>Real-time dashboards</span>
+          </div>
+          <div class="lp-pillar">
+            <i class="bi bi-cloud-check-fill"></i>
+            <span>Cloud-ready deployment</span>
+          </div>
+        </div>
+      </div>
+      <div class="lp-about-visual">
+        <div class="lp-about-card">
+          <div class="lp-about-stat-row">
+            <div class="lp-about-stat"><strong>30+</strong><span>Modules</span></div>
+            <div class="lp-about-stat"><strong>89</strong><span>API endpoints</span></div>
+          </div>
+          <div class="lp-about-stat-row">
+            <div class="lp-about-stat"><strong>Angular 11</strong><span>Frontend</span></div>
+            <div class="lp-about-stat"><strong>Spring Boot</strong><span>Backend</span></div>
+          </div>
+          <div class="lp-about-stat-row">
+            <div class="lp-about-stat"><strong>PostgreSQL</strong><span>Database</span></div>
+            <div class="lp-about-stat"><strong>Stripe</strong><span>Billing</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── CTA BANNER ──────────────────────────────────────────── -->
+  <section class="lp-cta">
+    <div class="lp-container lp-cta-inner">
+      <h2>Ready to modernise your HR operations?</h2>
+      <p>Start your free 14-day trial today. No credit card required.</p>
+      <div class="lp-cta-actions">
+        <a class="lp-btn lp-btn-white lp-btn-lg" routerLink="/register">Get started free</a>
+        <a class="lp-btn lp-btn-outline-white lp-btn-lg" routerLink="/login">Sign in</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── FOOTER ──────────────────────────────────────────────── -->
+  <footer class="lp-footer">
+    <div class="lp-container lp-footer-inner">
+      <div class="lp-footer-brand">
+        <span class="lp-logo-mark lp-logo-mark-sm">H</span>
+        <strong>Humant</strong>
+        <p>All-in-one HR platform for modern teams.</p>
+      </div>
+      <div class="lp-footer-links">
+        <div class="lp-footer-col">
+          <strong>Product</strong>
+          <a (click)="scrollTo('features')">Features</a>
+          <a (click)="scrollTo('pricing')">Pricing</a>
+          <a routerLink="/documentation">Documentation</a>
+        </div>
+        <div class="lp-footer-col">
+          <strong>Account</strong>
+          <a routerLink="/login">Sign in</a>
+          <a routerLink="/register">Register</a>
+        </div>
+        <div class="lp-footer-col">
+          <strong>Company</strong>
+          <a (click)="scrollTo('about')">About</a>
+          <a (click)="scrollTo('testimonials')">Testimonials</a>
+        </div>
+      </div>
+    </div>
+    <div class="lp-footer-bottom">
+      <p>© {{ currentYear }} Humant. All rights reserved.</p>
+    </div>
+  </footer>
+
+</div>

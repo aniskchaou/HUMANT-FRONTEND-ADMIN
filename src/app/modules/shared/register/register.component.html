@@ -1,0 +1,128 @@
+<div id="auth" class="auth-shell">
+  <div class="reg-grid">
+    <section class="reg-panel-form">
+      <div class="reg-inner">
+        <div class="reg-brand">
+          <a routerLink="/login" class="reg-back-link">← Back to login</a>
+          <div class="reg-brand-title">
+            <span class="reg-brand-mark">H</span>
+            <span>Humant</span>
+          </div>
+        </div>
+
+        <div class="reg-copy">
+          <span class="reg-eyebrow">Get started free</span>
+          <h1 class="reg-title">Register your company workspace</h1>
+          <p class="reg-subtitle">14-day free trial. No credit card required to start.</p>
+        </div>
+
+        <div class="alert alert-success" *ngIf="successMessage">
+          {{ successMessage }}
+        </div>
+        <div class="alert alert-danger" *ngIf="errorMessage">
+          {{ errorMessage }}
+        </div>
+
+        <form (ngSubmit)="register()" #regForm="ngForm" novalidate class="reg-form">
+
+          <!-- Company Code -->
+          <div class="reg-field">
+            <label for="tenantCode">Company code <span class="reg-required">*</span></label>
+            <div class="reg-input-wrapper">
+              <input
+                id="tenantCode"
+                type="text"
+                [(ngModel)]="tenantCode"
+                name="tenantCode"
+                (blur)="checkCode()"
+                (input)="codeAvailable = null"
+                placeholder="e.g. acme (lowercase, no spaces)"
+                required
+              />
+              <span class="reg-code-status" *ngIf="checkingCode">Checking...</span>
+              <span class="reg-code-status reg-code-ok" *ngIf="!checkingCode && codeAvailable === true">✓ Available</span>
+              <span class="reg-code-status reg-code-taken" *ngIf="!checkingCode && codeAvailable === false">✗ Taken</span>
+            </div>
+            <small class="reg-hint">This is the code your team will enter when logging in.</small>
+            <div class="reg-error" *ngIf="submitted && !tenantCode.trim()">Company code is required.</div>
+            <div class="reg-error" *ngIf="submitted && tenantCode.trim() && codeAvailable === false">This code is already taken. Choose another.</div>
+          </div>
+
+          <!-- Company Name -->
+          <div class="reg-field">
+            <label for="companyName">Company name <span class="reg-required">*</span></label>
+            <input id="companyName" type="text" [(ngModel)]="companyName" name="companyName" placeholder="Acme Corp" required />
+            <div class="reg-error" *ngIf="submitted && !companyName.trim()">Company name is required.</div>
+          </div>
+
+          <!-- Admin Email -->
+          <div class="reg-field">
+            <label for="adminEmail">Admin email <span class="reg-required">*</span></label>
+            <input id="adminEmail" type="email" [(ngModel)]="adminEmail" name="adminEmail" placeholder="admin@acme.com" required />
+            <div class="reg-error" *ngIf="submitted && !adminEmail.trim()">Email is required.</div>
+          </div>
+
+          <!-- Admin Username -->
+          <div class="reg-field">
+            <label for="adminUsername">Admin username <span class="reg-required">*</span></label>
+            <input id="adminUsername" type="text" [(ngModel)]="adminUsername" name="adminUsername" placeholder="admin" required />
+            <div class="reg-error" *ngIf="submitted && !adminUsername.trim()">Username is required.</div>
+          </div>
+
+          <!-- Password -->
+          <div class="reg-field">
+            <label for="adminPassword">Password <span class="reg-required">*</span></label>
+            <input id="adminPassword" type="password" [(ngModel)]="adminPassword" name="adminPassword" placeholder="Min 8 characters" required minlength="8" />
+            <div class="reg-error" *ngIf="submitted && adminPassword.length < 8">Password must be at least 8 characters.</div>
+          </div>
+
+          <!-- Confirm Password -->
+          <div class="reg-field">
+            <label for="confirmPassword">Confirm password <span class="reg-required">*</span></label>
+            <input id="confirmPassword" type="password" [(ngModel)]="confirmPassword" name="confirmPassword" placeholder="Repeat password" required />
+            <div class="reg-error" *ngIf="submitted && adminPassword !== confirmPassword">Passwords do not match.</div>
+          </div>
+
+          <button type="submit" class="btn btn-primary btn-block btn-lg reg-submit" [disabled]="submitting">
+            {{ submitting ? 'Creating workspace...' : 'Create workspace' }}
+          </button>
+
+          <p class="reg-terms">By registering you agree to our Terms of Service and Privacy Policy.</p>
+        </form>
+      </div>
+    </section>
+
+    <aside class="reg-panel-visual">
+      <div class="reg-visual-inner">
+        <span class="reg-visual-kicker">Everything you need</span>
+        <h2>A complete HR platform for your team</h2>
+        <p>Employees, payroll, attendance, recruitment, performance, and more — all in one workspace.</p>
+
+        <div class="reg-plan-grid">
+          <div class="reg-plan-card">
+            <strong>Free trial</strong>
+            <p>14 days, all features, no card needed</p>
+          </div>
+          <div class="reg-plan-card">
+            <strong>Starter</strong>
+            <p>$29/mo · Up to 10 users</p>
+          </div>
+          <div class="reg-plan-card">
+            <strong>Professional</strong>
+            <p>$79/mo · Up to 50 users</p>
+          </div>
+          <div class="reg-plan-card">
+            <strong>Enterprise</strong>
+            <p>$199/mo · Unlimited users</p>
+          </div>
+        </div>
+
+        <div class="reg-feature-list">
+          <div class="reg-feature-item" *ngFor="let f of ['Employee management', 'Payroll & Pay slips', 'Leave & Attendance', 'Recruitment pipeline', 'Training & Performance', 'Custom approval flows']">
+            <span class="reg-feature-check">✓</span> {{ f }}
+          </div>
+        </div>
+      </div>
+    </aside>
+  </div>
+</div>

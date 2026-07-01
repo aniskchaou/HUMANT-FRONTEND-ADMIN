@@ -1,0 +1,74 @@
+.sa-shell { padding: 2rem; max-width: 1200px; margin: 0 auto; }
+.sa-header { margin-bottom: 2rem; }
+.sa-header h1 { font-size: 1.8rem; }
+.sa-header p { color: var(--muted); }
+
+.sa-metrics {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.sa-metric {
+    padding: 1.25rem 1.5rem;
+    border: 1px solid rgba(19, 58, 90, 0.1);
+    border-radius: 1rem;
+    background: rgba(255, 255, 255, 0.85);
+}
+
+.sa-metric strong { display: block; font-size: 1.8rem; font-family: var(--font-display); color: var(--ink); }
+.sa-metric span { color: var(--muted); font-size: 0.85rem; }
+
+.sa-loading { text-align: center; padding: 2rem; color: var(--muted); }
+
+.sa-table-wrapper { overflow-x: auto; }
+
+.sa-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.88rem;
+}
+
+.sa-table th {
+    padding: 0.75rem 1rem;
+    text-align: left;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    border-bottom: 1.5px solid rgba(19, 58, 90, 0.1);
+}
+
+.sa-table td {
+    padding: 0.85rem 1rem;
+    border-bottom: 1px solid rgba(19, 58, 90, 0.07);
+    color: var(--ink);
+}
+
+.sa-table tr:hover td { background: rgba(29, 120, 116, 0.03); }
+
+.sa-status-badge {
+    display: inline-block;
+    padding: 0.2rem 0.6rem;
+    border-radius: 999px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    background: rgba(148, 163, 184, 0.2);
+    color: #334155;
+}
+
+.sa-active { background: rgba(22, 163, 74, 0.15); color: #15803d; }
+.sa-suspended { background: rgba(190, 18, 60, 0.12); color: #be123c; }
+
+.sa-plan-select {
+    padding: 0.3rem 0.5rem;
+    border: 1px solid rgba(19, 58, 90, 0.18);
+    border-radius: 0.5rem;
+    font-size: 0.82rem;
+    background: #fff;
+}
+
+.sa-actions { display: flex; gap: 0.5rem; }

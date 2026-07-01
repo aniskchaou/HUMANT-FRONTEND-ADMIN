@@ -96,6 +96,12 @@
 			<artifactId>springdoc-openapi-ui</artifactId>
 			<version>1.7.0</version>
 		</dependency>
+		<!-- Stripe Java SDK -->
+		<dependency>
+			<groupId>com.stripe</groupId>
+			<artifactId>stripe-java</artifactId>
+			<version>24.3.0</version>
+		</dependency>
 	</dependencies>
 
 	<build>

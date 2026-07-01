@@ -1,0 +1,37 @@
+<div class="sub-shell">
+  <div class="sub-header">
+    <h1>Choose your plan</h1>
+    <p>Start with a 14-day free trial on any plan. Cancel anytime.</p>
+  </div>
+
+  <div class="sub-loading" *ngIf="loading">Loading plans...</div>
+
+  <div class="alert alert-danger" *ngIf="errorMessage">{{ errorMessage }}</div>
+
+  <div class="sub-grid" *ngIf="!loading">
+    <div
+      class="sub-plan-card"
+      *ngFor="let plan of plans"
+      [class.sub-plan-featured]="plan.nickname?.toLowerCase().includes('professional')"
+    >
+      <div class="sub-plan-badge" *ngIf="plan.nickname?.toLowerCase().includes('professional')">Most popular</div>
+      <div class="sub-plan-name">{{ plan.nickname }}</div>
+      <div class="sub-plan-price">
+        {{ formatAmount(plan.amount, plan.currency) }}
+        <span class="sub-plan-interval">/ {{ plan.interval }}</span>
+      </div>
+
+      <ul class="sub-feature-list" *ngIf="plan.features">
+        <li *ngFor="let feature of plan.features">{{ feature }}</li>
+      </ul>
+
+      <button
+        class="btn btn-primary sub-plan-btn"
+        (click)="subscribe(plan.priceId)"
+        [disabled]="subscribing"
+      >
+        {{ subscribing ? 'Redirecting...' : 'Get started' }}
+      </button>
+    </div>
+  </div>
+</div>

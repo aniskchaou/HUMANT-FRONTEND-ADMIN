@@ -27,6 +27,11 @@ public class DatabaseUserDetailsService implements UserDetailsService {
 
 		UserRole role = account.getRole() != null ? account.getRole() : UserRole.EMPLOYEE;
 
+		// Populate TenantContext during authentication so downstream filters can read it
+		if (account.getTenantCode() != null) {
+			TenantContext.setCurrentTenant(account.getTenantCode());
+		}
+
 		return org.springframework.security.core.userdetails.User.withUsername(account.getUsername())
 			.password(account.getPassword())
 			.authorities(Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + role.name())))

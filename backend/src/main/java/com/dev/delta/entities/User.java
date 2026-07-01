@@ -36,7 +36,11 @@ public class User {
 	@ManyToOne
 	@JoinColumn(name = "company_id")
 	Company company;
-	
+
+	/** The tenant this user belongs to. Null only for SUPER_ADMIN accounts. */
+	@Column(name = "tenant_code", length = 80)
+	String tenantCode;
+
 	public User() {
 		// TODO Auto-generated constructor stub
 	}
@@ -106,7 +110,16 @@ public class User {
 		this.company = company;
 	}
 
+	public String getTenantCode() {
+		return tenantCode;
+	}
+
+	public void setTenantCode(String tenantCode) {
+		this.tenantCode = tenantCode;
+	}
+
 	public enum UserRole {
+		SUPER_ADMIN,
 		ADMIN,
 		HR,
 		MANAGER,

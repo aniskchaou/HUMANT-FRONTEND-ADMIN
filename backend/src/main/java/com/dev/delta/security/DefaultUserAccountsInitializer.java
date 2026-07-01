@@ -27,6 +27,7 @@ public class DefaultUserAccountsInitializer implements CommandLineRunner {
 	@Override
 	public void run(String... args) {
 		normalizeExistingUsers();
+		ensureDefaultAccount("superadmin", "superadmin123", "Platform Super Admin", UserRole.SUPER_ADMIN);
 		ensureDefaultAccount("admin", "admin", "Administrator", UserRole.ADMIN);
 		ensureDefaultAccount("hr", "hr123", "HR Operator", UserRole.HR);
 		ensureDefaultAccount("manager", "manager123", "People Manager", UserRole.MANAGER);

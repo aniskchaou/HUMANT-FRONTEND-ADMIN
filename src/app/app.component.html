@@ -1,4 +1,4 @@
-<div id="app" *ngIf="!hasRoute('login')" class="app-shell">
+<div id="app" *ngIf="!hasRoute('login') && !hasRoute('home') && !hasRoute('register')" class="app-shell">
   <app-navigation></app-navigation>
   <div id="main" class="layout-navbar">
     <header class="app-topbar">
@@ -49,7 +49,10 @@
   <app-login></app-login>
 </div>
 
-<script src="/assets/vendors/perfect-scrollbar/perfect-scrollbar.min.js"></script>
-<script src="/assets/js/bootstrap.bundle.min.js"></script>
+<div *ngIf="hasRoute('home')">
+  <app-landing></app-landing>
+</div>
 
-<script src="/assets/js/main.js"></script>
+<div *ngIf="hasRoute('register')">
+  <app-register></app-register>
+</div>

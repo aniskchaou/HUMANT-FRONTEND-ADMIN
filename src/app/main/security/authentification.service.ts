@@ -44,6 +44,7 @@ interface StoredAuthState {
   role?: string;
   companyName?: string;
   companyCode?: string;
+  tenantCode?: string;
   accessPolicy?: StoredAccessPolicy;
   authSettings?: AuthSettingsSnapshot;
   rememberMe: boolean;
@@ -74,7 +75,8 @@ export class AuthentificationService {
   authenticate(
     username: string,
     password: string,
-    rememberMe = false
+    rememberMe = false,
+    tenantCode = ''
   ): Observable<AuthenticatedSession> {
     const normalizedUsername = (username || '').trim();
     const authorization = this.buildAuthorizationToken(
@@ -83,6 +85,7 @@ export class AuthentificationService {
     );
     const headers = new HttpHeaders({
       Authorization: authorization,
+      ...(tenantCode ? { 'X-Tenant-Code': tenantCode } : {}),
     });
 
     return this.httpClient
@@ -93,7 +96,8 @@ export class AuthentificationService {
             sessionResponse.username || normalizedUsername,
             authorization,
             rememberMe,
-            sessionResponse
+            sessionResponse,
+            tenantCode
           );
 
           return this.toAuthenticatedSession(sessionResponse, session);
@@ -195,12 +199,22 @@ export class AuthentificationService {
     return state && state.companyName ? state.companyName : '';
   }
 
+  getStoredTenantCode(): string {
+    const state = this.readStoredState();
+    return state && state.tenantCode ? state.tenantCode : '';
+  }
+
   getAuthHeaders(includeContentType = false): HttpHeaders {
     let headers = new HttpHeaders();
     const authorization = this.getStoredAuthorization();
+    const tenantCode = this.getStoredTenantCode();
 
     if (authorization) {
       headers = headers.set('Authorization', authorization);
+    }
+
+    if (tenantCode) {
+      headers = headers.set('X-Tenant-Code', tenantCode);
     }
 
     if (includeContentType) {
@@ -269,7 +283,8 @@ export class AuthentificationService {
     username: string,
     authorization: string,
     rememberMe: boolean,
-    sessionResponse?: SessionResponse
+    sessionResponse?: SessionResponse,
+    tenantCode = ''
   ): StoredAuthState {
     const authorities = Array.isArray(sessionResponse && sessionResponse.authorities)
       ? sessionResponse.authorities
@@ -293,6 +308,7 @@ export class AuthentificationService {
         (authorities.length ? authorities[0].replace(/^ROLE_/, '').toUpperCase() : 'EMPLOYEE'),
       companyName: (sessionResponse && sessionResponse.company && sessionResponse.company.name) || '',
       companyCode: (sessionResponse && sessionResponse.company && sessionResponse.company.code) || '',
+      tenantCode: tenantCode || (sessionResponse && sessionResponse.company && sessionResponse.company.code) || '',
       accessPolicy: sessionResponse && sessionResponse.accessPolicy ? sessionResponse.accessPolicy : null,
       authSettings,
       rememberMe: effectiveRememberMe,
@@ -364,6 +380,7 @@ export class AuthentificationService {
         role: parsed.role || '',
         companyName: parsed.companyName || '',
         companyCode: parsed.companyCode || '',
+        tenantCode: parsed.tenantCode || '',
         accessPolicy: parsed.accessPolicy || null,
         authSettings: parsed.authSettings || null,
         rememberMe: !!parsed.rememberMe,

@@ -3,6 +3,19 @@
     padding: 1.5rem;
 }
 
+.auth-field-hint {
+    display: block;
+    margin: -0.5rem 0 0.75rem;
+    color: var(--muted);
+    font-size: 0.8rem;
+}
+
+.auth-register-link {
+    margin: 0.6rem 0 0;
+    color: var(--muted);
+    font-size: 0.86rem;
+}
+
 .auth-grid {
     display: grid;
     grid-template-columns: minmax(0, 1.06fr) minmax(0, 0.94fr);

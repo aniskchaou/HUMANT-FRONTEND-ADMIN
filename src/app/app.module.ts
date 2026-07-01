@@ -57,6 +57,10 @@ import { DashboardComponent } from './modules/shared/dashboard/dashboard.compone
 import { EditprofileComponent } from './modules/shared/editprofile/editprofile.component';
 import { LoginComponent } from './modules/shared/login/login.component';
 import { ProfileComponent } from './modules/shared/profile/profile.component';
+import { RegisterComponent } from './modules/shared/register/register.component';
+import { SubscriptionComponent } from './modules/shared/subscription/subscription.component';
+import { SuperAdminDashboardComponent } from './modules/shared/super-admin/super-admin-dashboard.component';
+import { LandingComponent } from './modules/shared/landing/landing.component';
 
 import { AddAwardComponent } from './modules/award/add-award/add-award.component';
 import { AddNoticeComponent } from './modules/notice/add-notice/add-notice.component';
@@ -285,15 +289,19 @@ const baseRoutes: Routes = [
     pathMatch: 'full',
   },
   { path: 'login', component: LoginComponent, pathMatch: 'full' },
+  { path: 'register', component: RegisterComponent, pathMatch: 'full' },
+  { path: 'subscription', component: SubscriptionComponent, pathMatch: 'full' },
+  { path: 'super-admin', component: SuperAdminDashboardComponent, pathMatch: 'full' },
+  { path: 'home', component: LandingComponent, pathMatch: 'full' },
   { path: 'profile', component: ProfileComponent, pathMatch: 'full' },
   { path: 'editprofile', component: ProfileComponent, pathMatch: 'full' },
   { path: 'warning', component: WarningComponent, pathMatch: 'full' },
-  { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
+  { path: '', redirectTo: 'home', pathMatch: 'full' },
   { path: '**', redirectTo: 'dashboard', pathMatch: 'full' },
 ];
 
 const routes: Routes = baseRoutes.map((route) =>
-  route.component && route.path !== 'login'
+  route.component && route.path !== 'login' && route.path !== 'register' && route.path !== 'home'
     ? { ...route, canActivate: [AuthguardService] }
     : route
 );
@@ -452,6 +460,10 @@ const routes: Routes = baseRoutes.map((route) =>
     EducationLevelListComponent,
     EventListComponent,
     AddAwardTypeComponent,
+    RegisterComponent,
+    SubscriptionComponent,
+    SuperAdminDashboardComponent,
+    LandingComponent,
   ],
   imports: [
     HttpClientModule,

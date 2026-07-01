@@ -12,9 +12,13 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.AuthenticationEntryPoint;
+import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import javax.servlet.http.HttpServletResponse;
 
 @Configuration
 @EnableWebSecurity
@@ -23,12 +27,16 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 	PasswordEncoder passwordEncoder;
 
 	private final DatabaseUserDetailsService databaseUserDetailsService;
+	private final TenantResolutionFilter tenantResolutionFilter;
 
 	@Autowired
-	public WebSecurityConfig(PasswordEncoder passwordEncoder, DatabaseUserDetailsService databaseUserDetailsService) {
+	public WebSecurityConfig(PasswordEncoder passwordEncoder,
+							 DatabaseUserDetailsService databaseUserDetailsService,
+							 TenantResolutionFilter tenantResolutionFilter) {
 		super();
 		this.passwordEncoder = passwordEncoder;
 		this.databaseUserDetailsService = databaseUserDetailsService;
+		this.tenantResolutionFilter = tenantResolutionFilter;
 	}
 
 	@Override
@@ -38,10 +46,18 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
-		http.cors().and().csrf().disable().
-
-				authorizeRequests()
+		http.cors().and().csrf().disable()
+				.addFilterAfter(tenantResolutionFilter, BasicAuthenticationFilter.class)
+				.authorizeRequests()
 				.antMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+				// --- Public SaaS endpoints ---
+				.antMatchers(HttpMethod.POST, "/api/tenants/register").permitAll()
+				.antMatchers(HttpMethod.GET, "/api/tenants/check").permitAll()
+				.antMatchers(HttpMethod.POST, "/api/stripe/webhook").permitAll()
+				.antMatchers("/api/stripe/plans").permitAll()
+				// --- Super admin ---
+				.antMatchers("/api/super-admin/**").hasRole("SUPER_ADMIN")
+				// --- Tenant-scoped endpoints ---
 				.antMatchers(HttpMethod.GET, "/user/session").authenticated()
 				.antMatchers("/user/**").hasRole("ADMIN")
 				.antMatchers("/api/admin/access-policies/**").hasRole("ADMIN")
@@ -146,7 +162,19 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 				.antMatchers(HttpMethod.PUT, "/api/documents/**").hasAnyRole("ADMIN", "HR")
 				.antMatchers(HttpMethod.DELETE, "/api/documents/**").hasRole("ADMIN")
 				.anyRequest().authenticated()
-				.and().httpBasic();
+				.and()
+				.httpBasic(basic -> basic.authenticationEntryPoint(silentEntryPoint()));
+	}
+
+	@Bean
+	public AuthenticationEntryPoint silentEntryPoint() {
+		return (request, response, authException) -> {
+			// Return 401 JSON without WWW-Authenticate header so the browser
+			// does NOT show its native Basic Auth popup dialog.
+			response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+			response.setContentType("application/json");
+			response.getWriter().write("{\"error\":\"Unauthorized\",\"message\":\"Authentication required\"}");
+		};
 	}
 
 	@Bean

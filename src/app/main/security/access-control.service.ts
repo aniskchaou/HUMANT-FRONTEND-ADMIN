@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 
 import { AuthentificationService, StoredAccessPolicy } from './authentification.service';
 
-type AccessRole = 'ADMIN' | 'HR' | 'MANAGER' | 'RECRUITER' | 'EMPLOYEE';
+type AccessRole = 'SUPER_ADMIN' | 'ADMIN' | 'HR' | 'MANAGER' | 'RECRUITER' | 'EMPLOYEE';
 
 interface RouteAccessRule {
   prefixes: string[];
@@ -107,7 +107,7 @@ export class AccessControlService {
       return false;
     }
 
-    if (currentRoles.includes('ADMIN')) {
+    if (currentRoles.includes('SUPER_ADMIN') || currentRoles.includes('ADMIN')) {
       return true;
     }
 
@@ -146,6 +146,10 @@ export class AccessControlService {
       return policy.defaultLandingRoute;
     }
 
+    if (currentRoles.includes('SUPER_ADMIN')) {
+      return '/super-admin';
+    }
+
     if (currentRoles.includes('ADMIN') || currentRoles.includes('HR') || currentRoles.includes('MANAGER')) {
       return '/dashboard';
     }
@@ -166,7 +170,7 @@ export class AccessControlService {
       .getStoredAuthorities()
       .map((authority) => authority.replace(/^ROLE_/, '').toUpperCase())
       .filter((authority): authority is AccessRole =>
-        ['ADMIN', 'HR', 'MANAGER', 'RECRUITER', 'EMPLOYEE'].includes(authority)
+        ['SUPER_ADMIN', 'ADMIN', 'HR', 'MANAGER', 'RECRUITER', 'EMPLOYEE'].includes(authority)
       );
   }
 

@@ -1,0 +1,71 @@
+<div class="sa-shell">
+  <div class="sa-header">
+    <h1>Platform Administration</h1>
+    <p>Manage all tenant workspaces.</p>
+  </div>
+
+  <div class="sa-metrics">
+    <div class="sa-metric">
+      <strong>{{ tenants.length }}</strong>
+      <span>Total tenants</span>
+    </div>
+    <div class="sa-metric">
+      <strong>{{ activeCount }}</strong>
+      <span>Active</span>
+    </div>
+    <div class="sa-metric">
+      <strong>{{ suspendedCount }}</strong>
+      <span>Suspended</span>
+    </div>
+    <div class="sa-metric">
+      <strong>{{ paidCount }}</strong>
+      <span>Paid plans</span>
+    </div>
+  </div>
+
+  <div class="alert alert-success" *ngIf="successMessage">{{ successMessage }}</div>
+  <div class="alert alert-danger" *ngIf="errorMessage">{{ errorMessage }}</div>
+
+  <div class="sa-loading" *ngIf="loading">Loading tenants...</div>
+
+  <div class="sa-table-wrapper" *ngIf="!loading">
+    <table class="sa-table">
+      <thead>
+        <tr>
+          <th>Code</th>
+          <th>Company</th>
+          <th>Email</th>
+          <th>Plan</th>
+          <th>Status</th>
+          <th>Created</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let tenant of tenants">
+          <td><code>{{ tenant.tenantCode }}</code></td>
+          <td>{{ tenant.companyName }}</td>
+          <td>{{ tenant.adminEmail }}</td>
+          <td>
+            <select class="sa-plan-select" (change)="changePlan(tenant.tenantCode, $any($event.target).value)">
+              <option value="FREE" [selected]="tenant.plan === 'FREE'">Free</option>
+              <option value="STARTER" [selected]="tenant.plan === 'STARTER'">Starter</option>
+              <option value="PROFESSIONAL" [selected]="tenant.plan === 'PROFESSIONAL'">Professional</option>
+              <option value="ENTERPRISE" [selected]="tenant.plan === 'ENTERPRISE'">Enterprise</option>
+            </select>
+          </td>
+          <td>
+            <span class="sa-status-badge" [class.sa-active]="tenant.status === 'ACTIVE'" [class.sa-suspended]="tenant.status === 'SUSPENDED'">
+              {{ tenant.status }}
+            </span>
+          </td>
+          <td>{{ tenant.createdAt | date:'mediumDate' }}</td>
+          <td class="sa-actions">
+            <button class="btn btn-sm btn-light" (click)="activate(tenant.tenantCode)" *ngIf="tenant.status !== 'ACTIVE'">Activate</button>
+            <button class="btn btn-sm btn-outline-danger" (click)="suspend(tenant.tenantCode)" *ngIf="tenant.status === 'ACTIVE'">Suspend</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
