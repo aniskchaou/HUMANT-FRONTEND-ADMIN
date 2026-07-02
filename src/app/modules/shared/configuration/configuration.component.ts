@@ -619,7 +619,7 @@ export class ConfigurationComponent extends URLLoader implements OnInit {
 
   resetThemePreferences(): void {
     const defaults = this.themePreferencesService.getDefaults();
-    this.themeForm.reset(defaults);
+    this.themeForm.reset(defaults, { emitEvent: false });
     this.themePreferencesService.save(defaults);
     super.show('Confirmation', 'Theme preferences reset to default.', 'success');
   }
@@ -1183,7 +1183,7 @@ export class ConfigurationComponent extends URLLoader implements OnInit {
       sessionTimeoutMinutes: normalized.sessionTimeoutMinutes,
       allowRememberMe: normalized.allowRememberMe,
       approvalStages: normalized.approvalStages,
-    });
+    }, { emitEvent: false });
     this.lastSavedAt = normalized.updatedAt || '';
     this.persistLocalConfiguration(normalized);
   }

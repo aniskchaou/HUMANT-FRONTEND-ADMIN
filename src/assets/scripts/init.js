@@ -1,6 +1,6 @@
 $(function () {
 
-    $(".dropdown-toggle").dropdown();
+    if ($.fn.dropdown) { $(".dropdown-toggle").dropdown(); }
     var table = $('#table').DataTable({
         orderCellsTop: true,
         dom: 'Bfrtip',

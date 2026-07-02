@@ -296,6 +296,8 @@ const baseRoutes: Routes = [
   { path: 'profile', component: ProfileComponent, pathMatch: 'full' },
   { path: 'editprofile', component: ProfileComponent, pathMatch: 'full' },
   { path: 'warning', component: WarningComponent, pathMatch: 'full' },
+  { path: 'user', component: UserComponent, pathMatch: 'full' },
+  { path: 'payslip', redirectTo: 'pay-slip', pathMatch: 'full' },
   { path: '', redirectTo: 'home', pathMatch: 'full' },
   { path: '**', redirectTo: 'dashboard', pathMatch: 'full' },
 ];
