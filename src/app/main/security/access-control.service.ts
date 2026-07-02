@@ -27,6 +27,7 @@ export class AccessControlService {
         '/interview',
         '/offer-letter',
         '/pipeline',
+        '/complain',
         '/announcement',
         '/communication',
         '/onboarding',

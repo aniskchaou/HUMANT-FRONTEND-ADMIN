@@ -1,6 +1,8 @@
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { NgModule } from '@angular/core';
+import { HTTP_INTERCEPTORS } from '@angular/common/http';
+import { AuthInterceptorService } from './main/security/auth-interceptor.service';
 
 import { AppComponent } from './app.component';
 import { NavigationComponent } from './template/navigation/navigation.component';
@@ -298,6 +300,7 @@ const baseRoutes: Routes = [
   { path: 'warning', component: WarningComponent, pathMatch: 'full' },
   { path: 'user', component: UserComponent, pathMatch: 'full' },
   { path: 'payslip', redirectTo: 'pay-slip', pathMatch: 'full' },
+  { path: 'payslip', redirectTo: 'pay-slip', pathMatch: 'full' },
   { path: '', redirectTo: 'home', pathMatch: 'full' },
   { path: '**', redirectTo: 'dashboard', pathMatch: 'full' },
 ];
@@ -477,7 +480,10 @@ const routes: Routes = baseRoutes.map((route) =>
     NgxChartsModule,
     RouterModule.forRoot(routes),
   ],
-  providers: [{ provide: APP_BASE_HREF, useValue: '' }],
+  providers: [
+    { provide: APP_BASE_HREF, useValue: '' },
+    { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptorService, multi: true },
+  ],
   bootstrap: [AppComponent],
 })
 export class AppModule {}

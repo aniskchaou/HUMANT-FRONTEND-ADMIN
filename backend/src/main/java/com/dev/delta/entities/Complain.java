@@ -6,6 +6,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @Entity
 public class Complain {
@@ -15,9 +16,15 @@ public class Complain {
 	Long id;
 	@ManyToOne
 	@JoinColumn(name="complain_by_id")
+	@JsonIgnoreProperties({"teamMembers","mentees","leaveRequests","attendances","payrolls",
+		"performanceReviews","documents","mentorshipsAsMentor","mentorshipsAsMentee",
+		"teams","managedTeams","skills","hibernateLazyInitializer","handler"})
 	Employee complainBy;
 	@ManyToOne
 	@JoinColumn(name="complain_against_id")
+	@JsonIgnoreProperties({"teamMembers","mentees","leaveRequests","attendances","payrolls",
+		"performanceReviews","documents","mentorshipsAsMentor","mentorshipsAsMentee",
+		"teams","managedTeams","skills","hibernateLazyInitializer","handler"})
 	Employee complainAgainst;
 	String complainTitle;
 	String complainDate;

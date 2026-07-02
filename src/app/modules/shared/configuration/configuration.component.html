@@ -880,7 +880,7 @@
                             <div class="ops-form-grid two-column-grid compact-grid">
                                 <div class="ops-form-field">
                                     <label for="accessPolicyRole">Role</label>
-                                    <select id="accessPolicyRole" formControlName="roleName" (ngModelChange)="resetAccessPolicyEditor()">
+                                    <select id="accessPolicyRole" formControlName="roleName" (change)="resetAccessPolicyEditor()">
                                         <option *ngFor="let roleName of accessPolicyRoles" [value]="roleName">{{ roleName }}</option>
                                     </select>
                                 </div>

@@ -1,6 +1,6 @@
 $(function () {
 
-    if ($.fn.dropdown) { $(".dropdown-toggle").dropdown(); }
+    if (typeof $.fn.dropdown === 'function') { try { $(".dropdown-toggle").dropdown(); } catch(e) {} }
     var table = $('#table').DataTable({
         orderCellsTop: true,
         dom: 'Bfrtip',
