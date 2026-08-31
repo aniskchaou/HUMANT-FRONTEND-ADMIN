@@ -1,4 +1,4 @@
-<div id="app" *ngIf="!hasRoute('login') && !hasRoute('home') && !hasRoute('register')" class="app-shell">
+<div id="app" *ngIf="!hasRoute('login') && !hasRoute('home') && !hasRoute('register') && !hasRoute('super-admin')" class="app-shell">
   <app-navigation></app-navigation>
   <div id="main" class="layout-navbar">
     <header class="app-topbar">
@@ -55,4 +55,8 @@
 
 <div *ngIf="hasRoute('register')">
   <app-register></app-register>
+</div>
+
+<div *ngIf="hasRoute('super-admin')">
+  <router-outlet></router-outlet>
 </div>

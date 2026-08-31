@@ -20,8 +20,14 @@ SELECT 'Consulting'
 WHERE NOT EXISTS (SELECT 1 FROM contract_type WHERE name = 'Consulting');
 
 -- Example data for Country
-INSERT INTO country (name) VALUES ('USA');
-INSERT INTO country (name) VALUES ('France');
+INSERT INTO country (name) SELECT 'United States' WHERE NOT EXISTS (SELECT 1 FROM country WHERE name = 'United States');
+INSERT INTO country (name) SELECT 'France'       WHERE NOT EXISTS (SELECT 1 FROM country WHERE name = 'France');
+INSERT INTO country (name) SELECT 'Germany'      WHERE NOT EXISTS (SELECT 1 FROM country WHERE name = 'Germany');
+INSERT INTO country (name) SELECT 'United Kingdom' WHERE NOT EXISTS (SELECT 1 FROM country WHERE name = 'United Kingdom');
+INSERT INTO country (name) SELECT 'Canada'       WHERE NOT EXISTS (SELECT 1 FROM country WHERE name = 'Canada');
+INSERT INTO country (name) SELECT 'Australia'    WHERE NOT EXISTS (SELECT 1 FROM country WHERE name = 'Australia');
+INSERT INTO country (name) SELECT 'Singapore'    WHERE NOT EXISTS (SELECT 1 FROM country WHERE name = 'Singapore');
+INSERT INTO country (name) SELECT 'Japan'        WHERE NOT EXISTS (SELECT 1 FROM country WHERE name = 'Japan');
 
 -- Example data for Departement
 INSERT INTO departement (name, manager)
@@ -70,16 +76,27 @@ SELECT 'Learning and Development Partner', (SELECT MIN(id) FROM departement WHER
 WHERE NOT EXISTS (SELECT 1 FROM designation WHERE name = 'Learning and Development Partner');
 
 -- Example data for Role
-INSERT INTO roles (name) VALUES ('Admin');
-INSERT INTO roles (name) VALUES ('User');
+INSERT INTO roles (name) SELECT 'Admin'     WHERE NOT EXISTS (SELECT 1 FROM roles WHERE name = 'Admin');
+INSERT INTO roles (name) SELECT 'User'      WHERE NOT EXISTS (SELECT 1 FROM roles WHERE name = 'User');
+INSERT INTO roles (name) SELECT 'Manager'   WHERE NOT EXISTS (SELECT 1 FROM roles WHERE name = 'Manager');
+INSERT INTO roles (name) SELECT 'HR'        WHERE NOT EXISTS (SELECT 1 FROM roles WHERE name = 'HR');
+INSERT INTO roles (name) SELECT 'Recruiter' WHERE NOT EXISTS (SELECT 1 FROM roles WHERE name = 'Recruiter');
 
 -- Example data for JobPosition
-INSERT INTO job_positions (title, description, location, open) VALUES ('Developer', 'Software Developer', 'Remote', true);
-INSERT INTO job_positions (title, description, location, open) VALUES ('Manager', 'Team Manager', 'Onsite', true);
+INSERT INTO job_positions (title, description, location, open) SELECT 'Software Engineer', 'Design, develop and maintain production software systems.', 'Remote', true WHERE NOT EXISTS (SELECT 1 FROM job_positions WHERE title = 'Software Engineer');
+INSERT INTO job_positions (title, description, location, open) SELECT 'HR Manager', 'Oversee HR operations, policies, recruitment and employee relations.', 'Hybrid', true WHERE NOT EXISTS (SELECT 1 FROM job_positions WHERE title = 'HR Manager');
+INSERT INTO job_positions (title, description, location, open) SELECT 'Finance Analyst', 'Budgeting, forecasting and financial reporting.', 'Onsite', true WHERE NOT EXISTS (SELECT 1 FROM job_positions WHERE title = 'Finance Analyst');
+INSERT INTO job_positions (title, description, location, open) SELECT 'Operations Lead', 'Coordinate cross-functional operations and process improvements.', 'Onsite', false WHERE NOT EXISTS (SELECT 1 FROM job_positions WHERE title = 'Operations Lead');
 
 -- Example data for Skill
-INSERT INTO skills (name, proficiency_level) VALUES ('Java', 'Expert');
-INSERT INTO skills (name, proficiency_level) VALUES ('SQL', 'Intermediate');
+INSERT INTO skills (name, proficiency_level) SELECT 'Java',             'Expert'       WHERE NOT EXISTS (SELECT 1 FROM skills WHERE name = 'Java');
+INSERT INTO skills (name, proficiency_level) SELECT 'SQL',              'Intermediate' WHERE NOT EXISTS (SELECT 1 FROM skills WHERE name = 'SQL');
+INSERT INTO skills (name, proficiency_level) SELECT 'Python',           'Advanced'     WHERE NOT EXISTS (SELECT 1 FROM skills WHERE name = 'Python');
+INSERT INTO skills (name, proficiency_level) SELECT 'JavaScript',       'Advanced'     WHERE NOT EXISTS (SELECT 1 FROM skills WHERE name = 'JavaScript');
+INSERT INTO skills (name, proficiency_level) SELECT 'Project Management','Intermediate' WHERE NOT EXISTS (SELECT 1 FROM skills WHERE name = 'Project Management');
+INSERT INTO skills (name, proficiency_level) SELECT 'HR Compliance',     'Expert'       WHERE NOT EXISTS (SELECT 1 FROM skills WHERE name = 'HR Compliance');
+INSERT INTO skills (name, proficiency_level) SELECT 'Excel',             'Advanced'     WHERE NOT EXISTS (SELECT 1 FROM skills WHERE name = 'Excel');
+INSERT INTO skills (name, proficiency_level) SELECT 'Payroll Management','Intermediate' WHERE NOT EXISTS (SELECT 1 FROM skills WHERE name = 'Payroll Management');
 
 -- Example data for Employee
 INSERT INTO employees (
@@ -507,7 +524,13 @@ WHERE NOT EXISTS (
 --INSERT INTO bonus (employee_id, amount, bonus_date, description) VALUES (1, '1000', '2025-07-01', 'Performance Bonus');
 
 -- Example data for Benefit
-INSERT INTO benefits (benefit_type, description, start_date, end_date, employee_id) VALUES ('Health', 'Health Insurance', '2025-01-01', '2025-12-31', 1);
+INSERT INTO benefits (benefit_type, description, start_date, end_date, employee_id)
+SELECT 'Health Insurance', 'Comprehensive medical, dental and vision cover via corporate group plan.', '2025-01-01', '2025-12-31',
+	(SELECT MIN(id) FROM employees WHERE full_name = 'Nadia Rahman')
+WHERE NOT EXISTS (
+	SELECT 1 FROM benefits WHERE benefit_type = 'Health Insurance'
+	  AND employee_id = (SELECT MIN(id) FROM employees WHERE full_name = 'Nadia Rahman')
+);
 
 -- Example data for Certification
 --INSERT INTO certification (name, employee_id, date_obtained) VALUES ('Java Cert', 1, '2025-06-01');
@@ -531,13 +554,30 @@ INSERT INTO benefits (benefit_type, description, start_date, end_date, employee_
 -- INSERT INTO contract (employee_id, subject, contract_value, contract_type_id, start_date, end_date, description, status) VALUES (1, 'Employment', '10000', 1, '2025-01-01', '2025-12-31', 'Annual contract', 'Active');
 
 -- Example data for Course
-INSERT INTO courses (title, description, start_date, end_date) VALUES ('Java Basics', 'Intro to Java', '2025-07-01', '2025-07-31');
+INSERT INTO courses (title, description, start_date, end_date)
+SELECT 'Leadership Foundations', 'Core leadership principles covering situational leadership, coaching and team motivation.', '2025-07-01', '2025-07-31'
+WHERE NOT EXISTS (SELECT 1 FROM courses WHERE title = 'Leadership Foundations');
+INSERT INTO courses (title, description, start_date, end_date)
+SELECT 'Payroll Compliance Masterclass', 'End-to-end payroll regulations, statutory deductions, year-end filings and compliance reporting.', '2025-08-01', '2025-08-31'
+WHERE NOT EXISTS (SELECT 1 FROM courses WHERE title = 'Payroll Compliance Masterclass');
 
 -- Example data for Deduction
-INSERT INTO deductions (type, amount, deduction_date, employee_id) VALUES ('Tax', 100, '2025-07-01', 1);
+INSERT INTO deductions (type, amount, deduction_date, employee_id)
+SELECT 'Income Tax Withholding', 620.00, '2025-07-31',
+	(SELECT MIN(id) FROM employees WHERE full_name = 'Nadia Rahman')
+WHERE NOT EXISTS (
+	SELECT 1 FROM deductions WHERE type = 'Income Tax Withholding' AND deduction_date = '2025-07-31'
+	  AND employee_id = (SELECT MIN(id) FROM employees WHERE full_name = 'Nadia Rahman')
+);
 
 -- Example data for Document
-INSERT INTO documents (document_name, document_type, file_path, employee_id, uploaded_at) VALUES ('Resume', 'PDF', '/files/resume.pdf', 1, '2025-07-01T10:00:00');
+INSERT INTO documents (document_name, document_type, file_path, employee_id, uploaded_at)
+SELECT 'Employment Contract 2025', 'PDF', '/files/documents/nadia-contract-2025.pdf',
+	(SELECT MIN(id) FROM employees WHERE full_name = 'Nadia Rahman'), '2025-02-15T09:00:00'
+WHERE NOT EXISTS (
+	SELECT 1 FROM documents WHERE document_name = 'Employment Contract 2025'
+	  AND employee_id = (SELECT MIN(id) FROM employees WHERE full_name = 'Nadia Rahman')
+);
 
 -- Example data for EducationLevel
 INSERT INTO education_level (name, years, certificate_level, fieldof_study, school)
@@ -571,29 +611,61 @@ WHERE NOT EXISTS (
 );
 
 -- Example data for Emergency
-INSERT INTO emergency (emergency_contact, emergency_phone) VALUES ('Mom', '555-9999');
+INSERT INTO emergency (emergency_contact, emergency_phone)
+SELECT 'Rachel Rahman (Spouse)', '+1-555-0199'
+WHERE NOT EXISTS (SELECT 1 FROM emergency WHERE emergency_phone = '+1-555-0199');
 
 -- Example data for Enrollment
-INSERT INTO enrollments (enrollment_date, status, employee_id) VALUES ('2025-07-01', 'ENROLLED', 1);
+INSERT INTO enrollments (enrollment_date, status, employee_id)
+SELECT '2025-07-15', 'ENROLLED',
+	(SELECT MIN(id) FROM employees WHERE full_name = 'Nadia Rahman')
+WHERE NOT EXISTS (
+	SELECT 1 FROM enrollments WHERE enrollment_date = '2025-07-15'
+	  AND employee_id = (SELECT MIN(id) FROM employees WHERE full_name = 'Nadia Rahman')
+);
 
 -- Example data for Event
-INSERT INTO event (event_title, event_date_time, event_note) VALUES ('Company Meeting', '2025-07-10 10:00', 'Quarterly update');
-INSERT INTO event (event_title, event_date_time, event_note) VALUES ('Leadership workshop', '2025-09-04 14:00', 'Cross-functional planning session for team leads and HR partners.');
+INSERT INTO event (event_title, event_date_time, event_note)
+SELECT 'All-Hands Q3 Company Meeting', '2025-07-10 10:00', 'Quarterly strategy review, financial update and departmental spotlights presented by leadership.'
+WHERE NOT EXISTS (SELECT 1 FROM event WHERE event_title = 'All-Hands Q3 Company Meeting');
+INSERT INTO event (event_title, event_date_time, event_note)
+SELECT 'Leadership Workshop – Coaching Skills', '2025-09-04 14:00', 'Cross-functional planning session for team leads and HR partners on building high-performance coaching habits.'
+WHERE NOT EXISTS (SELECT 1 FROM event WHERE event_title = 'Leadership Workshop – Coaching Skills');
 
 -- Example data for ExitInterview
-INSERT INTO exit_interviews (interview_date, interviewer_name, feedback, suggestions, employee_id) VALUES ('2025-07-01', 'Jane HR', 'Good', 'None', 1);
+INSERT INTO exit_interviews (interview_date, interviewer_name, feedback, suggestions, employee_id)
+SELECT '2025-07-15', 'Elena Rossi',
+	'Open about reasons for leaving; highlighted growth ceiling and better external opportunity. Spoke positively about team culture.',
+	'Consider structured career-pathing conversations at 12-month mark for high performers.',
+	(SELECT MIN(id) FROM employees WHERE full_name = 'Lucas Moreau')
+WHERE NOT EXISTS (
+	SELECT 1 FROM exit_interviews WHERE interview_date = '2025-07-15'
+	  AND employee_id = (SELECT MIN(id) FROM employees WHERE full_name = 'Lucas Moreau')
+);
 
 -- Example data for ExitRequest
-INSERT INTO exit_requests (request_date, last_working_day, status) VALUES ('2025-07-01', '2025-07-31', 'PENDING');
+INSERT INTO exit_requests (request_date, last_working_day, status)
+SELECT '2025-06-30', '2025-07-31', 'APPROVED'
+WHERE NOT EXISTS (SELECT 1 FROM exit_requests WHERE request_date = '2025-06-30' AND last_working_day = '2025-07-31');
 
 -- Example data for ExpenseClaim
-INSERT INTO expense_claims (claim_type, description, amount, claim_date, status) VALUES ('Travel', 'Taxi fare', 50, '2025-07-01', 'PENDING');
+INSERT INTO expense_claims (claim_type, description, amount, claim_date, status)
+SELECT 'Travel', 'Return flights and ground transport for HR Leaders Summit 2025 – Chicago.', 840.00, '2025-07-22', 'PENDING'
+WHERE NOT EXISTS (SELECT 1 FROM expense_claims WHERE description = 'Return flights and ground transport for HR Leaders Summit 2025 – Chicago.');
 
 -- Example data for Feedback
-INSERT INTO feedbacks (comment, given_by, given_at, type) VALUES ('Great job!', 'Manager', '2025-07-01T09:00:00', 'POSITIVE');
+INSERT INTO feedbacks (comment, given_by, given_at, type)
+SELECT 'Delivered the Q2 payroll cycle flawlessly under tight deadlines and proactively flagged a tax calculation discrepancy before finalisation.', 'Marcus Reid', '2025-07-05T09:00:00', 'POSITIVE'
+WHERE NOT EXISTS (SELECT 1 FROM feedbacks WHERE given_by = 'Marcus Reid' AND given_at = '2025-07-05T09:00:00');
 
 -- Example data for FinalSettlement
-INSERT INTO final_settlements (settlement_date, total_amount, remarks, employee_id) VALUES ('2025-07-01', 2000, 'Final payment', 1);
+INSERT INTO final_settlements (settlement_date, total_amount, remarks, employee_id)
+SELECT '2025-07-31', 8450.00, 'Includes accrued leave payout, notice-period salary and final expense reimbursement. Cleared by finance on 2025-08-01.',
+	(SELECT MIN(id) FROM employees WHERE full_name = 'Lucas Moreau')
+WHERE NOT EXISTS (
+	SELECT 1 FROM final_settlements WHERE settlement_date = '2025-07-31'
+	  AND employee_id = (SELECT MIN(id) FROM employees WHERE full_name = 'Lucas Moreau')
+);
 
 -- Example data for Holiday
 INSERT INTO holidays (name, date, is_recurring)
@@ -609,13 +681,22 @@ WHERE NOT EXISTS (
 );
 
 -- Example data for InsurancePlan
-INSERT INTO insurance_plans (provider_name, policy_number, coverage_details, start_date, end_date, employee_id) VALUES ('Axa', 'AXA123', 'Full', '2025-01-01', '2025-12-31', 1);
+INSERT INTO insurance_plans (provider_name, policy_number, coverage_details, start_date, end_date, employee_id)
+SELECT 'AXA Health', 'AXA-GRP-2025-001', 'Full medical, dental, optical and mental-health cover with worldwide emergency assistance.', '2025-01-01', '2025-12-31',
+	(SELECT MIN(id) FROM employees WHERE full_name = 'Nadia Rahman')
+WHERE NOT EXISTS (
+	SELECT 1 FROM insurance_plans WHERE policy_number = 'AXA-GRP-2025-001'
+);
 
 -- Example data for Interview
-INSERT INTO interviews (scheduled_at, location, interviewer_name, status) VALUES ('2025-07-01T14:00:00', 'HQ', 'Jane HR', 'SCHEDULED');
+INSERT INTO interviews (scheduled_at, location, interviewer_name, status)
+SELECT '2025-08-12T14:00:00', 'Video Call – Google Meet', 'Elena Rossi, HR Director', 'SCHEDULED'
+WHERE NOT EXISTS (SELECT 1 FROM interviews WHERE scheduled_at = '2025-08-12T14:00:00');
 
 -- Example data for JobApplication
-INSERT INTO job_application (position_id, name, email, phone, applied_on, status) VALUES (1, 'Dave', 'dave@example.com', '555-8888', '2025-07-01', 'PENDING');
+INSERT INTO job_application (position_id, name, email, phone, applied_on, status)
+SELECT (SELECT MIN(id) FROM job WHERE name = 'HR Operations Manager'), 'David Osei', 'david.osei@gmail.com', '+44-7700-900145', '2025-07-28', 'UNDER_REVIEW'
+WHERE NOT EXISTS (SELECT 1 FROM job_application WHERE email = 'david.osei@gmail.com');
 
 -- Example data for Job
 INSERT INTO job (name, description)
@@ -651,7 +732,12 @@ SELECT 'HR Business Partner', 'Partner with department leads on headcount planni
 WHERE NOT EXISTS (SELECT 1 FROM job WHERE name = 'HR Business Partner');
 
 -- Example data for LearningMaterial
-INSERT INTO learning_materials (title, description, material_type, file_path, uploaded_at, course_id) VALUES ('Intro Video', 'Welcome', 'Video', '/files/intro.mp4', '2025-07-01T08:00:00', 1);
+INSERT INTO learning_materials (title, description, material_type, file_path, uploaded_at, course_id)
+SELECT 'Module 1: Understanding Leadership Styles',
+	'Video lecture covering situational, transformational and servant leadership models with real-world case studies.',
+	'Video', '/files/courses/leadership-foundations/module-1.mp4', '2025-06-20T08:00:00',
+	(SELECT MIN(id) FROM courses WHERE title = 'Leadership Foundations')
+WHERE NOT EXISTS (SELECT 1 FROM learning_materials WHERE title = 'Module 1: Understanding Leadership Styles');
 
 -- Example data for Leave
 INSERT INTO type_leave (name, days)
@@ -701,10 +787,14 @@ WHERE NOT EXISTS (
 );
 
 -- Example data for LeaveRequest
-INSERT INTO leave_requests (start_date, end_date, status) VALUES ('2025-07-10', '2025-07-15', 'PENDING');
+INSERT INTO leave_requests (start_date, end_date, status)
+SELECT '2025-08-18', '2025-08-22', 'APPROVED'
+WHERE NOT EXISTS (SELECT 1 FROM leave_requests WHERE start_date = '2025-08-18' AND end_date = '2025-08-22');
 
 -- Example data for LegalCompliance
-INSERT INTO legal_compliances (compliance_type, description, effective_date, expiry_date, is_compliant, remarks) VALUES ('GDPR', 'Data protection', '2025-01-01', '2025-12-31', true, 'Compliant');
+INSERT INTO legal_compliances (compliance_type, description, effective_date, expiry_date, is_compliant, remarks)
+SELECT 'GDPR', 'General Data Protection Regulation – EU employee and candidate data handling, consent management and breach notification procedures.', '2025-01-01', '2025-12-31', true, 'Full compliance confirmed by external audit dated 2025-03-15.'
+WHERE NOT EXISTS (SELECT 1 FROM legal_compliances WHERE compliance_type = 'GDPR' AND effective_date = '2025-01-01');
 
 -- Example data for Loan
 INSERT INTO loan (loan_name, receive_type, employee_id, interest_percentage, loan_amount, apply_date, remarks)
@@ -728,13 +818,26 @@ WHERE NOT EXISTS (
 -- INSERT INTO location (name, address, city_id, state, zipcode, country_id) VALUES ('Main Office', '1 Main St', 1, 'NY', '10001', 1);
 
 -- Example data for Manager
-INSERT INTO managers (first_name, last_name, email, phone) VALUES ('Sarah', 'Connor', 'sarah@example.com', '555-7777');
+INSERT INTO managers (first_name, last_name, email, phone)
+SELECT 'Sarah', 'Mitchell', 'sarah.mitchell@humant.io', '+1-555-0101'
+WHERE NOT EXISTS (SELECT 1 FROM managers WHERE email = 'sarah.mitchell@humant.io');
 
 -- Example data for Meeting
-INSERT INTO meeting (title, date_time, room, note) VALUES ('Sprint Planning', '2025-07-15 09:00', 'Room 1', 'Plan next sprint');
+INSERT INTO meeting (title, date_time, room, note)
+SELECT 'Q3 Workforce Planning', '2025-08-05 10:00', 'Conference Room A', 'Headcount review, attrition forecast and open role prioritisation for Q3.'
+WHERE NOT EXISTS (SELECT 1 FROM meeting WHERE title = 'Q3 Workforce Planning');
 
 -- Example data for Mentorship
-INSERT INTO mentorships (mentor_id, mentee_id, start_date, end_date, status) VALUES (1, 2, '2025-07-01', '2025-12-31', 'Active');
+INSERT INTO mentorships (mentor_id, mentee_id, start_date, end_date, status)
+SELECT
+	(SELECT MIN(id) FROM employees WHERE full_name = 'Nadia Rahman'),
+	(SELECT MIN(id) FROM employees WHERE full_name = 'Daniel Kim'),
+	'2025-07-01', '2025-12-31', 'Active'
+WHERE NOT EXISTS (
+	SELECT 1 FROM mentorships
+	WHERE mentor_id = (SELECT MIN(id) FROM employees WHERE full_name = 'Nadia Rahman')
+	  AND mentee_id = (SELECT MIN(id) FROM employees WHERE full_name = 'Daniel Kim')
+);
 
 -- Example data for Notice
 INSERT INTO notice (notice_title, start_date, end_date, notice_note)
@@ -774,10 +877,29 @@ WHERE NOT EXISTS (SELECT 1 FROM objectives WHERE title = 'Offboarding transition
 --INSERT INTO offer_letters (issue_date, position_offered, salary_offered, terms_and_conditions, file_path, candidate_id) VALUES ('2025-07-01', 'Dev', '5000', 'Standard', '/files/offer.pdf', 1);
 
 -- Example data for OnboardingChecklist
-INSERT INTO onboarding_checklists (task_name, completed, employee_id) VALUES ('Setup Email', true, 1);
+INSERT INTO onboarding_checklists (task_name, completed, employee_id)
+SELECT 'Set up corporate email and communication accounts', true,
+	(SELECT MIN(id) FROM employees WHERE full_name = 'Nadia Rahman')
+WHERE NOT EXISTS (
+	SELECT 1 FROM onboarding_checklists WHERE task_name = 'Set up corporate email and communication accounts'
+	  AND employee_id = (SELECT MIN(id) FROM employees WHERE full_name = 'Nadia Rahman')
+);
+INSERT INTO onboarding_checklists (task_name, completed, employee_id)
+SELECT 'Complete IT security and data privacy training', false,
+	(SELECT MIN(id) FROM employees WHERE full_name = 'Nadia Rahman')
+WHERE NOT EXISTS (
+	SELECT 1 FROM onboarding_checklists WHERE task_name = 'Complete IT security and data privacy training'
+	  AND employee_id = (SELECT MIN(id) FROM employees WHERE full_name = 'Nadia Rahman')
+);
 
 -- Example data for Payroll
-INSERT INTO payrolls (payroll_date, basic_salary, bonus, deductions, net_salary, employee_id) VALUES ('2025-07-31', 5000, 500, 100, 5400, 1);
+INSERT INTO payrolls (payroll_date, basic_salary, bonus, deductions, net_salary, employee_id)
+SELECT '2025-07-31', 5000, 500, 100, 5400,
+	(SELECT MIN(id) FROM employees WHERE full_name = 'Nadia Rahman')
+WHERE NOT EXISTS (
+	SELECT 1 FROM payrolls WHERE payroll_date = '2025-07-31'
+	  AND employee_id = (SELECT MIN(id) FROM employees WHERE full_name = 'Nadia Rahman')
+);
 
 -- Example data for PaySlip
 INSERT INTO payslips (issue_date, basic_salary, bonus, deductions, net_salary, employee_id, remarks)
@@ -829,22 +951,49 @@ WHERE NOT EXISTS (
 	);
 
 -- Example data for PerformanceReview
-INSERT INTO performance_reviews (reviewer_name, review_date, feedback, rating, employee_id) VALUES ('Manager', '2025-07-01', 'Excellent', 5, 1);
+INSERT INTO performance_reviews (reviewer_name, review_date, feedback, rating, employee_id)
+SELECT 'Elena Rossi', '2025-07-01', 'Consistently delivers quality work, proactively identifies process gaps and mentors junior team members effectively.', 5,
+	(SELECT MIN(id) FROM employees WHERE full_name = 'Nadia Rahman')
+WHERE NOT EXISTS (
+	SELECT 1 FROM performance_reviews
+	WHERE employee_id = (SELECT MIN(id) FROM employees WHERE full_name = 'Nadia Rahman') AND review_date = '2025-07-01'
+);
 
 -- Example data for Policy
-INSERT INTO policies (title, description, effective_date, expiry_date, document_path) VALUES ('Leave Policy', 'Annual leave policy', '2025-01-01', '2025-12-31', '/files/policy.pdf');
+INSERT INTO policies (title, description, effective_date, expiry_date, document_path)
+SELECT 'Annual Leave Policy', 'Governs employee entitlement to paid annual leave, accrual rules, carry-over limits and approval workflow.', '2025-01-01', '2025-12-31', '/files/policies/annual-leave-policy.pdf'
+WHERE NOT EXISTS (SELECT 1 FROM policies WHERE title = 'Annual Leave Policy');
+INSERT INTO policies (title, description, effective_date, expiry_date, document_path)
+SELECT 'Remote Work Policy', 'Defines eligibility, equipment allowances, security requirements and productivity expectations for remote employees.', '2025-01-01', '2025-12-31', '/files/policies/remote-work-policy.pdf'
+WHERE NOT EXISTS (SELECT 1 FROM policies WHERE title = 'Remote Work Policy');
 
 -- Example data for Position
-INSERT INTO position (name) VALUES ('Developer');
+INSERT INTO position (name) SELECT 'Software Engineer' WHERE NOT EXISTS (SELECT 1 FROM position WHERE name = 'Software Engineer');
+INSERT INTO position (name) SELECT 'HR Specialist'    WHERE NOT EXISTS (SELECT 1 FROM position WHERE name = 'HR Specialist');
+INSERT INTO position (name) SELECT 'Finance Analyst'  WHERE NOT EXISTS (SELECT 1 FROM position WHERE name = 'Finance Analyst');
 
 -- Example data for Project
-INSERT INTO projects (name, description, start_date, end_date, project_manager_id) VALUES ('Apollo', 'Moon mission', '2025-07-01', '2025-12-31', 1);
+INSERT INTO projects (name, description, start_date, end_date, project_manager_id)
+SELECT 'Workforce Digitalisation 2025', 'Migrate manual HR workflows to the platform: onboarding, leave, payroll approval and performance cycles.', '2025-07-01', '2025-12-31',
+	(SELECT MIN(id) FROM employees WHERE full_name = 'Nadia Rahman')
+WHERE NOT EXISTS (SELECT 1 FROM projects WHERE name = 'Workforce Digitalisation 2025');
+INSERT INTO projects (name, description, start_date, end_date, project_manager_id)
+SELECT 'Talent Retention Initiative', 'Design and roll out a structured career-pathing programme targeting the top 20% performers.', '2025-08-01', '2025-11-30',
+	(SELECT MIN(id) FROM employees WHERE full_name = 'Nadia Rahman')
+WHERE NOT EXISTS (SELECT 1 FROM projects WHERE name = 'Talent Retention Initiative');
 
 -- Example data for Referral
 --INSERT INTO referrals (candidate_name, candidate_email, candidate_phone, referral_date, status) VALUES ('Eve', 'eve@example.com', '555-2222', '2025-07-01', 'PENDING');
 
 -- Example data for Reimbursement
-INSERT INTO reimbursements (description, amount, reimbursement_date, employee_id) VALUES ('Travel expenses', 100, '2025-07-01', 1);
+INSERT INTO reimbursements (description, amount, reimbursement_date, employee_id)
+SELECT 'Business travel – HR conference attendance, flights and hotel', 485.00, '2025-07-15',
+	(SELECT MIN(id) FROM employees WHERE full_name = 'Nadia Rahman')
+WHERE NOT EXISTS (
+	SELECT 1 FROM reimbursements
+	WHERE description = 'Business travel – HR conference attendance, flights and hotel'
+	  AND employee_id = (SELECT MIN(id) FROM employees WHERE full_name = 'Nadia Rahman')
+);
 
 -- Example data for Resignation
 INSERT INTO resignation (employee_id, departement_id, resignation_date, resignation_reason)
@@ -1053,25 +1202,61 @@ SELECT 'Standard', 3000, 500, 200, 100, 50, 100
 WHERE NOT EXISTS (SELECT 1 FROM salary_structures WHERE structure_name = 'Standard');
 
 -- Example data for Schedule
-INSERT INTO schedule (working_hours) VALUES ('9-5');
+INSERT INTO schedule (working_hours) SELECT '09:00 – 17:00' WHERE NOT EXISTS (SELECT 1 FROM schedule WHERE working_hours = '09:00 – 17:00');
+INSERT INTO schedule (working_hours) SELECT '08:00 – 16:00' WHERE NOT EXISTS (SELECT 1 FROM schedule WHERE working_hours = '08:00 – 16:00');
 
 -- Example data for Shift
 --INSERT INTO shifts (name, start_time, end_time, work_schedule_id) VALUES ('Morning', '08:00:00', '16:00:00', 1);
 
 -- Example data for Skill-Employee join table
-INSERT INTO employee_skills (employee_id, skill_id) VALUES (1, 1);
+INSERT INTO employee_skills (employee_id, skill_id)
+SELECT
+	(SELECT MIN(id) FROM employees WHERE full_name = 'Nadia Rahman'),
+	(SELECT MIN(id) FROM skills WHERE name = 'HR Compliance')
+WHERE EXISTS (SELECT 1 FROM employees WHERE full_name = 'Nadia Rahman')
+  AND EXISTS (SELECT 1 FROM skills WHERE name = 'HR Compliance')
+  AND NOT EXISTS (SELECT 1 FROM employee_skills WHERE employee_id = (SELECT MIN(id) FROM employees WHERE full_name = 'Nadia Rahman') AND skill_id = (SELECT MIN(id) FROM skills WHERE name = 'HR Compliance'));
+INSERT INTO employee_skills (employee_id, skill_id)
+SELECT
+	(SELECT MIN(id) FROM employees WHERE full_name = 'Daniel Kim'),
+	(SELECT MIN(id) FROM skills WHERE name = 'Python')
+WHERE EXISTS (SELECT 1 FROM employees WHERE full_name = 'Daniel Kim')
+  AND EXISTS (SELECT 1 FROM skills WHERE name = 'Python')
+  AND NOT EXISTS (SELECT 1 FROM employee_skills WHERE employee_id = (SELECT MIN(id) FROM employees WHERE full_name = 'Daniel Kim') AND skill_id = (SELECT MIN(id) FROM skills WHERE name = 'Python'));
 
 -- Example data for Structure
 --INSERT INTO structure (structure_name, type_employee, country, scheduled_pay) VALUES ('Corp', 'Full Time', 'USA', 'Monthly');
 
 -- Example data for Task
-INSERT INTO tasks (title, description, due_date, status, assigned_to_id, assigned_by_id) VALUES ('Finish Report', 'Complete the Q2 report', '2025-07-20', 'PENDING', 1, 2);
+INSERT INTO tasks (title, description, due_date, status, assigned_to_id, assigned_by_id)
+SELECT
+	'Prepare Q3 Headcount Report',
+	'Compile headcount data, attrition breakdown and open-role aging from the HR platform for the Q3 leadership review.',
+	'2025-08-15', 'PENDING',
+	(SELECT MIN(id) FROM employees WHERE full_name = 'Nadia Rahman'),
+	(SELECT MIN(id) FROM employees WHERE full_name = 'Daniel Kim')
+WHERE NOT EXISTS (SELECT 1 FROM tasks WHERE title = 'Prepare Q3 Headcount Report');
 
 -- Example data for Tax
-INSERT INTO taxes (tax_type, amount, tax_date, employee_id) VALUES ('Income Tax', 200, '2025-07-01', 1);
+INSERT INTO taxes (tax_type, amount, tax_date, employee_id)
+SELECT 'Income Tax', 620.00, '2025-07-31',
+	(SELECT MIN(id) FROM employees WHERE full_name = 'Nadia Rahman')
+WHERE NOT EXISTS (
+	SELECT 1 FROM taxes WHERE tax_type = 'Income Tax' AND tax_date = '2025-07-31'
+	  AND employee_id = (SELECT MIN(id) FROM employees WHERE full_name = 'Nadia Rahman')
+);
 
 -- Example data for Team
-INSERT INTO teams (name, description, manager_id) VALUES ('Dev Team', 'Development', 1);
+INSERT INTO teams (name, description, manager_id)
+SELECT 'People & Culture',
+	'Drives recruitment, onboarding, engagement and HR policy across the organisation.',
+	(SELECT MIN(id) FROM employees WHERE full_name = 'Nadia Rahman')
+WHERE NOT EXISTS (SELECT 1 FROM teams WHERE name = 'People & Culture');
+INSERT INTO teams (name, description, manager_id)
+SELECT 'Engineering',
+	'Builds and maintains platform infrastructure, internal tooling and customer-facing products.',
+	(SELECT MIN(id) FROM employees WHERE full_name = 'Daniel Kim')
+WHERE NOT EXISTS (SELECT 1 FROM teams WHERE name = 'Engineering');
 
 -- Example data for Termination
 INSERT INTO termination (type_termination, reason, employee_id, notice_date, termination_date, description)
@@ -1096,7 +1281,12 @@ WHERE NOT EXISTS (
 --INSERT INTO timesheets (date, start_time, end_time, task_description, employee_id) VALUES ('2025-07-01', '08:00:00', '17:00:00', 'Worked on project', 1);
 
 -- Example data for Trainer
-INSERT INTO trainer (first_name, last_name, contact_number, email, company, expertise, education_level_id, address) VALUES ('John', 'Smith', '555-3333', 'john.smith@example.com', 'Acme', 'Java', 1, '123 Main St');
+INSERT INTO trainer (first_name, last_name, contact_number, email, company, expertise, education_level_id, address)
+SELECT 'Marcus', 'Reid', '+1-415-555-0200', 'marcus.reid@learncraft.io', 'LearnCraft Consulting',
+	'Leadership Development, Change Management and Executive Coaching',
+	(SELECT MIN(id) FROM education_level LIMIT 1),
+	'288 Harbour Drive, San Francisco, CA 94105'
+WHERE NOT EXISTS (SELECT 1 FROM trainer WHERE email = 'marcus.reid@learncraft.io');
 
 -- Example data for Training
 INSERT INTO type_training (name)
@@ -1176,7 +1366,11 @@ WHERE NOT EXISTS (SELECT 1 FROM type_award WHERE name = 'Service Milestone');
 -- Seeded earlier with duplicate-safe inserts before leave records.
 
 -- Example data for TypeTermination
-INSERT INTO type_termination (name) VALUES ('Resignation');
+INSERT INTO type_termination (name) SELECT 'Resignation'      WHERE NOT EXISTS (SELECT 1 FROM type_termination WHERE name = 'Resignation');
+INSERT INTO type_termination (name) SELECT 'Redundancy'       WHERE NOT EXISTS (SELECT 1 FROM type_termination WHERE name = 'Redundancy');
+INSERT INTO type_termination (name) SELECT 'Retirement'       WHERE NOT EXISTS (SELECT 1 FROM type_termination WHERE name = 'Retirement');
+INSERT INTO type_termination (name) SELECT 'Contract Expiry'  WHERE NOT EXISTS (SELECT 1 FROM type_termination WHERE name = 'Contract Expiry');
+INSERT INTO type_termination (name) SELECT 'Dismissal'        WHERE NOT EXISTS (SELECT 1 FROM type_termination WHERE name = 'Dismissal');
 
 -- Example data for TypeTraining
 -- Seeded earlier to satisfy training foreign keys.
@@ -1185,7 +1379,10 @@ INSERT INTO type_termination (name) VALUES ('Resignation');
 --INSERT INTO user (username, password) VALUES ('admin', 'admin123');
 
 -- Example data for Visa
-INSERT INTO visas (visa_type, visa_number, issue_date, expiry_date, employee_id) VALUES ('Work', 'VISA123', '2025-07-01', '2026-07-01', 1);
+INSERT INTO visas (visa_type, visa_number, issue_date, expiry_date, employee_id)
+SELECT 'Work Permit', 'WP-2025-NR001', '2025-02-01', '2027-01-31',
+	(SELECT MIN(id) FROM employees WHERE full_name = 'Nadia Rahman')
+WHERE NOT EXISTS (SELECT 1 FROM visas WHERE visa_number = 'WP-2025-NR001');
 
 -- Example data for Warning
 INSERT INTO warning (employee_id, warning_title, warning_date, description)
@@ -1206,10 +1403,298 @@ WHERE NOT EXISTS (
 --INSERT INTO work_entry (from_date, to_date, period, hours) VALUES ('2025-07-01', '2025-07-31', 'July', '160');
 
 -- Example data for WorkingLocation
-INSERT INTO working_location (work_address, work_location, homeworkingdistance) VALUES ('HQ', 'Office', '5km');
+INSERT INTO working_location (work_address, work_location, homeworkingdistance)
+SELECT '350 Fifth Avenue, New York, NY 10118', 'Head Office', '0 km'
+WHERE NOT EXISTS (SELECT 1 FROM working_location WHERE work_address = '350 Fifth Avenue, New York, NY 10118');
+INSERT INTO working_location (work_address, work_location, homeworkingdistance)
+SELECT 'Remote – Home Office', 'Remote', '25 km'
+WHERE NOT EXISTS (SELECT 1 FROM working_location WHERE work_address = 'Remote – Home Office');
 
 -- Example data for WorkPermit
-INSERT INTO work_permit (visa_no, work_permit_no, visa_expire_date, work_permit_expiration_date, work_permit) VALUES ('VISA123', 'WP123', '2026-07-01', '2027-07-01', 'Active');
+INSERT INTO work_permit (visa_no, work_permit_no, visa_expire_date, work_permit_expiration_date, work_permit)
+SELECT 'WP-2025-NR001', 'WPNO-2025-001', '2027-01-31', '2027-01-31', 'Active'
+WHERE NOT EXISTS (SELECT 1 FROM work_permit WHERE visa_no = 'WP-2025-NR001');
 
 -- Example data for WorkSchedule
 --INSERT INTO work_schedules (name) VALUES ('Regular 9-5');
+
+-- ── Candidates ───────────────────────────────────────────────────────────
+INSERT INTO candidates (first_name, last_name, email, phone, status, application_date, resume_path, job_position_id)
+SELECT 'David','Osei','david.osei@gmail.com','+44-7700-900145','INTERVIEW','2025-07-28','/files/resumes/david-osei-cv.pdf',(SELECT MIN(id) FROM job_positions WHERE title='HR Manager')
+WHERE NOT EXISTS (SELECT 1 FROM candidates WHERE email='david.osei@gmail.com');
+INSERT INTO candidates (first_name, last_name, email, phone, status, application_date, resume_path, job_position_id)
+SELECT 'Sofia','Müller','sofia.muller@outlook.de','+49-172-5500001','SCREENING','2025-08-01','/files/resumes/sofia-muller-cv.pdf',(SELECT MIN(id) FROM job_positions WHERE title='HR Manager')
+WHERE NOT EXISTS (SELECT 1 FROM candidates WHERE email='sofia.muller@outlook.de');
+INSERT INTO candidates (first_name, last_name, email, phone, status, application_date, resume_path, job_position_id)
+SELECT 'James','Whitfield','james.whitfield@protonmail.com','+1-617-555-0182','OFFER','2025-07-15','/files/resumes/james-whitfield-cv.pdf',(SELECT MIN(id) FROM job_positions WHERE title='Finance Analyst')
+WHERE NOT EXISTS (SELECT 1 FROM candidates WHERE email='james.whitfield@protonmail.com');
+INSERT INTO candidates (first_name, last_name, email, phone, status, application_date, resume_path, job_position_id)
+SELECT 'Amara','Diallo','amara.diallo@gmail.com','+33-6-12345678','APPLIED','2025-08-05','/files/resumes/amara-diallo-cv.pdf',(SELECT MIN(id) FROM job_positions WHERE title='Finance Analyst')
+WHERE NOT EXISTS (SELECT 1 FROM candidates WHERE email='amara.diallo@gmail.com');
+INSERT INTO candidates (first_name, last_name, email, phone, status, application_date, resume_path, job_position_id)
+SELECT 'Kenji','Tanaka','kenji.tanaka@corp.jp','+81-90-1234-5678','REJECTED','2025-07-10','/files/resumes/kenji-tanaka-cv.pdf',(SELECT MIN(id) FROM job_positions WHERE title='Software Engineer')
+WHERE NOT EXISTS (SELECT 1 FROM candidates WHERE email='kenji.tanaka@corp.jp');
+INSERT INTO candidates (first_name, last_name, email, phone, status, application_date, resume_path, job_position_id)
+SELECT 'Priya','Sharma','priya.sharma@techfirm.in','+91-98765-43210','INTERVIEW','2025-08-03','/files/resumes/priya-sharma-cv.pdf',(SELECT MIN(id) FROM job_positions WHERE title='HR Manager')
+WHERE NOT EXISTS (SELECT 1 FROM candidates WHERE email='priya.sharma@techfirm.in');
+INSERT INTO candidates (first_name, last_name, email, phone, status, application_date, resume_path, job_position_id)
+SELECT 'Lucas','Bernard','lucas.bernard@yahoo.fr','+33-7-98765432','SCREENING','2025-08-07','/files/resumes/lucas-bernard-cv.pdf',(SELECT MIN(id) FROM job_positions WHERE title='Finance Analyst')
+WHERE NOT EXISTS (SELECT 1 FROM candidates WHERE email='lucas.bernard@yahoo.fr');
+INSERT INTO candidates (first_name, last_name, email, phone, status, application_date, resume_path, job_position_id)
+SELECT 'Mei','Chen','mei.chen@linkedin-apply.com','+65-9123-4567','OFFER','2025-07-20','/files/resumes/mei-chen-cv.pdf',(SELECT MIN(id) FROM job_positions WHERE title='Operations Lead')
+WHERE NOT EXISTS (SELECT 1 FROM candidates WHERE email='mei.chen@linkedin-apply.com');
+INSERT INTO candidates (first_name, last_name, email, phone, status, application_date, resume_path, job_position_id)
+SELECT 'Elias','Khoury','elias.khoury@gmail.com','+961-70-123456','APPLIED','2025-08-09','/files/resumes/elias-khoury-cv.pdf',(SELECT MIN(id) FROM job_positions WHERE title='Finance Analyst')
+WHERE NOT EXISTS (SELECT 1 FROM candidates WHERE email='elias.khoury@gmail.com');
+INSERT INTO candidates (first_name, last_name, email, phone, status, application_date, resume_path, job_position_id)
+SELECT 'Fatima','Al-Rashid','fatima.alrashid@email.ae','+971-50-9876543','HIRED','2025-06-25','/files/resumes/fatima-alrashid-cv.pdf',(SELECT MIN(id) FROM job_positions WHERE title='HR Manager')
+WHERE NOT EXISTS (SELECT 1 FROM candidates WHERE email='fatima.alrashid@email.ae');
+INSERT INTO candidates (first_name, last_name, email, phone, status, application_date, resume_path, job_position_id)
+SELECT 'Oliver','Hansen','oliver.hansen@maersk-applicant.dk','+45-20123456','INTERVIEW','2025-07-30','/files/resumes/oliver-hansen-cv.pdf',(SELECT MIN(id) FROM job_positions WHERE title='HR Manager')
+WHERE NOT EXISTS (SELECT 1 FROM candidates WHERE email='oliver.hansen@maersk-applicant.dk');
+INSERT INTO candidates (first_name, last_name, email, phone, status, application_date, resume_path, job_position_id)
+SELECT 'Yasmin','Torres','yasmin.torres@hotmail.mx','+52-55-5678-9012','SCREENING','2025-08-04','/files/resumes/yasmin-torres-cv.pdf',(SELECT MIN(id) FROM job_positions WHERE title='Finance Analyst')
+WHERE NOT EXISTS (SELECT 1 FROM candidates WHERE email='yasmin.torres@hotmail.mx');
+
+-- ── Offer Letters ─────────────────────────────────────────────────────────
+INSERT INTO offer_letters (issue_date, position_offered, salary_offered, terms_and_conditions, file_path, candidate_id)
+SELECT '2025-07-25','Senior Payroll Analyst','72,000 USD per annum + 10% performance bonus','Standard employment terms. 3-month probation. 25 days annual leave. Health and dental insurance included from day one.','/files/offer-letters/james-whitfield-offer.pdf',(SELECT MIN(id) FROM candidates WHERE email='james.whitfield@protonmail.com')
+WHERE NOT EXISTS (SELECT 1 FROM offer_letters WHERE candidate_id=(SELECT MIN(id) FROM candidates WHERE email='james.whitfield@protonmail.com'));
+INSERT INTO offer_letters (issue_date, position_offered, salary_offered, terms_and_conditions, file_path, candidate_id)
+SELECT '2025-07-28','Operations Lead','68,500 SGD per annum + relocation allowance of 5,000 SGD','Full-time hybrid role. 30 days annual leave. Comprehensive medical cover. 6-month notice period after probation.','/files/offer-letters/mei-chen-offer.pdf',(SELECT MIN(id) FROM candidates WHERE email='mei.chen@linkedin-apply.com')
+WHERE NOT EXISTS (SELECT 1 FROM offer_letters WHERE candidate_id=(SELECT MIN(id) FROM candidates WHERE email='mei.chen@linkedin-apply.com'));
+INSERT INTO offer_letters (issue_date, position_offered, salary_offered, terms_and_conditions, file_path, candidate_id)
+SELECT '2025-07-05','HR Manager','58,000 AED per annum + housing allowance of 12,000 AED','Standard Gulf employment contract. 2-year initial term with automatic renewal. 30 calendar days annual leave.','/files/offer-letters/fatima-alrashid-offer.pdf',(SELECT MIN(id) FROM candidates WHERE email='fatima.alrashid@email.ae')
+WHERE NOT EXISTS (SELECT 1 FROM offer_letters WHERE candidate_id=(SELECT MIN(id) FROM candidates WHERE email='fatima.alrashid@email.ae'));
+
+-- ── Pipeline stages ───────────────────────────────────────────────────────
+INSERT INTO pipelines (stage, notes, candidate_id) SELECT 'CV Review','Strong background in payroll operations. 7 years at KPMG managing 400-person payroll.',(SELECT MIN(id) FROM candidates WHERE email='david.osei@gmail.com') WHERE NOT EXISTS (SELECT 1 FROM pipelines WHERE candidate_id=(SELECT MIN(id) FROM candidates WHERE email='david.osei@gmail.com') AND stage='CV Review');
+INSERT INTO pipelines (stage, notes, candidate_id) SELECT 'Phone Screen','First call completed. Communication skills excellent. Requested 62k GBP.',(SELECT MIN(id) FROM candidates WHERE email='david.osei@gmail.com') WHERE NOT EXISTS (SELECT 1 FROM pipelines WHERE candidate_id=(SELECT MIN(id) FROM candidates WHERE email='david.osei@gmail.com') AND stage='Phone Screen');
+INSERT INTO pipelines (stage, notes, candidate_id) SELECT 'Technical Interview','Panel interview with Elena Rossi and Nadia Rahman. Scored 4.2/5.',(SELECT MIN(id) FROM candidates WHERE email='david.osei@gmail.com') WHERE NOT EXISTS (SELECT 1 FROM pipelines WHERE candidate_id=(SELECT MIN(id) FROM candidates WHERE email='david.osei@gmail.com') AND stage='Technical Interview');
+INSERT INTO pipelines (stage, notes, candidate_id) SELECT 'CV Review','Certified payroll professional (CPP). 5 years in shared services.',(SELECT MIN(id) FROM candidates WHERE email='james.whitfield@protonmail.com') WHERE NOT EXISTS (SELECT 1 FROM pipelines WHERE candidate_id=(SELECT MIN(id) FROM candidates WHERE email='james.whitfield@protonmail.com') AND stage='CV Review');
+INSERT INTO pipelines (stage, notes, candidate_id) SELECT 'Offer Extended','Verbal acceptance confirmed. Offer letter sent 2025-07-25. Start date: 2025-09-01.',(SELECT MIN(id) FROM candidates WHERE email='james.whitfield@protonmail.com') WHERE NOT EXISTS (SELECT 1 FROM pipelines WHERE candidate_id=(SELECT MIN(id) FROM candidates WHERE email='james.whitfield@protonmail.com') AND stage='Offer Extended');
+INSERT INTO pipelines (stage, notes, candidate_id) SELECT 'CV Review','MA in Talent Management. 80+ placements in 2024.',(SELECT MIN(id) FROM candidates WHERE email='sofia.muller@outlook.de') WHERE NOT EXISTS (SELECT 1 FROM pipelines WHERE candidate_id=(SELECT MIN(id) FROM candidates WHERE email='sofia.muller@outlook.de') AND stage='CV Review');
+INSERT INTO pipelines (stage, notes, candidate_id) SELECT 'CV Review','MSc Compensation Analytics. Authored pay-equity framework for 1,200-person workforce.',(SELECT MIN(id) FROM candidates WHERE email='amara.diallo@gmail.com') WHERE NOT EXISTS (SELECT 1 FROM pipelines WHERE candidate_id=(SELECT MIN(id) FROM candidates WHERE email='amara.diallo@gmail.com') AND stage='CV Review');
+INSERT INTO pipelines (stage, notes, candidate_id) SELECT 'Phone Screen','Fluent English and Hindi. Available immediately. Needs visa sponsorship confirmed.',(SELECT MIN(id) FROM candidates WHERE email='priya.sharma@techfirm.in') WHERE NOT EXISTS (SELECT 1 FROM pipelines WHERE candidate_id=(SELECT MIN(id) FROM candidates WHERE email='priya.sharma@techfirm.in') AND stage='Phone Screen');
+INSERT INTO pipelines (stage, notes, candidate_id) SELECT 'Technical Interview','Demonstrated learning needs analysis methodology. Invited to second round.',(SELECT MIN(id) FROM candidates WHERE email='priya.sharma@techfirm.in') WHERE NOT EXISTS (SELECT 1 FROM pipelines WHERE candidate_id=(SELECT MIN(id) FROM candidates WHERE email='priya.sharma@techfirm.in') AND stage='Technical Interview');
+INSERT INTO pipelines (stage, notes, candidate_id) SELECT 'CV Review','People analytics lead at 3,000-person fintech. Built workforce dashboards in Power BI and Python.',(SELECT MIN(id) FROM candidates WHERE email='kenji.tanaka@corp.jp') WHERE NOT EXISTS (SELECT 1 FROM pipelines WHERE candidate_id=(SELECT MIN(id) FROM candidates WHERE email='kenji.tanaka@corp.jp') AND stage='CV Review');
+INSERT INTO pipelines (stage, notes, candidate_id) SELECT 'Offer Extended','Offer letter issued 2025-07-28 at 68,500 SGD. Verbal acceptance received same day.',(SELECT MIN(id) FROM candidates WHERE email='mei.chen@linkedin-apply.com') WHERE NOT EXISTS (SELECT 1 FROM pipelines WHERE candidate_id=(SELECT MIN(id) FROM candidates WHERE email='mei.chen@linkedin-apply.com') AND stage='Offer Extended');
+INSERT INTO pipelines (stage, notes, candidate_id) SELECT 'Hired','Contract signed 2025-07-10. Background check cleared. Onboarding scheduled 2025-08-04.',(SELECT MIN(id) FROM candidates WHERE email='fatima.alrashid@email.ae') WHERE NOT EXISTS (SELECT 1 FROM pipelines WHERE candidate_id=(SELECT MIN(id) FROM candidates WHERE email='fatima.alrashid@email.ae') AND stage='Hired');
+
+-- ═══════════════════════════════════════════════════════════════════════════
+-- SUPER ADMIN PORTAL SEED DATA
+-- ═══════════════════════════════════════════════════════════════════════════
+
+-- ── SaaS Plans ───────────────────────────────────────────────────────────
+INSERT INTO saas_plans (plan_key, name, description, monthly_price_cents, annual_price_cents, setup_fee_cents, trial_days, currency, min_users, max_users, max_employees, max_storage_mb, api_limit_per_month, features, enabled, hidden, popular, public_plan, sort_order)
+SELECT 'FREE', 'Free', 'Get started at no cost. Basic HR features included.', 0, 0, 0, 14, 'USD', 1, 5, 10, 512, 1000,
+       'employee_management,leave_management,attendance_tracking', true, false, false, true, 0
+WHERE NOT EXISTS (SELECT 1 FROM saas_plans WHERE plan_key = 'FREE');
+
+INSERT INTO saas_plans (plan_key, name, description, monthly_price_cents, annual_price_cents, setup_fee_cents, trial_days, currency, min_users, max_users, max_employees, max_storage_mb, api_limit_per_month, features, enabled, hidden, popular, public_plan, sort_order)
+SELECT 'STARTER', 'Starter', 'Perfect for small teams. Includes core HR, leave and attendance.', 2900, 29000, 0, 14, 'USD', 1, 25, 100, 5120, 10000,
+       'employee_management,leave_management,attendance_tracking,document_management,holiday_management', true, false, false, true, 1
+WHERE NOT EXISTS (SELECT 1 FROM saas_plans WHERE plan_key = 'STARTER');
+
+INSERT INTO saas_plans (plan_key, name, description, monthly_price_cents, annual_price_cents, setup_fee_cents, trial_days, currency, min_users, max_users, max_employees, max_storage_mb, api_limit_per_month, features, enabled, hidden, popular, public_plan, sort_order)
+SELECT 'PROFESSIONAL', 'Professional', 'Everything in Starter plus payroll, performance, recruitment and advanced reports.', 7900, 79000, 0, 14, 'USD', 1, 100, 500, 20480, 50000,
+       'employee_management,leave_management,attendance_tracking,document_management,holiday_management,payroll_management,performance_review,recruitment_pipeline,advanced_reports,expense_management,loan_management', true, false, true, true, 2
+WHERE NOT EXISTS (SELECT 1 FROM saas_plans WHERE plan_key = 'PROFESSIONAL');
+
+INSERT INTO saas_plans (plan_key, name, description, monthly_price_cents, annual_price_cents, setup_fee_cents, trial_days, currency, min_users, max_users, max_employees, max_storage_mb, api_limit_per_month, features, enabled, hidden, popular, public_plan, sort_order)
+SELECT 'ENTERPRISE', 'Enterprise', 'Everything in Professional plus SSO, advanced permissions, API access, custom integrations and dedicated support.', 19900, 199000, 50000, 30, 'USD', 10, 9999, 99999, 102400, 1000000,
+       'employee_management,leave_management,attendance_tracking,document_management,holiday_management,payroll_management,performance_review,recruitment_pipeline,advanced_reports,expense_management,loan_management,sso_integration,custom_api,advanced_permissions,dedicated_support,custom_integrations,audit_logs', true, false, false, true, 3
+WHERE NOT EXISTS (SELECT 1 FROM saas_plans WHERE plan_key = 'ENTERPRISE');
+
+-- ── Feature Flags ─────────────────────────────────────────────────────────
+INSERT INTO feature_flags (feature_key, feature_name, description, module, enabled_globally, enabled_for_plans, enabled_for_tenants, beta_feature, rollout_percent)
+SELECT 'employee_management','Employee Management','Core employee records, profiles and org structure','HR',true,'FREE,STARTER,PROFESSIONAL,ENTERPRISE','',false,100
+WHERE NOT EXISTS (SELECT 1 FROM feature_flags WHERE feature_key = 'employee_management');
+
+INSERT INTO feature_flags (feature_key, feature_name, description, module, enabled_globally, enabled_for_plans, enabled_for_tenants, beta_feature, rollout_percent)
+SELECT 'leave_management','Leave Management','Leave requests, approvals, balances and types','HR',false,'STARTER,PROFESSIONAL,ENTERPRISE','',false,100
+WHERE NOT EXISTS (SELECT 1 FROM feature_flags WHERE feature_key = 'leave_management');
+
+INSERT INTO feature_flags (feature_key, feature_name, description, module, enabled_globally, enabled_for_plans, enabled_for_tenants, beta_feature, rollout_percent)
+SELECT 'attendance_tracking','Attendance Tracking','Daily attendance, check-in/out and timesheets','HR',false,'STARTER,PROFESSIONAL,ENTERPRISE','',false,100
+WHERE NOT EXISTS (SELECT 1 FROM feature_flags WHERE feature_key = 'attendance_tracking');
+
+INSERT INTO feature_flags (feature_key, feature_name, description, module, enabled_globally, enabled_for_plans, enabled_for_tenants, beta_feature, rollout_percent)
+SELECT 'document_management','Document Management','Upload, store and manage HR documents','HR',false,'STARTER,PROFESSIONAL,ENTERPRISE','',false,100
+WHERE NOT EXISTS (SELECT 1 FROM feature_flags WHERE feature_key = 'document_management');
+
+INSERT INTO feature_flags (feature_key, feature_name, description, module, enabled_globally, enabled_for_plans, enabled_for_tenants, beta_feature, rollout_percent)
+SELECT 'payroll_management','Payroll Management','Salary slips, payroll runs and deductions','Payroll',false,'PROFESSIONAL,ENTERPRISE','',false,100
+WHERE NOT EXISTS (SELECT 1 FROM feature_flags WHERE feature_key = 'payroll_management');
+
+INSERT INTO feature_flags (feature_key, feature_name, description, module, enabled_globally, enabled_for_plans, enabled_for_tenants, beta_feature, rollout_percent)
+SELECT 'performance_review','Performance Reviews','Goals, KPIs, 360 feedback and appraisals','HR',false,'PROFESSIONAL,ENTERPRISE','',false,100
+WHERE NOT EXISTS (SELECT 1 FROM feature_flags WHERE feature_key = 'performance_review');
+
+INSERT INTO feature_flags (feature_key, feature_name, description, module, enabled_globally, enabled_for_plans, enabled_for_tenants, beta_feature, rollout_percent)
+SELECT 'recruitment_pipeline','Recruitment Pipeline','Jobs, candidates, interviews and offer letters','Recruitment',false,'PROFESSIONAL,ENTERPRISE','',false,100
+WHERE NOT EXISTS (SELECT 1 FROM feature_flags WHERE feature_key = 'recruitment_pipeline');
+
+INSERT INTO feature_flags (feature_key, feature_name, description, module, enabled_globally, enabled_for_plans, enabled_for_tenants, beta_feature, rollout_percent)
+SELECT 'advanced_reports','Advanced Reports','Custom report builder, exports and analytics','Analytics',false,'PROFESSIONAL,ENTERPRISE','',false,100
+WHERE NOT EXISTS (SELECT 1 FROM feature_flags WHERE feature_key = 'advanced_reports');
+
+INSERT INTO feature_flags (feature_key, feature_name, description, module, enabled_globally, enabled_for_plans, enabled_for_tenants, beta_feature, rollout_percent)
+SELECT 'expense_management','Expense Management','Expense claims, approvals and reimbursements','Finance',false,'PROFESSIONAL,ENTERPRISE','',false,100
+WHERE NOT EXISTS (SELECT 1 FROM feature_flags WHERE feature_key = 'expense_management');
+
+INSERT INTO feature_flags (feature_key, feature_name, description, module, enabled_globally, enabled_for_plans, enabled_for_tenants, beta_feature, rollout_percent)
+SELECT 'loan_management','Loan Management','Employee loans and advance salary requests','Finance',false,'PROFESSIONAL,ENTERPRISE','',false,100
+WHERE NOT EXISTS (SELECT 1 FROM feature_flags WHERE feature_key = 'loan_management');
+
+INSERT INTO feature_flags (feature_key, feature_name, description, module, enabled_globally, enabled_for_plans, enabled_for_tenants, beta_feature, rollout_percent)
+SELECT 'sso_integration','SSO Integration','Single Sign-On via SAML, OIDC or OAuth2','Security',false,'ENTERPRISE','',false,100
+WHERE NOT EXISTS (SELECT 1 FROM feature_flags WHERE feature_key = 'sso_integration');
+
+INSERT INTO feature_flags (feature_key, feature_name, description, module, enabled_globally, enabled_for_plans, enabled_for_tenants, beta_feature, rollout_percent)
+SELECT 'custom_api','Custom API Access','Full REST API access with rate limits','API',false,'ENTERPRISE','',false,100
+WHERE NOT EXISTS (SELECT 1 FROM feature_flags WHERE feature_key = 'custom_api');
+
+INSERT INTO feature_flags (feature_key, feature_name, description, module, enabled_globally, enabled_for_plans, enabled_for_tenants, beta_feature, rollout_percent)
+SELECT 'advanced_permissions','Advanced Permissions','Granular role-based access control','Security',false,'ENTERPRISE','',false,100
+WHERE NOT EXISTS (SELECT 1 FROM feature_flags WHERE feature_key = 'advanced_permissions');
+
+INSERT INTO feature_flags (feature_key, feature_name, description, module, enabled_globally, enabled_for_plans, enabled_for_tenants, beta_feature, rollout_percent)
+SELECT 'dedicated_support','Dedicated Support','Priority support with dedicated CSM','Support',false,'ENTERPRISE','',false,100
+WHERE NOT EXISTS (SELECT 1 FROM feature_flags WHERE feature_key = 'dedicated_support');
+
+INSERT INTO feature_flags (feature_key, feature_name, description, module, enabled_globally, enabled_for_plans, enabled_for_tenants, beta_feature, rollout_percent)
+SELECT 'audit_logs','Audit Logs','Full audit trail for all user actions','Security',false,'ENTERPRISE','',false,100
+WHERE NOT EXISTS (SELECT 1 FROM feature_flags WHERE feature_key = 'audit_logs');
+
+INSERT INTO feature_flags (feature_key, feature_name, description, module, enabled_globally, enabled_for_plans, enabled_for_tenants, beta_feature, rollout_percent)
+SELECT 'ai_insights','AI Insights','AI-powered HR analytics and recommendations','Analytics',false,'','',true,30
+WHERE NOT EXISTS (SELECT 1 FROM feature_flags WHERE feature_key = 'ai_insights');
+
+INSERT INTO feature_flags (feature_key, feature_name, description, module, enabled_globally, enabled_for_plans, enabled_for_tenants, beta_feature, rollout_percent)
+SELECT 'smart_scheduling','Smart Scheduling','AI-assisted shift scheduling and planning','HR',false,'','',true,20
+WHERE NOT EXISTS (SELECT 1 FROM feature_flags WHERE feature_key = 'smart_scheduling');
+
+-- ── Tenants ───────────────────────────────────────────────────────────────
+INSERT INTO tenants (tenant_code, company_name, admin_email, plan, status, billing_cycle, max_users, max_employees, seats_consumed, storage_usage_mb, api_calls_this_month, total_employees, total_users, industry, company_size, country, currency, timezone, language, owner_name, phone, created_at, trial_ends_at, subscription_ends_at)
+SELECT 'techcorp','TechCorp Global','admin@techcorp.com','ENTERPRISE','ACTIVE','ANNUAL','500','2000','247',18420,94530,1245,247,'Technology','1000+','United States','USD','America/New_York','en','Sarah Mitchell','+1-555-0101',NOW() - INTERVAL '14 months',NULL,NOW() + INTERVAL '10 months'
+WHERE NOT EXISTS (SELECT 1 FROM tenants WHERE tenant_code = 'techcorp');
+
+INSERT INTO tenants (tenant_code, company_name, admin_email, plan, status, billing_cycle, max_users, max_employees, seats_consumed, storage_usage_mb, api_calls_this_month, total_employees, total_users, industry, company_size, country, currency, timezone, language, owner_name, phone, created_at, trial_ends_at, subscription_ends_at)
+SELECT 'startupx','StartupX Labs','admin@startupx.io','STARTER','TRIAL','MONTHLY','10','40','6',320,1250,18,6,'Technology','11-50','United Kingdom','GBP','Europe/London','en','James Harlow','+44-20-0001',NOW() - INTERVAL '5 days',NOW() + INTERVAL '9 days',NULL
+WHERE NOT EXISTS (SELECT 1 FROM tenants WHERE tenant_code = 'startupx');
+
+INSERT INTO tenants (tenant_code, company_name, admin_email, plan, status, billing_cycle, max_users, max_employees, seats_consumed, storage_usage_mb, api_calls_this_month, total_employees, total_users, industry, company_size, country, currency, timezone, language, owner_name, phone, created_at, trial_ends_at, subscription_ends_at)
+SELECT 'globalhr','Global HR Solutions','admin@globalhr.com','PROFESSIONAL','ACTIVE','MONTHLY','100','500','78',4096,22400,312,78,'Human Resources','201-500','Germany','EUR','Europe/Berlin','de','Klaus Weber','+49-30-00002',NOW() - INTERVAL '8 months',NULL,NOW() + INTERVAL '22 days'
+WHERE NOT EXISTS (SELECT 1 FROM tenants WHERE tenant_code = 'globalhr');
+
+INSERT INTO tenants (tenant_code, company_name, admin_email, plan, status, billing_cycle, max_users, max_employees, seats_consumed, storage_usage_mb, api_calls_this_month, total_employees, total_users, industry, company_size, country, currency, timezone, language, owner_name, phone, created_at, trial_ends_at, subscription_ends_at)
+SELECT 'devagency','DevAgency Co','admin@devagency.dev','FREE','PENDING','MONTHLY','5','10','0',0,0,0,0,'Software','1-10','Canada','CAD','America/Toronto','en','Liam Nguyen','+1-416-0003',NOW() - INTERVAL '2 days',NULL,NULL
+WHERE NOT EXISTS (SELECT 1 FROM tenants WHERE tenant_code = 'devagency');
+
+INSERT INTO tenants (tenant_code, company_name, admin_email, plan, status, billing_cycle, max_users, max_employees, seats_consumed, storage_usage_mb, api_calls_this_month, total_employees, total_users, industry, company_size, country, currency, timezone, language, owner_name, phone, created_at, trial_ends_at, subscription_ends_at)
+SELECT 'retailpro','Retail Pro Group','admin@retailpro.com','ENTERPRISE','ACTIVE','ANNUAL','300','1500','189',14230,67800,889,189,'Retail','1000+','France','EUR','Europe/Paris','fr','Marie Dupont','+33-1-00004',NOW() - INTERVAL '20 months',NULL,NOW() + INTERVAL '4 months'
+WHERE NOT EXISTS (SELECT 1 FROM tenants WHERE tenant_code = 'retailpro');
+
+INSERT INTO tenants (tenant_code, company_name, admin_email, plan, status, billing_cycle, max_users, max_employees, seats_consumed, storage_usage_mb, api_calls_this_month, total_employees, total_users, industry, company_size, country, currency, timezone, language, owner_name, phone, created_at, trial_ends_at, subscription_ends_at)
+SELECT 'cloudfirst','CloudFirst Inc','admin@cloudfirst.io','PROFESSIONAL','SUSPENDED','MONTHLY','50','200','0',2048,0,145,0,'Cloud Services','51-200','Australia','AUD','Australia/Sydney','en','Tom Richards','+61-2-00005',NOW() - INTERVAL '6 months',NULL,NOW() - INTERVAL '1 month'
+WHERE NOT EXISTS (SELECT 1 FROM tenants WHERE tenant_code = 'cloudfirst');
+
+INSERT INTO tenants (tenant_code, company_name, admin_email, plan, status, billing_cycle, max_users, max_employees, seats_consumed, storage_usage_mb, api_calls_this_month, total_employees, total_users, industry, company_size, country, currency, timezone, language, owner_name, phone, created_at, trial_ends_at, subscription_ends_at)
+SELECT 'smallbiz','SmallBiz Hub','admin@smallbiz.com','STARTER','ACTIVE','MONTHLY','20','80','12',680,3200,42,12,'Consulting','11-50','United States','USD','America/Chicago','en','Anna Brooks','+1-312-0006',NOW() - INTERVAL '3 months',NULL,NOW() + INTERVAL '18 days'
+WHERE NOT EXISTS (SELECT 1 FROM tenants WHERE tenant_code = 'smallbiz');
+
+INSERT INTO tenants (tenant_code, company_name, admin_email, plan, status, billing_cycle, max_users, max_employees, seats_consumed, storage_usage_mb, api_calls_this_month, total_employees, total_users, industry, company_size, country, currency, timezone, language, owner_name, phone, created_at, trial_ends_at, subscription_ends_at)
+SELECT 'megacorp','MegaCorp Industries','admin@megacorp.com','ENTERPRISE','ACTIVE','ANNUAL','1000','5000','621',51200,215000,3812,621,'Manufacturing','1000+','Japan','JPY','Asia/Tokyo','ja','Kenji Tanaka','+81-3-00007',NOW() - INTERVAL '30 months',NULL,NOW() + INTERVAL '8 months'
+WHERE NOT EXISTS (SELECT 1 FROM tenants WHERE tenant_code = 'megacorp');
+
+INSERT INTO tenants (tenant_code, company_name, admin_email, plan, status, billing_cycle, max_users, max_employees, seats_consumed, storage_usage_mb, api_calls_this_month, total_employees, total_users, industry, company_size, country, currency, timezone, language, owner_name, phone, created_at, trial_ends_at, subscription_ends_at)
+SELECT 'financeplus','FinancePlus Ltd','admin@financeplus.com','PROFESSIONAL','TRIAL','MONTHLY','50','200','3',120,450,14,3,'Finance','51-200','Singapore','SGD','Asia/Singapore','en','Wei Chen','+65-00008',NOW() - INTERVAL '3 days',NOW() + INTERVAL '11 days',NULL
+WHERE NOT EXISTS (SELECT 1 FROM tenants WHERE tenant_code = 'financeplus');
+
+INSERT INTO tenants (tenant_code, company_name, admin_email, plan, status, billing_cycle, max_users, max_employees, seats_consumed, storage_usage_mb, api_calls_this_month, total_employees, total_users, industry, company_size, country, currency, timezone, language, owner_name, phone, created_at, trial_ends_at, subscription_ends_at, cancelled_at)
+SELECT 'oldclient','OldClient Corp','admin@oldclient.com','FREE','CANCELLED','MONTHLY','5','10','0',0,0,0,0,'Media','1-10','United States','USD','America/Los_Angeles','en','Dan Foster','+1-310-0009',NOW() - INTERVAL '12 months',NULL,NULL,NOW() - INTERVAL '2 months'
+WHERE NOT EXISTS (SELECT 1 FROM tenants WHERE tenant_code = 'oldclient');
+
+-- ── Invoices ──────────────────────────────────────────────────────────────
+INSERT INTO invoices (invoice_number, tenant_code, company_name, amount_cents, tax_amount_cents, currency, status, description, issued_at, due_at, paid_at)
+SELECT 'INV-202407-0001','techcorp','TechCorp Global',199900,19990,'USD','PAID','Enterprise Annual Subscription - Year 2',NOW()-INTERVAL '13 months',NOW()-INTERVAL '12 months',NOW()-INTERVAL '12 months'
+WHERE NOT EXISTS (SELECT 1 FROM invoices WHERE invoice_number = 'INV-202407-0001');
+
+INSERT INTO invoices (invoice_number, tenant_code, company_name, amount_cents, tax_amount_cents, currency, status, description, issued_at, due_at, paid_at)
+SELECT 'INV-202507-0002','techcorp','TechCorp Global',199900,19990,'USD','PAID','Enterprise Annual Subscription - Year 3',NOW()-INTERVAL '1 month',NOW(),NOW()-INTERVAL '28 days'
+WHERE NOT EXISTS (SELECT 1 FROM invoices WHERE invoice_number = 'INV-202507-0002');
+
+INSERT INTO invoices (invoice_number, tenant_code, company_name, amount_cents, tax_amount_cents, currency, status, description, issued_at, due_at, paid_at)
+SELECT 'INV-202507-0003','globalhr','Global HR Solutions',7900,790,'USD','PAID','Professional Monthly - August 2025',NOW()-INTERVAL '33 days',NOW()-INTERVAL '30 days',NOW()-INTERVAL '30 days'
+WHERE NOT EXISTS (SELECT 1 FROM invoices WHERE invoice_number = 'INV-202507-0003');
+
+INSERT INTO invoices (invoice_number, tenant_code, company_name, amount_cents, tax_amount_cents, currency, status, description, issued_at, due_at, paid_at)
+SELECT 'INV-202508-0004','globalhr','Global HR Solutions',7900,790,'USD','SENT','Professional Monthly - September 2025',NOW()-INTERVAL '5 days',NOW()+INTERVAL '25 days',NULL
+WHERE NOT EXISTS (SELECT 1 FROM invoices WHERE invoice_number = 'INV-202508-0004');
+
+INSERT INTO invoices (invoice_number, tenant_code, company_name, amount_cents, tax_amount_cents, currency, status, description, issued_at, due_at, paid_at)
+SELECT 'INV-202506-0005','smallbiz','SmallBiz Hub',2900,290,'USD','PAID','Starter Monthly - July 2025',NOW()-INTERVAL '40 days',NOW()-INTERVAL '37 days',NOW()-INTERVAL '37 days'
+WHERE NOT EXISTS (SELECT 1 FROM invoices WHERE invoice_number = 'INV-202506-0005');
+
+INSERT INTO invoices (invoice_number, tenant_code, company_name, amount_cents, tax_amount_cents, currency, status, description, issued_at, due_at, paid_at)
+SELECT 'INV-202508-0006','smallbiz','SmallBiz Hub',2900,290,'USD','SENT','Starter Monthly - August 2025',NOW()-INTERVAL '4 days',NOW()+INTERVAL '26 days',NULL
+WHERE NOT EXISTS (SELECT 1 FROM invoices WHERE invoice_number = 'INV-202508-0006');
+
+INSERT INTO invoices (invoice_number, tenant_code, company_name, amount_cents, tax_amount_cents, currency, status, description, issued_at, due_at, paid_at)
+SELECT 'INV-202505-0007','retailpro','Retail Pro Group',199900,19990,'USD','PAID','Enterprise Annual Subscription',NOW()-INTERVAL '3 months',NOW()-INTERVAL '2 months' + INTERVAL '20 days',NOW()-INTERVAL '2 months' + INTERVAL '18 days'
+WHERE NOT EXISTS (SELECT 1 FROM invoices WHERE invoice_number = 'INV-202505-0007');
+
+INSERT INTO invoices (invoice_number, tenant_code, company_name, amount_cents, tax_amount_cents, currency, status, description, issued_at, due_at, paid_at)
+SELECT 'INV-202502-0008','cloudfirst','CloudFirst Inc',7900,790,'USD','OVERDUE','Professional Monthly - March 2025',NOW()-INTERVAL '160 days',NOW()-INTERVAL '130 days',NULL
+WHERE NOT EXISTS (SELECT 1 FROM invoices WHERE invoice_number = 'INV-202502-0008');
+
+INSERT INTO invoices (invoice_number, tenant_code, company_name, amount_cents, tax_amount_cents, currency, status, description, issued_at, due_at, paid_at)
+SELECT 'INV-202501-0009','megacorp','MegaCorp Industries',199900,19990,'USD','PAID','Enterprise Annual Subscription',NOW()-INTERVAL '7 months',NOW()-INTERVAL '6 months',NOW()-INTERVAL '6 months'
+WHERE NOT EXISTS (SELECT 1 FROM invoices WHERE invoice_number = 'INV-202501-0009');
+
+INSERT INTO invoices (invoice_number, tenant_code, company_name, amount_cents, tax_amount_cents, currency, status, description, issued_at, due_at)
+SELECT 'INV-202508-0010','devagency','DevAgency Co',0,0,'CAD','DRAFT','Free Plan Activation',NOW()-INTERVAL '2 days',NOW()+INTERVAL '28 days'
+WHERE NOT EXISTS (SELECT 1 FROM invoices WHERE invoice_number = 'INV-202508-0010');
+
+INSERT INTO invoices (invoice_number, tenant_code, company_name, amount_cents, tax_amount_cents, currency, status, description, issued_at, due_at, paid_at)
+SELECT 'INV-202508-0011','globalhr','Global HR Solutions',7900,790,'USD','REFUNDED','Professional Monthly - Refund',NOW()-INTERVAL '60 days',NOW()-INTERVAL '57 days',NOW()-INTERVAL '55 days'
+WHERE NOT EXISTS (SELECT 1 FROM invoices WHERE invoice_number = 'INV-202508-0011');
+
+-- ── Payments ─────────────────────────────────────────────────────────────
+INSERT INTO payments (tenant_code, company_name, amount_cents, refunded_amount_cents, currency, status, method, description, invoice_id, created_at, processed_at)
+SELECT 'techcorp','TechCorp Global',219890,0,'USD','COMPLETED','STRIPE','Enterprise Annual - Year 2',(SELECT id FROM invoices WHERE invoice_number='INV-202407-0001'),NOW()-INTERVAL '12 months',NOW()-INTERVAL '12 months'
+WHERE NOT EXISTS (SELECT 1 FROM payments WHERE tenant_code='techcorp' AND created_at::date = (NOW()-INTERVAL '12 months')::date);
+
+INSERT INTO payments (tenant_code, company_name, amount_cents, refunded_amount_cents, currency, status, method, description, invoice_id, created_at, processed_at)
+SELECT 'techcorp','TechCorp Global',219890,0,'USD','COMPLETED','STRIPE','Enterprise Annual - Year 3',(SELECT id FROM invoices WHERE invoice_number='INV-202507-0002'),NOW()-INTERVAL '28 days',NOW()-INTERVAL '28 days'
+WHERE NOT EXISTS (SELECT 1 FROM payments WHERE tenant_code='techcorp' AND created_at::date = (NOW()-INTERVAL '28 days')::date);
+
+INSERT INTO payments (tenant_code, company_name, amount_cents, refunded_amount_cents, currency, status, method, description, invoice_id, created_at, processed_at)
+SELECT 'globalhr','Global HR Solutions',8690,0,'USD','COMPLETED','STRIPE','Professional Monthly - Aug',(SELECT id FROM invoices WHERE invoice_number='INV-202507-0003'),NOW()-INTERVAL '30 days',NOW()-INTERVAL '30 days'
+WHERE NOT EXISTS (SELECT 1 FROM payments WHERE tenant_code='globalhr' AND created_at::date = (NOW()-INTERVAL '30 days')::date);
+
+INSERT INTO payments (tenant_code, company_name, amount_cents, refunded_amount_cents, currency, status, method, description, invoice_id, created_at, processed_at)
+SELECT 'smallbiz','SmallBiz Hub',3190,0,'USD','COMPLETED','STRIPE','Starter Monthly - Jul',(SELECT id FROM invoices WHERE invoice_number='INV-202506-0005'),NOW()-INTERVAL '37 days',NOW()-INTERVAL '37 days'
+WHERE NOT EXISTS (SELECT 1 FROM payments WHERE tenant_code='smallbiz' AND created_at::date = (NOW()-INTERVAL '37 days')::date);
+
+INSERT INTO payments (tenant_code, company_name, amount_cents, refunded_amount_cents, currency, status, method, description, invoice_id, created_at, processed_at)
+SELECT 'retailpro','Retail Pro Group',219890,0,'USD','COMPLETED','STRIPE','Enterprise Annual',(SELECT id FROM invoices WHERE invoice_number='INV-202505-0007'),NOW()-INTERVAL '2 months'+INTERVAL '18 days',NOW()-INTERVAL '2 months'+INTERVAL '18 days'
+WHERE NOT EXISTS (SELECT 1 FROM payments WHERE tenant_code='retailpro' AND amount_cents=219890);
+
+INSERT INTO payments (tenant_code, company_name, amount_cents, refunded_amount_cents, currency, status, method, description, invoice_id, failure_reason, created_at)
+SELECT 'cloudfirst','CloudFirst Inc',8690,0,'USD','FAILED','STRIPE','Professional Monthly - overdue',(SELECT id FROM invoices WHERE invoice_number='INV-202502-0008'),'Card declined: insufficient funds',NOW()-INTERVAL '130 days'
+WHERE NOT EXISTS (SELECT 1 FROM payments WHERE tenant_code='cloudfirst' AND status='FAILED');
+
+INSERT INTO payments (tenant_code, company_name, amount_cents, refunded_amount_cents, currency, status, method, description, invoice_id, created_at, processed_at)
+SELECT 'megacorp','MegaCorp Industries',219890,0,'USD','COMPLETED','STRIPE','Enterprise Annual',(SELECT id FROM invoices WHERE invoice_number='INV-202501-0009'),NOW()-INTERVAL '6 months',NOW()-INTERVAL '6 months'
+WHERE NOT EXISTS (SELECT 1 FROM payments WHERE tenant_code='megacorp' AND amount_cents=219890);
+
+INSERT INTO payments (tenant_code, company_name, amount_cents, refunded_amount_cents, currency, status, method, description, invoice_id, created_at, processed_at, refunded_at)
+SELECT 'globalhr','Global HR Solutions',8690,8690,'USD','REFUNDED','STRIPE','Professional Monthly - Refund issued',(SELECT id FROM invoices WHERE invoice_number='INV-202508-0011'),NOW()-INTERVAL '55 days',NOW()-INTERVAL '55 days',NOW()-INTERVAL '52 days'
+WHERE NOT EXISTS (SELECT 1 FROM payments WHERE tenant_code='globalhr' AND status='REFUNDED');
+
+INSERT INTO payments (tenant_code, company_name, amount_cents, refunded_amount_cents, currency, status, method, description, invoice_id, failure_reason, created_at)
+SELECT 'startupx','StartupX Labs',2900,0,'USD','FAILED','STRIPE','Starter Trial conversion attempt',0,'Card requires authentication - 3DS failed',NOW()-INTERVAL '1 day'
+WHERE NOT EXISTS (SELECT 1 FROM payments WHERE tenant_code='startupx' AND status='FAILED');
+

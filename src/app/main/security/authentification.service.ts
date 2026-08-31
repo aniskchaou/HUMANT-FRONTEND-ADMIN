@@ -396,6 +396,8 @@ export class AuthentificationService {
   }
 
   private deriveAuthoritiesFromUsername(username?: string): string[] {
+    const u = (username || '').toLowerCase().trim();
+    if (u === 'superadmin') { return ['ROLE_SUPER_ADMIN']; }
     const normalizedUsername = (username || '').trim().toLowerCase();
 
     switch (normalizedUsername) {

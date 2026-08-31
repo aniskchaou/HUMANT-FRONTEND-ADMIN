@@ -3,6 +3,7 @@ import { NavigationEnd, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { URLLoader } from 'src/app/main/configs/URLLoader';
 import { AccessControlService } from 'src/app/main/security/access-control.service';
+import { AuthentificationService } from 'src/app/main/security/authentification.service';
 interface NavigationEntry {
   label: string;
   route: string;
@@ -101,16 +102,21 @@ export class NavigationComponent extends URLLoader implements OnInit, OnDestroy 
 
   constructor(
     private router: Router,
-    public accessControlService: AccessControlService
+    public accessControlService: AccessControlService,
+    private authService: AuthentificationService
   ) {
     super();
-    //super.loadScripts();
   }
 
   private readonly expandedSectionLabels = new Set<string>();
   private routerEventsSubscription?: Subscription;
 
   ngOnInit(): void {
+    // Redirect SUPER_ADMIN away from the regular app shell to the dedicated portal
+    if (this.isSuperAdmin) {
+      this.router.navigate(['/super-admin']);
+      return;
+    }
     this.expandActiveSection();
     this.routerEventsSubscription = this.router.events.subscribe((event) => {
       if (event instanceof NavigationEnd) {
@@ -121,6 +127,10 @@ export class NavigationComponent extends URLLoader implements OnInit, OnDestroy 
 
   ngOnDestroy(): void {
     this.routerEventsSubscription?.unsubscribe();
+  }
+
+  get isSuperAdmin(): boolean {
+    return this.authService.hasRole('SUPER_ADMIN');
   }
 
   get visibleSections(): NavigationSection[] {

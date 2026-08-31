@@ -26,6 +26,7 @@ export class LoginComponent extends URLLoader implements OnInit {
   errorMessage = '';
   buttonLoginClicked = false;
   readonly demoAccounts: DemoAccount[] = [
+    { label: 'Super Admin', username: 'superadmin', password: 'superadmin123' },
     { label: 'Admin workspace', username: 'admin', password: 'admin' },
     { label: 'HR workspace', username: 'hr', password: 'hr123' },
     { label: 'Manager workspace', username: 'manager', password: 'manager123' },

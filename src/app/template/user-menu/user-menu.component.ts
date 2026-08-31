@@ -42,6 +42,12 @@ export class UserMenuComponent implements OnInit, OnDestroy {
     }
   }
 
+  get isSuperAdmin(): boolean {
+    return this.authentificationService
+      .getStoredAuthorities()
+      .some((a) => a.replace(/^ROLE_/, '').toUpperCase() === 'SUPER_ADMIN');
+  }
+
   get initials(): string {
     const displayName = (this.displayName || 'Operator').trim();
     const tokens = displayName.split(/\s+/).filter((value) => value.length > 0);

@@ -1,0 +1,400 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Humant &#8212; Complete HR Management Platform</title>
+<style>
+  :root {
+    --bg-main:#0f172a;--bg-alt:#162032;--bg-card:#1e293b;
+    --text-main:#f8fafc;--text-muted:#94a3b8;
+    --brand-primary:#3b82f6;--brand-secondary:#6366f1;--brand-accent:#0ea5e9;
+    --accent-green:#10b981;--accent-warning:#f59e0b;--accent-danger:#ef4444;
+    --border-light:#1e2a3a;--border-soft:#243044;
+    --radius-lg:16px;--radius-md:10px;
+    --shadow-sm:0 1px 2px rgba(0,0,0,.3);
+    --shadow-md:0 4px 6px -1px rgba(0,0,0,.4);
+    --shadow-lg:0 20px 25px -5px rgba(0,0,0,.4);
+    --shadow-giant:0 35px 60px -15px rgba(0,0,0,.5);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:"Segoe UI",-apple-system,BlinkMacSystemFont,Roboto,sans-serif;background:var(--bg-main);color:var(--text-main);line-height:1.6;overflow-x:hidden}
+  .grid-pattern{position:absolute;inset:0;background-image:radial-gradient(circle at 1px 1px,rgba(255,255,255,.04) 1.2px,transparent 0);background-size:24px 24px;pointer-events:none;z-index:0}
+  .glow-blur-1{position:absolute;top:-10%;left:15%;width:400px;height:400px;border-radius:50%;background:radial-gradient(circle,rgba(59,130,246,.12) 0%,transparent 70%);filter:blur(60px);z-index:1;pointer-events:none}
+  .glow-blur-2{position:absolute;bottom:10%;right:15%;width:500px;height:500px;border-radius:50%;background:radial-gradient(circle,rgba(99,102,241,.09) 0%,transparent 70%);filter:blur(80px);z-index:1;pointer-events:none}
+  .accent-gradient-text{background:linear-gradient(135deg,var(--brand-primary) 0%,var(--brand-secondary) 50%,var(--brand-accent) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-weight:800}
+  .badge-premium{display:inline-flex;align-items:center;gap:8px;background:rgba(59,130,246,.1);border:1px solid rgba(59,130,246,.25);color:#93c5fd;padding:6px 16px;border-radius:99px;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:24px}
+  .browser-frame{background:var(--bg-card);border:1px solid var(--border-light);border-radius:var(--radius-lg);box-shadow:var(--shadow-giant);overflow:hidden;transition:transform .4s cubic-bezier(.16,1,.3,1),border-color .4s}
+  .browser-frame:hover{border-color:rgba(59,130,246,.3);transform:translateY(-4px)}
+  .browser-header{height:48px;background:#0f172a;border-bottom:1px solid var(--border-light);display:flex;align-items:center;padding:0 18px;position:relative}
+  .browser-dots{display:flex;gap:6px;position:absolute;left:18px}
+  .browser-dot{width:12px;height:12px;border-radius:50%}
+  .dot-red{background:#ef4444}.dot-yellow{background:#f59e0b}.dot-green{background:#10b981}
+  .browser-address{background:#1e293b;border-radius:6px;font-size:11px;color:var(--text-muted);padding:5px 24px;max-width:480px;width:100%;margin:0 auto;text-align:center;border:1px solid var(--border-light);font-family:Consolas,Monaco,monospace;letter-spacing:.02em}
+  section{padding:120px 24px;position:relative}
+  section.alt-bg{background:var(--bg-alt);border-top:1px solid var(--border-light);border-bottom:1px solid var(--border-light)}
+  .container{max-width:1200px;margin:0 auto;position:relative;z-index:10}
+  .center{text-align:center}
+  .section-label{text-transform:uppercase;letter-spacing:.16em;font-size:11px;font-weight:800;color:var(--brand-primary);margin-bottom:12px;display:block}
+  .section-title{font-size:clamp(2rem,4.5vw,3.2rem);font-weight:800;letter-spacing:-.02em;line-height:1.15;margin-bottom:20px;color:var(--text-main)}
+  .section-desc{font-size:1.15rem;color:var(--text-muted);max-width:650px;margin:0 auto 60px}
+  .hero{padding-top:160px;padding-bottom:110px;background:linear-gradient(180deg,#0a1628 0%,#0f172a 100%);text-align:center}
+  .hero h1{font-size:clamp(2.6rem,6.2vw,4.8rem);font-weight:950;line-height:1.08;letter-spacing:-.03em;margin-bottom:24px}
+  .hero p{font-size:clamp(1.1rem,2vw,1.3rem);color:var(--text-muted);max-width:740px;margin:0 auto 48px}
+  .cta-group{display:flex;gap:16px;flex-wrap:wrap;justify-content:center;margin-bottom:80px}
+  .btn{display:inline-flex;align-items:center;gap:10px;padding:16px 36px;border-radius:var(--radius-md);font-weight:700;font-size:15px;text-decoration:none;transition:all .2s cubic-bezier(.16,1,.3,1);cursor:pointer;border:none}
+  .btn-primary{background:linear-gradient(135deg,var(--brand-primary) 0%,var(--brand-secondary) 100%);color:#fff;box-shadow:0 10px 25px -4px rgba(59,130,246,.3)}
+  .btn-primary:hover{box-shadow:0 14px 35px -4px rgba(59,130,246,.5);transform:translateY(-2px)}
+  .btn-success{background:linear-gradient(135deg,#10b981 0%,#059669 100%);color:#fff;box-shadow:0 10px 25px -4px rgba(16,185,129,.3)}
+  .btn-success:hover{box-shadow:0 14px 35px -4px rgba(16,185,129,.5);transform:translateY(-2px)}
+  .btn-outline{background:transparent;border:1px solid var(--border-soft);color:var(--text-main)}
+  .btn-outline:hover{background:var(--bg-card);border-color:rgba(59,130,246,.4);transform:translateY(-2px)}
+  .stats-banner{background:var(--bg-card);border-top:1px solid var(--border-light);border-bottom:1px solid var(--border-light);padding:56px 24px}
+  .stats-cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:32px}
+  .stat-col{text-align:center;position:relative}
+  .stat-col:not(:last-child)::after{content:"";position:absolute;right:-16px;top:15%;height:70%;width:1px;background:var(--border-light)}
+  .stat-num{font-size:2.8rem;font-weight:900;line-height:1;margin-bottom:8px;background:linear-gradient(135deg,var(--brand-primary) 0%,var(--brand-secondary) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+  .stat-legend{font-size:13px;color:var(--text-muted);font-weight:700;text-transform:uppercase;letter-spacing:.08em}
+  .highlight-row{display:grid;grid-template-columns:1.15fr 1fr;gap:72px;align-items:center;margin-bottom:130px}
+  .highlight-row.reversed>:first-child{order:2}
+  .highlight-row:last-child{margin-bottom:0}
+  .highlight-feats{list-style:none;display:flex;flex-direction:column;gap:24px;margin-top:36px}
+  .highlight-feat{display:flex;gap:16px;align-items:flex-start}
+  .highlight-icon-bullet{width:40px;height:40px;border-radius:10px;background:rgba(59,130,246,.08);border:1px solid rgba(59,130,246,.2);color:var(--brand-primary);display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0;font-weight:900}
+  .highlight-feat h4{font-size:1.1rem;font-weight:700;margin-bottom:6px;color:var(--text-main)}
+  .highlight-feat p{color:var(--text-muted);font-size:.94rem;line-height:1.5}
+  .feats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:30px;margin-top:56px}
+  .feat-card{background:var(--bg-card);border:1px solid var(--border-light);border-radius:var(--radius-lg);padding:36px;transition:all .3s cubic-bezier(.16,1,.3,1)}
+  .feat-card:hover{border-color:var(--brand-primary);box-shadow:var(--shadow-lg);transform:translateY(-4px)}
+  .feat-grad-icon{width:56px;height:56px;border-radius:12px;background:rgba(59,130,246,.07);border:1px solid rgba(59,130,246,.18);display:flex;align-items:center;justify-content:center;font-size:22px;margin-bottom:24px;font-weight:900;color:var(--brand-primary)}
+  .feat-card h3{font-size:1.2rem;font-weight:800;margin-bottom:12px;color:var(--text-main)}
+  .feat-card p{color:var(--text-muted);font-size:.94rem;line-height:1.6}
+  .roles-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:30px;margin-top:56px}
+  .role-card{background:var(--bg-card);border:1px solid var(--border-light);border-radius:var(--radius-lg);padding:40px 32px;text-align:center;transition:all .3s cubic-bezier(.16,1,.3,1)}
+  .role-card:hover{border-color:var(--brand-primary);box-shadow:var(--shadow-lg);transform:translateY(-4px)}
+  .role-icon{width:64px;height:64px;border-radius:50%;margin:0 auto 20px;display:flex;align-items:center;justify-content:center;font-size:1.4rem;font-weight:900;color:#fff;background:linear-gradient(135deg,var(--brand-primary),var(--brand-secondary))}
+  .role-card h3{font-size:1.2rem;font-weight:800;margin-bottom:16px;color:var(--text-main)}
+  .role-list{list-style:none;font-size:.92rem;color:var(--text-muted);display:flex;flex-direction:column;gap:10px;text-align:left;background:var(--bg-alt);padding:20px;border-radius:var(--radius-md);border:1px solid var(--border-light)}
+  .role-list li{display:flex;align-items:center;gap:10px}
+  .role-list li::before{content:"\2726";color:var(--brand-secondary);font-weight:bold}
+  .modules-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-top:40px}
+  .mod-chip{background:var(--bg-card);border:1px solid var(--border-light);border-radius:10px;padding:14px 16px;font-size:.9rem;font-weight:600;display:flex;align-items:center;gap:10px;color:var(--text-main);transition:border-color .2s}
+  .mod-chip:hover{border-color:var(--brand-primary)}
+  .mod-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+  .stack-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:24px;margin-top:56px}
+  .stack-card{background:var(--bg-card);border:1px solid var(--border-light);border-radius:var(--radius-lg);padding:28px}
+  .stack-card h4{font-size:1rem;font-weight:800;margin-bottom:14px;color:var(--text-main)}
+  .stack-tag{display:inline-flex;padding:4px 12px;border-radius:99px;font-size:12px;font-weight:700;background:rgba(59,130,246,.07);color:#93c5fd;border:1px solid rgba(59,130,246,.18);margin:3px}
+  .comparison-wrapper{background:var(--bg-card);border:1px solid var(--border-light);border-radius:var(--radius-lg);overflow-x:auto;margin-top:56px;box-shadow:var(--shadow-lg)}
+  .comp-table{width:100%;border-collapse:collapse;font-size:14px;text-align:center}
+  .comp-table th,.comp-table td{padding:20px 24px;border-bottom:1px solid var(--border-light)}
+  .comp-table th{background:var(--bg-alt);font-weight:800;color:var(--text-muted);font-size:12px;text-transform:uppercase;letter-spacing:.08em}
+  .comp-table th.brand-col{background:rgba(59,130,246,.06);color:var(--brand-primary);font-size:14px;font-weight:800}
+  .comp-table td:first-child{text-align:left;font-weight:700;color:var(--text-main)}
+  .comp-table tr:last-child td{border-bottom:none}
+  .comp-table tr:hover td{background:rgba(59,130,246,.03)}
+  .check{color:var(--accent-green);font-weight:800}
+  .cross{color:#475569}
+  .faq-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(420px,1fr));gap:24px;margin-top:56px}
+  .faq-card{background:var(--bg-card);border:1px solid var(--border-light);border-radius:var(--radius-lg);padding:32px;transition:border-color .2s}
+  .faq-card:hover{border-color:var(--brand-primary)}
+  .faq-question{font-size:1.05rem;font-weight:850;color:var(--text-main);margin-bottom:12px;display:flex;gap:12px;align-items:flex-start}
+  .faq-q-bullet{color:var(--brand-primary);font-weight:bold;flex-shrink:0}
+  .faq-answer{font-size:.92rem;color:var(--text-muted);line-height:1.6;padding-left:24px}
+  .footer-callband{text-align:center;padding:130px 24px;background:radial-gradient(ellipse 70% 60% at 50% 100%,#162032 0%,#0f172a 80%);border-top:1px solid var(--border-light)}
+  .footer-callband h2{font-size:clamp(2rem,4vw,3rem);font-weight:900;margin-bottom:20px}
+  .footer-callband p{color:var(--text-muted);max-width:560px;margin:0 auto 40px}
+  footer{background:#0a1628;border-top:1px solid var(--border-light);padding:60px 24px 44px;text-align:center;font-size:13px;color:var(--text-muted)}
+  footer strong{color:var(--brand-primary)}
+  footer a{color:#93c5fd;text-decoration:none;font-weight:600}
+  footer a:hover{text-decoration:underline}
+  @media(max-width:960px){.highlight-row{grid-template-columns:1fr;gap:48px}.highlight-row.reversed>:first-child{order:unset}}
+  @media(max-width:768px){.feats-grid,.roles-grid,.stack-grid{grid-template-columns:1fr}}
+  @media(max-width:640px){.comp-table{font-size:12px}.comp-table th,.comp-table td{padding:12px 14px}.faq-grid{grid-template-columns:1fr}.stat-col:not(:last-child)::after{display:none}}
+</style>
+</head>
+<body>
+<div class="glow-blur-1"></div>
+<div class="glow-blur-2"></div>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="grid-pattern"></div>
+  <div class="container center">
+    <div class="badge-premium">&#10022; Complete HR Management Platform</div>
+    <h1>One unified platform for your<br><span class="accent-gradient-text">entire HR operations pipeline</span></h1>
+    <p>Humant centralises recruitment, workforce administration, payroll workflows, employee lifecycle management, and compliance governance in one structured multi-tenant platform.</p>
+    <div class="cta-group">
+      <a href="../premium-docs/index.html" class="btn btn-primary">View Documentation &rarr;</a>
+      <a href="../marketing/presentation.html" class="btn btn-success">Product Presentation</a>
+      <a href="#compare" class="btn btn-outline">Why Humant?</a>
+    </div>
+    <div class="browser-frame" style="max-width:1100px;margin:0 auto;">
+      <div class="browser-header">
+        <div class="browser-dots"><span class="browser-dot dot-red"></span><span class="browser-dot dot-yellow"></span><span class="browser-dot dot-green"></span></div>
+        <div class="browser-address">humant.local/dashboard</div>
+      </div>
+      <div style="background:linear-gradient(160deg,#1a2744 0%,#162032 100%);padding:32px 28px;min-height:400px;">
+        <div style="display:grid;grid-template-columns:200px 1fr;gap:0;background:#0f172a;border-radius:12px;overflow:hidden;border:1px solid #1e2a3a;min-height:336px;">
+          <div style="background:#0a1628;border-right:1px solid #1e2a3a;padding:20px 12px;">
+            <div style="height:32px;background:linear-gradient(135deg,#3b82f6,#6366f1);border-radius:8px;margin-bottom:16px;"></div>
+            <div style="display:flex;flex-direction:column;gap:4px;">
+              <div style="height:24px;background:#162032;border-radius:6px;"></div>
+              <div style="height:24px;background:rgba(59,130,246,.15);border-radius:6px;border-left:3px solid #3b82f6;"></div>
+              <div style="height:24px;background:#162032;border-radius:6px;"></div>
+              <div style="height:24px;background:#162032;border-radius:6px;"></div>
+              <div style="height:24px;background:#162032;border-radius:6px;"></div>
+            </div>
+          </div>
+          <div style="padding:24px;">
+            <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px;">
+              <div style="background:rgba(59,130,246,.1);border-radius:10px;padding:14px;border:1px solid rgba(59,130,246,.2);"><div style="font-size:1.3rem;font-weight:900;color:#3b82f6;">1,245</div><div style="font-size:10px;color:#64748b;font-weight:700;text-transform:uppercase;">Employees</div></div>
+              <div style="background:rgba(16,185,129,.1);border-radius:10px;padding:14px;border:1px solid rgba(16,185,129,.2);"><div style="font-size:1.3rem;font-weight:900;color:#10b981;">94%</div><div style="font-size:10px;color:#64748b;font-weight:700;text-transform:uppercase;">Attendance</div></div>
+              <div style="background:rgba(245,158,11,.1);border-radius:10px;padding:14px;border:1px solid rgba(245,158,11,.2);"><div style="font-size:1.3rem;font-weight:900;color:#f59e0b;">12</div><div style="font-size:10px;color:#64748b;font-weight:700;text-transform:uppercase;">Open Leaves</div></div>
+              <div style="background:rgba(99,102,241,.1);border-radius:10px;padding:14px;border:1px solid rgba(99,102,241,.2);"><div style="font-size:1.3rem;font-weight:900;color:#6366f1;">77</div><div style="font-size:10px;color:#64748b;font-weight:700;text-transform:uppercase;">Open Jobs</div></div>
+            </div>
+            <div style="height:8px;background:#1e2a3a;border-radius:4px;margin-bottom:6px;"></div>
+            <div style="height:8px;background:#1e2a3a;border-radius:4px;width:78%;margin-bottom:6px;"></div>
+            <div style="height:8px;background:#1e2a3a;border-radius:4px;width:55%;margin-bottom:20px;"></div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+              <div style="height:72px;background:#1e2a3a;border-radius:8px;border:1px solid #243044;"></div>
+              <div style="height:72px;background:#1e2a3a;border-radius:8px;border:1px solid #243044;"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- STATS -->
+<div class="stats-banner">
+  <div class="container">
+    <div class="stats-cols">
+      <div class="stat-col"><div class="stat-num">40+</div><div class="stat-legend">Business Modules</div></div>
+      <div class="stat-col"><div class="stat-num">6</div><div class="stat-legend">Role Profiles</div></div>
+      <div class="stat-col"><div class="stat-num">Multi</div><div class="stat-legend">Tenant Ready</div></div>
+      <div class="stat-col"><div class="stat-num">3</div><div class="stat-legend">Database Options</div></div>
+      <div class="stat-col"><div class="stat-num">1-Click</div><div class="stat-legend">GUI Launcher</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- CORE PLATFORM -->
+<section id="pillars">
+  <div class="container center">
+    <span class="section-label">Core Platform</span>
+    <h2 class="section-title">Six workforce management pillars</h2>
+    <p class="section-desc">Every module maps to a real HR business need &mdash; no generic scaffolding, no filler screens.</p>
+    <div class="feats-grid">
+      <div class="feat-card"><div class="feat-grad-icon">TA</div><h3>Talent Acquisition</h3><p>Jobs, candidate records, application pipeline, multi-stage interviews and offer letter preparation &mdash; coordinated from a single recruitment chain.</p></div>
+      <div class="feat-card"><div class="feat-grad-icon">WA</div><h3>Workforce Administration</h3><p>Employee records, attendance tracking, leave management, contracts, documents, onboarding checklists and operational transfers with full audit trails.</p></div>
+      <div class="feat-card"><div class="feat-grad-icon">CW</div><h3>Compensation Workflows</h3><p>Salary structuring, payslip generation, loan management, advance salary requests and expense claim processing &mdash; all linked to employee records.</p></div>
+      <div class="feat-card"><div class="feat-grad-icon">CG</div><h3>Compliance &amp; Governance</h3><p>Warnings, complaints, notices, performance reviews and off-boarding processes with complete lifecycle tracking and approval flows.</p></div>
+      <div class="feat-card"><div class="feat-grad-icon">ED</div><h3>Employee Development</h3><p>Training programmes, event coordination, performance goal tracking, 360&deg; feedback cycles and awards &mdash; supporting growth at every career stage.</p></div>
+      <div class="feat-card"><div class="feat-grad-icon">SA</div><h3>Super Admin Portal</h3><p>Full SaaS platform management &mdash; tenant lifecycle, billing, plans, feature flags, integrations, analytics and customer 360&deg; profiles in one portal.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- HIGHLIGHT ROWS -->
+<section class="alt-bg">
+  <div class="container">
+    <div class="highlight-row">
+      <div>
+        <span class="section-label">Platform Administration</span>
+        <h2 class="section-title">Full SaaS control from a dedicated Super Admin portal</h2>
+        <p style="color:var(--text-muted);">Platform operators get a completely isolated portal to run the SaaS business &mdash; from tenant onboarding to revenue analytics and feature rollouts.</p>
+        <ul class="highlight-feats">
+          <li class="highlight-feat"><div class="highlight-icon-bullet">$</div><div><h4>Live Revenue Dashboard</h4><p>MRR, ARR, ARPU, CLV, churn rate and 16 KPI cards updated in real time from live tenant and payment data.</p></div></li>
+          <li class="highlight-feat"><div class="highlight-icon-bullet">T</div><div><h4>Tenant Lifecycle Management</h4><p>Create, edit, archive, suspend and restore tenant workspaces. Manage billing cycles, seat limits, coupons and discounts.</p></div></li>
+          <li class="highlight-feat"><div class="highlight-icon-bullet">F</div><div><h4>Feature Flags &amp; Plan Management</h4><p>Toggle features per plan, per tenant or globally. Configure SaaS plans with pricing, limits and feature lists.</p></div></li>
+        </ul>
+      </div>
+      <div class="browser-frame">
+        <div class="browser-header">
+          <div class="browser-dots"><span class="browser-dot dot-red"></span><span class="browser-dot dot-yellow"></span><span class="browser-dot dot-green"></span></div>
+          <div class="browser-address">humant.local/super-admin</div>
+        </div>
+        <div style="background:#0a1628;padding:24px;min-height:300px;">
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px;">
+            <div style="background:rgba(59,130,246,.1);border-radius:8px;padding:12px;border:1px solid rgba(59,130,246,.2);"><div style="font-size:1.1rem;font-weight:900;color:#3b82f6;">$47.2K</div><div style="font-size:10px;color:#475569;font-weight:700;">MRR</div></div>
+            <div style="background:rgba(16,185,129,.1);border-radius:8px;padding:12px;border:1px solid rgba(16,185,129,.2);"><div style="font-size:1.1rem;font-weight:900;color:#10b981;">10</div><div style="font-size:10px;color:#475569;font-weight:700;">TENANTS</div></div>
+            <div style="background:rgba(99,102,241,.1);border-radius:8px;padding:12px;border:1px solid rgba(99,102,241,.2);"><div style="font-size:1.1rem;font-weight:900;color:#6366f1;">2.1%</div><div style="font-size:10px;color:#475569;font-weight:700;">CHURN</div></div>
+          </div>
+          <div style="background:#1e293b;border-radius:8px;padding:16px;border:1px solid #1e2a3a;">
+            <div style="height:7px;background:#243044;border-radius:4px;margin-bottom:6px;"></div>
+            <div style="height:7px;background:#243044;border-radius:4px;width:72%;margin-bottom:6px;"></div>
+            <div style="height:7px;background:#243044;border-radius:4px;width:50%;"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="highlight-row reversed">
+      <div>
+        <span class="section-label">Employee Lifecycle</span>
+        <h2 class="section-title">Every stage of the employee journey in one place</h2>
+        <p style="color:var(--text-muted);">From the first job posting to the final settlement &mdash; Humant tracks every step with structured workflows, approvals and complete history.</p>
+        <ul class="highlight-feats">
+          <li class="highlight-feat"><div class="highlight-icon-bullet">R</div><div><h4>Recruitment to Onboarding</h4><p>Pipeline stages, interview scheduling, offer letters and onboarding checklists flow automatically from one module to the next.</p></div></li>
+          <li class="highlight-feat"><div class="highlight-icon-bullet">A</div><div><h4>Attendance &amp; Leave</h4><p>Daily check-in/out, leave requests with approval flows, configurable leave types, holiday calendars and balance tracking.</p></div></li>
+          <li class="highlight-feat"><div class="highlight-icon-bullet">P</div><div><h4>Performance &amp; Growth</h4><p>Goal setting, review cycles, training enrolments, mentorship records and awards &mdash; all linked to the employee profile.</p></div></li>
+        </ul>
+      </div>
+      <div class="browser-frame">
+        <div class="browser-header">
+          <div class="browser-dots"><span class="browser-dot dot-red"></span><span class="browser-dot dot-yellow"></span><span class="browser-dot dot-green"></span></div>
+          <div class="browser-address">humant.local/employee</div>
+        </div>
+        <div style="background:#0a1628;padding:20px;min-height:300px;">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+            <div style="background:#1e293b;border-radius:8px;padding:16px;border:1px solid #1e2a3a;">
+              <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;"><div style="width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#3b82f6,#6366f1);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:900;font-size:12px;">NR</div><div><div style="height:9px;background:#243044;border-radius:3px;width:70px;"></div><div style="height:7px;background:#162032;border-radius:3px;width:45px;margin-top:4px;"></div></div></div>
+              <div style="height:5px;background:#243044;border-radius:3px;margin-bottom:4px;"></div><div style="height:5px;background:#243044;border-radius:3px;width:65%;"></div>
+            </div>
+            <div style="background:#1e293b;border-radius:8px;padding:16px;border:1px solid #1e2a3a;">
+              <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;"><div style="width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#10b981,#059669);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:900;font-size:12px;">DK</div><div><div style="height:9px;background:#243044;border-radius:3px;width:70px;"></div><div style="height:7px;background:#162032;border-radius:3px;width:45px;margin-top:4px;"></div></div></div>
+              <div style="height:5px;background:#243044;border-radius:3px;margin-bottom:4px;"></div><div style="height:5px;background:#243044;border-radius:3px;width:65%;"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ROLES -->
+<section id="roles">
+  <div class="container center">
+    <span class="section-label">Access Model</span>
+    <h2 class="section-title">Built for six distinct team roles</h2>
+    <p class="section-desc">Each role gets exactly the access it needs &mdash; route guards enforce it on both frontend and backend.</p>
+    <div class="roles-grid">
+      <div class="role-card"><div class="role-icon">SA</div><h3>Super Admin</h3><ul class="role-list"><li>Tenant management</li><li>Platform billing &amp; invoices</li><li>Feature flags &amp; plans</li><li>Integrations &amp; analytics</li></ul></div>
+      <div class="role-card"><div class="role-icon" style="background:linear-gradient(135deg,#6366f1,#0ea5e9);">AD</div><h3>Admin</h3><ul class="role-list"><li>Master data setup</li><li>User &amp; role management</li><li>System configuration</li><li>Full audit access</li></ul></div>
+      <div class="role-card"><div class="role-icon" style="background:linear-gradient(135deg,#10b981,#0ea5e9);">HR</div><h3>HR Manager</h3><ul class="role-list"><li>Employee lifecycle</li><li>Recruitment pipeline</li><li>Leave &amp; attendance</li><li>Onboarding flows</li></ul></div>
+      <div class="role-card"><div class="role-icon" style="background:linear-gradient(135deg,#f59e0b,#ef4444);">MG</div><h3>Department Manager</h3><ul class="role-list"><li>Team attendance</li><li>Interview panel</li><li>Performance input</li><li>Team approvals</li></ul></div>
+      <div class="role-card"><div class="role-icon" style="background:linear-gradient(135deg,#0ea5e9,#6366f1);">RC</div><h3>Recruiter</h3><ul class="role-list"><li>Job postings</li><li>Candidate pipeline</li><li>Interview scheduling</li><li>Offer letter prep</li></ul></div>
+      <div class="role-card"><div class="role-icon" style="background:linear-gradient(135deg,#94a3b8,#475569);">EM</div><h3>Employee</h3><ul class="role-list"><li>Profile management</li><li>Leave requests</li><li>Payslip viewing</li><li>Notice board</li></ul></div>
+    </div>
+  </div>
+</section>
+
+<!-- MODULES -->
+<section class="alt-bg" id="modules">
+  <div class="container center">
+    <span class="section-label">Module Coverage</span>
+    <h2 class="section-title">40+ production-ready business modules</h2>
+    <p class="section-desc">Each module is a complete feature with its own list, detail view, form and REST API endpoint.</p>
+    <div class="modules-grid">
+      <div class="mod-chip"><span class="mod-dot" style="background:#3b82f6"></span>Employee</div>
+      <div class="mod-chip"><span class="mod-dot" style="background:#3b82f6"></span>Department</div>
+      <div class="mod-chip"><span class="mod-dot" style="background:#3b82f6"></span>Designation</div>
+      <div class="mod-chip"><span class="mod-dot" style="background:#6366f1"></span>Attendance</div>
+      <div class="mod-chip"><span class="mod-dot" style="background:#6366f1"></span>Leave</div>
+      <div class="mod-chip"><span class="mod-dot" style="background:#6366f1"></span>Holiday</div>
+      <div class="mod-chip"><span class="mod-dot" style="background:#10b981"></span>Salary</div>
+      <div class="mod-chip"><span class="mod-dot" style="background:#10b981"></span>Payslip</div>
+      <div class="mod-chip"><span class="mod-dot" style="background:#10b981"></span>Loan</div>
+      <div class="mod-chip"><span class="mod-dot" style="background:#10b981"></span>Advance Salary</div>
+      <div class="mod-chip"><span class="mod-dot" style="background:#10b981"></span>Expense</div>
+      <div class="mod-chip"><span class="mod-dot" style="background:#3b82f6"></span>Job</div>
+      <div class="mod-chip"><span class="mod-dot" style="background:#3b82f6"></span>Candidate</div>
+      <div class="mod-chip"><span class="mod-dot" style="background:#3b82f6"></span>Pipeline</div>
+      <div class="mod-chip"><span class="mod-dot" style="background:#3b82f6"></span>Interview</div>
+      <div class="mod-chip"><span class="mod-dot" style="background:#3b82f6"></span>Offer Letter</div>
+      <div class="mod-chip"><span class="mod-dot" style="background:#6366f1"></span>Onboarding</div>
+      <div class="mod-chip"><span class="mod-dot" style="background:#6366f1"></span>Contract</div>
+      <div class="mod-chip"><span class="mod-dot" style="background:#6366f1"></span>Document</div>
+      <div class="mod-chip"><span class="mod-dot" style="background:#6366f1"></span>Training</div>
+      <div class="mod-chip"><span class="mod-dot" style="background:#6366f1"></span>Performance</div>
+      <div class="mod-chip"><span class="mod-dot" style="background:#6366f1"></span>Complaint</div>
+      <div class="mod-chip"><span class="mod-dot" style="background:#6366f1"></span>Warning</div>
+      <div class="mod-chip"><span class="mod-dot" style="background:#ef4444"></span>Termination</div>
+      <div class="mod-chip"><span class="mod-dot" style="background:#ef4444"></span>Resignation</div>
+      <div class="mod-chip"><span class="mod-dot" style="background:#0ea5e9"></span>Tenants</div>
+      <div class="mod-chip"><span class="mod-dot" style="background:#0ea5e9"></span>Subscriptions</div>
+      <div class="mod-chip"><span class="mod-dot" style="background:#0ea5e9"></span>Billing &amp; Invoices</div>
+      <div class="mod-chip"><span class="mod-dot" style="background:#0ea5e9"></span>Feature Flags</div>
+      <div class="mod-chip"><span class="mod-dot" style="background:#0ea5e9"></span>Integrations</div>
+      <div class="mod-chip"><span class="mod-dot" style="background:#0ea5e9"></span>SaaS Analytics</div>
+      <div class="mod-chip"><span class="mod-dot" style="background:#3b82f6"></span>Announcement</div>
+      <div class="mod-chip"><span class="mod-dot" style="background:#3b82f6"></span>Event</div>
+      <div class="mod-chip"><span class="mod-dot" style="background:#3b82f6"></span>Transfer</div>
+      <div class="mod-chip"><span class="mod-dot" style="background:#3b82f6"></span>Award</div>
+    </div>
+  </div>
+</section>
+
+<!-- TECH STACK -->
+<section id="stack">
+  <div class="container center">
+    <span class="section-label">Technical Foundation</span>
+    <h2 class="section-title">Production-grade technology choices</h2>
+    <p class="section-desc">Angular 11 + Spring Boot &mdash; battle-tested enterprise stack with PostgreSQL as the recommended database.</p>
+    <div class="stack-grid">
+      <div class="stack-card"><h4>Frontend</h4><span class="stack-tag">Angular 11</span><span class="stack-tag">Bootstrap 4</span><span class="stack-tag">RxJS 6</span><span class="stack-tag">ngx-charts</span><span class="stack-tag">DataTables</span></div>
+      <div class="stack-card"><h4>Backend</h4><span class="stack-tag">Spring Boot 2.5</span><span class="stack-tag">Spring Data JPA</span><span class="stack-tag">Spring Security</span><span class="stack-tag">Hibernate 5</span><span class="stack-tag">Stripe SDK</span></div>
+      <div class="stack-card"><h4>Database</h4><span class="stack-tag">PostgreSQL (default)</span><span class="stack-tag" style="color:#a5b4fc;border-color:rgba(99,102,241,.3);">MySQL</span><span class="stack-tag" style="color:#fcd34d;border-color:rgba(245,158,11,.3);">SQLite</span></div>
+      <div class="stack-card"><h4>Build &amp; Deploy</h4><span class="stack-tag">Maven Wrapper</span><span class="stack-tag">Angular CLI</span><span class="stack-tag">Java 11</span><span class="stack-tag">Node.js 14/16</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- COMPARISON -->
+<section class="alt-bg" id="compare">
+  <div class="container center">
+    <span class="section-label">Platform Comparison</span>
+    <h2 class="section-title">Why choose Humant</h2>
+    <p class="section-desc">Structured, self-hosted and purpose-built for real HR operations teams.</p>
+    <div class="comparison-wrapper">
+      <table class="comp-table">
+        <thead><tr><th style="text-align:left;">Feature</th><th class="brand-col">Humant</th><th>Typical HR SaaS</th><th>Spreadsheets</th></tr></thead>
+        <tbody>
+          <tr><td>Structured recruitment pipeline</td><td><span class="check">&#10003;</span></td><td>Partial</td><td><span class="cross">&#10007;</span></td></tr>
+          <tr><td>Full payroll pre-processing</td><td><span class="check">&#10003;</span></td><td>Partial</td><td><span class="cross">&#10007;</span></td></tr>
+          <tr><td>Multi-tenant SaaS architecture</td><td><span class="check">&#10003;</span></td><td><span class="check">&#10003;</span></td><td><span class="cross">&#10007;</span></td></tr>
+          <tr><td>Super Admin billing portal</td><td><span class="check">&#10003;</span></td><td><span class="cross">&#10007;</span></td><td><span class="cross">&#10007;</span></td></tr>
+          <tr><td>Self-hosted, full data ownership</td><td><span class="check">&#10003;</span></td><td><span class="cross">&#10007;</span></td><td><span class="check">&#10003;</span></td></tr>
+          <tr><td>Multi-database support</td><td><span class="check">&#10003;</span></td><td><span class="cross">&#10007;</span></td><td><span class="cross">&#10007;</span></td></tr>
+          <tr><td>GUI launcher for non-technical users</td><td><span class="check">&#10003;</span></td><td><span class="cross">&#10007;</span></td><td><span class="cross">&#10007;</span></td></tr>
+          <tr><td>Production deployment generator</td><td><span class="check">&#10003;</span></td><td><span class="cross">&#10007;</span></td><td><span class="cross">&#10007;</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section id="faq">
+  <div class="container center">
+    <span class="section-label">FAQ</span>
+    <h2 class="section-title">Common questions</h2>
+    <p class="section-desc">Everything you need to know before getting started.</p>
+    <div class="faq-grid" style="text-align:left;max-width:1100px;margin:0 auto;">
+      <div class="faq-card"><div class="faq-question"><span class="faq-q-bullet">Q</span>Does Humant require PostgreSQL?</div><p class="faq-answer">PostgreSQL is the default and recommended database. The launcher can switch to MySQL or SQLite for zero-configuration local development via the database selector in the setup wizard.</p></div>
+      <div class="faq-card"><div class="faq-question"><span class="faq-q-bullet">Q</span>What Java version is required?</div><p class="faq-answer">Java 11 is required by the Spring Boot 2.5 backend. The Maven wrapper handles Maven automatically &mdash; no global Maven install needed.</p></div>
+      <div class="faq-card"><div class="faq-question"><span class="faq-q-bullet">Q</span>Can I deploy to a cloud server?</div><p class="faq-answer">Yes. The deployment generator builds the Angular bundle, packages the Spring Boot JAR, and exports a complete deployment folder with an Nginx reverse proxy config example suitable for Ubuntu VPS, AWS EC2, Render or Railway.</p></div>
+      <div class="faq-card"><div class="faq-question"><span class="faq-q-bullet">Q</span>Why does npm install need --legacy-peer-deps?</div><p class="faq-answer">angular-datatables@10 has a peer dependency conflict with Angular 11. The legacy flag is required for npm 7+. The GUI launcher sets this automatically.</p></div>
+      <div class="faq-card"><div class="faq-question"><span class="faq-q-bullet">Q</span>How does multi-tenancy work?</div><p class="faq-answer">Each tenant is identified by a unique tenantCode used at login. A TenantResolutionFilter injects tenant context into every request, providing row-level data isolation without separate schemas.</p></div>
+      <div class="faq-card"><div class="faq-question"><span class="faq-q-bullet">Q</span>Is Stripe required for the app to run?</div><p class="faq-answer">No. Stripe keys default to placeholder values if not configured. All HR modules work independently. Stripe is only needed for the tenant subscription checkout flow.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER CTA -->
+<div class="footer-callband">
+  <div class="container center">
+    <div class="badge-premium" style="margin-bottom:28px;">&#10022; Ready to deploy</div>
+    <h2 class="accent-gradient-text">Start running Humant today.</h2>
+    <p>Open the launcher and have the full HR stack running in under five minutes. No cloud account required.</p>
+    <div class="cta-group">
+      <a href="../premium-docs/index.html" class="btn btn-primary">Read the Docs &rarr;</a>
+      <a href="../marketing/presentation.html" class="btn btn-success">Product Presentation</a>
+      <a href="../marketing/poster.html" class="btn btn-outline">Marketing Poster</a>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

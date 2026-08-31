@@ -89,6 +89,10 @@ public class TenantService {
         return tenantRepository.save(tenant);
     }
 
+    public void delete(Tenant tenant) {
+        tenantRepository.delete(tenant);
+    }
+
     public boolean codeExists(String tenantCode) {
         return tenantRepository.existsByTenantCode(tenantCode.toLowerCase().trim());
     }

@@ -29,6 +29,12 @@
     </div>
     <span class="dropdown-count">{{ roleLabel }}</span>
   </li>
+  <li *ngIf="isSuperAdmin">
+    <a class="dropdown-item user-menu-item" routerLink="/super-admin">
+      <i class="bi bi-shield-shaded"></i>
+      <span>Platform Admin Portal</span>
+    </a>
+  </li>
   <li>
     <a class="dropdown-item user-menu-item" routerLink="/profile">
       <i class="bi bi-person-circle"></i>

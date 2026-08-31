@@ -67,9 +67,10 @@ public class TenantResolutionFilter extends OncePerRequestFilter {
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
         String path = request.getServletPath();
-        // Skip tenant resolution for public registration + Stripe webhook endpoints
         return path.startsWith("/api/tenants/register")
                 || path.startsWith("/api/stripe/webhook")
-                || path.startsWith("/api/tenants/check");
+                || path.startsWith("/api/tenants/check")
+                // Super-admin endpoints are cross-tenant by design
+                || path.startsWith("/api/super-admin");
     }
 }

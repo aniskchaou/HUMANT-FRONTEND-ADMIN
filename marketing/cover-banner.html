@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" /><meta name="viewport" content="width=device-width,initial-scale=1.0" />
+<title>Humant — Product Cover Banner (590x300)</title>
+<style>
+  :root { --bg:#07101a; --brand:#0ea5e9; --brand2:#10b981; --accent:#f59e0b; --text:#f8fafc; --muted:#94a3b8; --line:rgba(255,255,255,0.1); }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { width:590px; height:300px; font-family:'Segoe UI',-apple-system,sans-serif; background:var(--bg); color:var(--text); position:relative; overflow:hidden; display:flex; padding:22px; user-select:none; }
+  body::before { content:""; position:absolute; inset:0; background-image:radial-gradient(circle at 1px 1px,rgba(148,163,184,.18) 1.1px,transparent 0); background-size:18px 18px; opacity:.32; pointer-events:none; z-index:0; }
+  .glow-r { position:absolute; top:-60px; right:-60px; width:380px; height:380px; background:radial-gradient(circle,rgba(14,165,233,.22) 0%,rgba(16,185,129,.1) 40%,transparent 70%); filter:blur(50px); z-index:0; }
+  .glow-l { position:absolute; bottom:-80px; left:60px; width:300px; height:300px; background:radial-gradient(circle,rgba(245,158,11,.1) 0%,transparent 70%); filter:blur(60px); z-index:0; }
+  .left { width:180px; height:100%; position:relative; z-index:1; display:flex; flex-direction:column; justify-content:center; }
+  .right { flex:1; position:relative; z-index:1; height:100%; }
+  .brand-row { display:flex; align-items:center; gap:10px; margin-bottom:10px; }
+  .logo-chip { width:36px; height:36px; border-radius:11px; background:linear-gradient(135deg,var(--brand) 0%,var(--brand2) 100%); display:grid; place-items:center; font-size:20px; font-weight:900; box-shadow:0 10px 22px rgba(14,165,233,.3); }
+  .brand-name { font-size:25px; font-weight:900; letter-spacing:-.04em; }
+  .tag { font-size:11px; font-weight:800; letter-spacing:.18em; color:var(--accent); text-transform:uppercase; margin-bottom:18px; }
+  .headline { font-size:22px; line-height:.96; font-weight:900; letter-spacing:-.04em; margin-bottom:14px; }
+  .pill-list { display:grid; gap:7px; }
+  .pill { display:flex; align-items:center; gap:8px; font-size:11.5px; color:var(--muted); }
+  .dot { width:6px; height:6px; border-radius:50%; background:var(--brand); box-shadow:0 0 10px rgba(14,165,233,.6); }
+  .frame { height:100%; border-radius:16px; overflow:hidden; border:1px solid var(--line); background:rgba(7,16,25,.95); box-shadow:0 24px 50px rgba(0,0,0,.4); transform:perspective(1200px) rotateY(-12deg) rotateX(7deg) rotateZ(-2deg); }
+  .frame-bar { height:22px; border-bottom:1px solid var(--line); background:rgba(2,8,23,.9); display:flex; align-items:center; justify-content:center; font-size:8px; color:var(--muted); font-family:Consolas,monospace; letter-spacing:.08em; }
+  .frame img { width:100%; height:calc(100% - 22px); object-fit:cover; display:block; }
+</style>
+</head>
+<body>
+  <div class="glow-r"></div><div class="glow-l"></div>
+  <section class="left">
+    <div class="brand-row"><div class="logo-chip">H</div><div class="brand-name">Humant</div></div>
+    <div class="tag">HRMS Platform</div>
+    <div class="headline">Hire.<br/>Manage.<br/>Pay.</div>
+    <div class="pill-list">
+      <div class="pill"><span class="dot"></span>Recruitment pipeline</div>
+      <div class="pill"><span class="dot" style="background:var(--brand2);box-shadow:0 0 10px rgba(16,185,129,.6);"></span>Workforce ops</div>
+      <div class="pill"><span class="dot" style="background:var(--accent);box-shadow:0 0 10px rgba(245,158,11,.5);"></span>Payroll workflows</div>
+    </div>
+  </section>
+  <section class="right">
+    <div class="frame">
+      <div class="frame-bar">humant.local/dashboard</div>
+      <img src="../screenshots/screenshot.png" alt="Humant interface" />
+    </div>
+  </section>
+</body>
+</html>

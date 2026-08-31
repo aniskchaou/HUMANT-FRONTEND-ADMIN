@@ -1,0 +1,9 @@
+{
+  "dialect": "postgres",
+  "sqliteStorage": "./humant.db",
+  "host": "localhost",
+  "port": "5432",
+  "dbName": "humant",
+  "username": "postgres",
+  "password": "admin"
+}

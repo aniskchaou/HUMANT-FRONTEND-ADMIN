@@ -1,0 +1,379 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Humant — Product Documentation Guide</title>
+  <meta name="description" content="Humant HRMS offline documentation: product overview, modules, roles, quick start, launcher, deployment generator, architecture, and operations." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/styles.css" />
+</head>
+<body>
+<div class="shell">
+
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <img src="../screenshots/logo.png" alt="Humant" class="sidebar-logo" />
+      <div><div class="sidebar-title">Humant Docs</div><div class="sidebar-sub">Implementation &amp; User Guide</div></div>
+    </div>
+    <button class="menu-close" id="menuClose">&#10005; Close</button>
+    <nav class="side-nav">
+      <div class="nav-section">Overview</div>
+      <a href="#overview">1. Product Overview</a>
+      <a href="#features">2. Features</a>
+      <a href="#roles">3. User Roles</a>
+      <div class="nav-section">Getting Started</div>
+      <a href="#requirements">4. System Requirements</a>
+      <a href="#quickstart">5. Quick Start</a>
+      <a href="#launcher">6. GUI Launcher</a>
+      <a href="#cli-setup">7. CLI Setup</a>
+      <a href="#database">8. Database Setup</a>
+      <div class="nav-section">Deployment</div>
+      <a href="#deployment-generator">9. Deployment Generator</a>
+      <a href="#vps-deploy">10. VPS Deployment</a>
+      <a href="#nginx-setup">11. Nginx Configuration</a>
+      <a href="#env-vars">12. Environment Variables</a>
+      <div class="nav-section">User Guide</div>
+      <a href="#module-hr">13. HR Modules</a>
+      <a href="#module-payroll">14. Payroll Modules</a>
+      <a href="#module-recruitment">15. Recruitment Modules</a>
+      <a href="#module-config">16. Configuration Modules</a>
+      <div class="nav-section">Architecture</div>
+      <a href="#architecture">17. Architecture</a>
+      <a href="#api">18. API Overview</a>
+      <div class="nav-section">Reference</div>
+      <a href="#faq">19. FAQ</a>
+      <a href="#changelog">20. Change Log</a>
+    </nav>
+    <div class="sidebar-note">
+      <strong>Maintenance rule</strong>
+      <p>Update screenshots and module tables on each release so readers always see current UI.</p>
+    </div>
+  </aside>
+
+  <main class="content">
+    <header class="doc-hero">
+      <button class="menu-open" id="menuOpen">&#9776; Menu</button>
+      <div class="hero-copy">
+        <span class="eyebrow">Official Documentation</span>
+        <h1>Humant Product Documentation</h1>
+        <p>End-to-end guide for HR teams, administrators, and developers: platform overview, feature usage, role model, database setup, launcher walkthrough, deployment instructions, and module reference.</p>
+        <div class="hero-kpis">
+          <div><strong>35+</strong><span>Business Modules</span></div>
+          <div><strong>5</strong><span>Role Profiles</span></div>
+          <div><strong>3</strong><span>DB Options</span></div>
+        </div>
+      </div>
+      <div class="hero-browser">
+        <div class="browser-bar"><div class="dots"><span class="d1"></span><span class="d2"></span><span class="d3"></span></div><span>humant.local/dashboard</span></div>
+        <img src="../screenshots/screenshot.png" alt="Humant app" />
+      </div>
+    </header>
+
+    <section id="overview" class="card">
+      <h2>1. Product Overview</h2>
+      <p><strong>Humant</strong> is a full Human Resource Management System (HRMS) that centralizes people operations across recruitment, employee administration, compensation workflows, documentation, compliance, and team communication.</p>
+      <div class="callout success"><strong>In short:</strong> Humant replaces disconnected spreadsheets, email chains, and single-purpose tools with one organized operational system where each role sees exactly what they need.</div>
+      <h3 style="margin-top:24px;">What Humant covers</h3>
+      <div class="grid three">
+        <article><h3>Hire</h3><ul><li>Job postings and candidate records</li><li>Multi-stage pipeline tracking</li><li>Structured interview coordination</li><li>Offer letter generation</li></ul></article>
+        <article><h3>Operate</h3><ul><li>Employee profile management</li><li>Attendance and leave tracking</li><li>Contract and document management</li><li>Onboarding and offboarding</li></ul></article>
+        <article><h3>Pay</h3><ul><li>Salary setup and calculation</li><li>Monthly payslip generation</li><li>Loan and advance salary tracking</li><li>Expense claim management</li></ul></article>
+      </div>
+    </section>
+
+    <section id="features" class="card">
+      <h2>2. Features</h2>
+      <div class="grid three">
+        <article><h3>&#128273; Authentication</h3><ul><li>JWT session management</li><li>Role-protected routes</li><li>Forgot password flow</li></ul></article>
+        <article><h3>&#128101; Employee Management</h3><ul><li>Full employee lifecycle</li><li>Department and designation mapping</li><li>Document repository</li></ul></article>
+        <article><h3>&#128197; Attendance &amp; Leave</h3><ul><li>Daily attendance recording</li><li>Leave request workflow</li><li>Holiday calendar</li></ul></article>
+        <article><h3>&#128176; Compensation</h3><ul><li>Salary structure and payslip</li><li>Loan and advance management</li><li>Expense reimbursement</li></ul></article>
+        <article><h3>&#127891; Recruitment</h3><ul><li>Job and candidate pipeline</li><li>Interview scheduling</li><li>Offer letter templates</li></ul></article>
+        <article><h3>&#128202; Performance</h3><ul><li>Goal setting and reviews</li><li>360 feedback cycles</li><li>Training and development</li></ul></article>
+        <article><h3>&#128275; Compliance</h3><ul><li>Warning and complaint tracking</li><li>Notice management</li><li>Termination and resignation flows</li></ul></article>
+        <article><h3>&#128172; Communication</h3><ul><li>Internal announcements</li><li>Direct messaging</li><li>Notification center</li></ul></article>
+        <article><h3>&#128293; Integrations</h3><ul><li>Stripe payment processing</li><li>Email notifications</li><li>OpenAPI (Swagger) UI</li></ul></article>
+      </div>
+    </section>
+
+    <section id="roles" class="card">
+      <h2>3. User Roles</h2>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Role</th><th>Primary Access</th><th>Typical Daily Actions</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Admin</strong></td><td>All modules, settings, users</td><td>Configure master data, assign roles, audit reports</td></tr>
+            <tr><td><strong>HR Manager</strong></td><td>Workforce, recruitment, compliance</td><td>Manage employee lifecycle, process leave and attendance, run onboarding</td></tr>
+            <tr><td><strong>Payroll / Finance</strong></td><td>Salary, payslip, loans, expenses</td><td>Process payroll cycles, approve expense claims, manage loans</td></tr>
+            <tr><td><strong>Department Manager</strong></td><td>Team attendance, interviews, performance</td><td>Review team attendance, give performance input, participate in interviews</td></tr>
+            <tr><td><strong>Employee</strong></td><td>Self-service profile, leave, payslip</td><td>Submit leave requests, view payslips, check announcements</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="requirements" class="card">
+      <h2>4. System Requirements</h2>
+      <div class="grid two">
+        <article><h3>Runtime</h3><ul><li>Node.js 14.x or 16.x (Angular 11 compatibility)</li><li>npm 6+ or 8+</li><li>Java 11 JDK (Spring Boot 2.5 backend)</li></ul></article>
+        <article><h3>Database</h3><ul><li><strong>PostgreSQL 12+</strong> — recommended for production</li><li><strong>MySQL 8+</strong> — supported alternative</li><li><strong>SQLite</strong> — zero-config for local development</li></ul></article>
+      </div>
+      <div class="callout info" style="margin-top:16px;">The GUI launcher (Step 1) checks prerequisites automatically and offers one-click install via Winget (Windows), Homebrew (macOS), or apt-get (Linux).</div>
+    </section>
+
+    <section id="quickstart" class="card">
+      <h2>5. Quick Start</h2>
+      <p>Three approaches — choose the one that matches your context.</p>
+      <h3 style="margin-top:20px;">Option A — GUI Launcher (recommended)</h3>
+      <p>Double-click <code>launcher.bat</code> (Windows) or run <code>./launcher.sh</code> (macOS/Linux). The browser opens at <code>http://localhost:3030</code>. Follow the 4-step wizard.</p>
+      <h3 style="margin-top:20px;">Option B — Manual CLI</h3>
+      <pre>npm install --legacy-peer-deps
+
+# PostgreSQL database
+psql -U postgres -c "CREATE DATABASE humant;"
+
+# Backend (separate terminal)
+cd backend && ./mvnw spring-boot:run
+
+# Frontend
+npm run serve -- --port 4201</pre>
+      <p>Frontend: <strong>http://localhost:4201</strong> &nbsp;|&nbsp; Backend API: <strong>http://localhost:8080</strong></p>
+    </section>
+
+    <section id="launcher" class="card">
+      <h2>6. GUI Launcher</h2>
+      <p>The launcher is a zero-dependency Node.js server that provides a browser-based control panel at <code>http://localhost:3030</code>.</p>
+      <h3 style="margin-top:20px;">4-step wizard</h3>
+      <div class="grid two" style="margin-top:12px;">
+        <article><h3>Step 1 — Prerequisites</h3><p>Checks Node.js, npm, Java 11, and Git. Shows version info. Offers auto-install via OS package manager.</p></article>
+        <article><h3>Step 2 — Database</h3><p>Select SQLite (zero-config), PostgreSQL, or MySQL. Configure host/port/credentials. Config saved to <code>backend/launcher-config.json</code>.</p></article>
+        <article><h3>Step 3 — Install</h3><p>Runs <code>npm install --legacy-peer-deps</code> for Angular. Progress bar tracks installation. Backend Maven deps resolve automatically at start.</p></article>
+        <article><h3>Step 4 — Launch</h3><p>Start/stop button pair. Boots Angular on 4201 and Spring Boot on 8080 simultaneously. Live activity log at the bottom.</p></article>
+      </div>
+      <div class="callout warning" style="margin-top:16px;"><strong>Note:</strong> The launcher passes database env vars to the backend process on start. Changing the dialect after first run may require <code>spring.jpa.hibernate.ddl-auto=create</code> temporarily to reinitialize schema.</div>
+    </section>
+
+    <section id="cli-setup" class="card">
+      <h2>7. CLI Setup Details</h2>
+      <h3>Frontend dependency conflicts</h3>
+      <p>Angular 11 + <code>angular-datatables@10</code> has a peer dependency conflict with npm 7+. Always install with:</p>
+      <pre>npm install --legacy-peer-deps</pre>
+      <h3 style="margin-top:20px;">Frontend development server</h3>
+      <pre># Standard Angular dev server
+npm run serve -- --port 4201
+
+# Production build
+npm run build</pre>
+      <h3 style="margin-top:20px;">Backend startup</h3>
+      <pre>cd backend
+
+# Windows
+.\mvnw.cmd spring-boot:run
+
+# macOS / Linux
+./mvnw spring-boot:run</pre>
+    </section>
+
+    <section id="database" class="card">
+      <h2>8. Database Setup</h2>
+      <h3>PostgreSQL (default)</h3>
+      <pre>CREATE DATABASE humant;
+-- application.properties default: localhost:5432, user=postgres</pre>
+      <p>Backend config: <code>backend/src/main/resources/application.properties</code>. Override at runtime via <code>HUMANT_DATASOURCE_*</code> environment variables.</p>
+      <h3 style="margin-top:20px;">SQLite (zero-config)</h3>
+      <p>Set dialect to <code>sqlite</code> in the launcher. The backend creates <code>humant.db</code> automatically. No setup required.</p>
+      <h3 style="margin-top:20px;">MySQL</h3>
+      <pre>CREATE DATABASE humant CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;</pre>
+      <p>Set dialect to <code>mysql</code> in the launcher and provide host/port/credentials. The MySQL JDBC driver is already bundled in <code>pom.xml</code>.</p>
+    </section>
+
+    <section id="deployment-generator" class="card">
+      <h2>9. Deployment Generator</h2>
+      <p>The deployment generator creates a self-contained folder ready for upload to any JVM-capable server or cloud platform.</p>
+      <pre>node generate-deployment-version.js
+# or double-click
+generate-deployment-version.bat</pre>
+      <p>Opens a browser UI at <code>http://localhost:3040</code>.</p>
+      <h3 style="margin-top:20px;">What gets generated</h3>
+      <div class="grid two" style="margin-top:12px;">
+        <article><h3>frontend/</h3><p>Production Angular build output (<code>dist/my-app-angular</code> contents), ready for Nginx or CDN.</p></article>
+        <article><h3>backend/humant.jar</h3><p>Packaged Spring Boot JAR from <code>backend/target</code> — runs with <code>java -jar</code>.</p></article>
+        <article><h3>config/application-production.properties</h3><p>Production Spring Boot properties with your selected database, Stripe keys, and public URL.</p></article>
+        <article><h3>config/nginx.conf.example</h3><p>Same-origin Nginx config: serves <code>frontend/</code> at root and proxies <code>/api</code> to the backend.</p></article>
+      </div>
+    </section>
+
+    <section id="vps-deploy" class="card">
+      <h2>10. VPS Deployment</h2>
+      <pre>sudo apt update
+sudo apt install -y nginx postgresql openjdk-11-jre-headless ufw
+
+# Upload deployment bundle to server
+scp -r deployment-builds/humant-deployment-* user@server:/var/www/humant/
+
+# Create database
+sudo -u postgres psql -c "CREATE DATABASE humant;"
+
+# Copy nginx config
+sudo cp /var/www/humant/config/nginx.conf.example /etc/nginx/sites-available/humant
+sudo ln -s /etc/nginx/sites-available/humant /etc/nginx/sites-enabled/
+sudo nginx -t && sudo systemctl reload nginx
+
+# Start backend (systemd service recommended for production)
+java -jar /var/www/humant/backend/humant.jar \
+  --spring.config.location=file:/var/www/humant/config/application-production.properties</pre>
+    </section>
+
+    <section id="nginx-setup" class="card">
+      <h2>11. Nginx Configuration</h2>
+      <p>The generated <code>nginx.conf.example</code> uses a same-origin reverse proxy model:</p>
+      <pre>server {
+    listen 80;
+    server_name your-domain.example;
+
+    root /var/www/humant/frontend;
+    index index.html;
+
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+
+    location /api/ {
+        proxy_pass http://127.0.0.1:8080;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+    }
+}</pre>
+      <p>With this setup, the Angular app calls <code>/api</code> relative to the same origin, so no CORS configuration is needed and the <code>HUMANT_DATASOURCE_URL</code> in the Angular build resolves automatically.</p>
+    </section>
+
+    <section id="env-vars" class="card">
+      <h2>12. Environment Variables</h2>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Variable</th><th>Default</th><th>Description</th></tr></thead>
+          <tbody>
+            <tr><td><code>HUMANT_DATASOURCE_URL</code></td><td>jdbc:postgresql://localhost:5432/humant</td><td>JDBC connection URL</td></tr>
+            <tr><td><code>HUMANT_DATASOURCE_USERNAME</code></td><td>postgres</td><td>Database username</td></tr>
+            <tr><td><code>HUMANT_DATASOURCE_PASSWORD</code></td><td>admin</td><td>Database password</td></tr>
+            <tr><td><code>HUMANT_DATASOURCE_DRIVER</code></td><td>org.postgresql.Driver</td><td>JDBC driver class</td></tr>
+            <tr><td><code>HUMANT_JPA_DIALECT</code></td><td>org.hibernate.dialect.PostgreSQLDialect</td><td>Hibernate dialect</td></tr>
+            <tr><td><code>APP_BASE_URL</code></td><td>http://localhost:4201</td><td>Public base URL for Stripe redirects</td></tr>
+            <tr><td><code>STRIPE_SECRET_KEY</code></td><td>sk_test_placeholder</td><td>Stripe secret API key</td></tr>
+            <tr><td><code>STRIPE_WEBHOOK_SECRET</code></td><td>whsec_placeholder</td><td>Stripe webhook signing secret</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="module-hr" class="card">
+      <h2>13. HR Modules</h2>
+      <div class="grid three">
+        <article><h3>Employee</h3><p>Create and manage employee profiles with personal details, employment info, and linked records. The central entity for all HR operations.</p></article>
+        <article><h3>Attendance</h3><p>Daily attendance records, biometric import support, and monthly summaries. Feeds into payroll pre-processing.</p></article>
+        <article><h3>Leave</h3><p>Leave request workflow with type-based balance tracking. Managers receive and approve requests. Integrates with holiday calendar.</p></article>
+        <article><h3>Contract</h3><p>Employee contract templates with type classification (permanent, fixed-term, freelance). Tracks start/end dates and renewal events.</p></article>
+        <article><h3>Document</h3><p>Document repository per employee. Supports multi-version uploads, category tagging, and access-level controls (admin-only / employee-visible).</p></article>
+        <article><h3>Onboarding</h3><p>Checklist-based onboarding with task assignment to HR and the new hire. Tracks completion percentage and surfaces blockers.</p></article>
+        <article><h3>Warning / Complaint</h3><p>Formal record of workplace warnings and complaints with severity classification, resolution notes, and manager sign-off.</p></article>
+        <article><h3>Notice</h3><p>Internal notice board with target audience (department, designation, or all). Publication date tracking and acknowledgement status.</p></article>
+        <article><h3>Termination / Resign</h3><p>Off-boarding workflows covering exit interviews, clearance checklists, final settlement calculation, and documentation.</p></article>
+      </div>
+    </section>
+
+    <section id="module-payroll" class="card">
+      <h2>14. Payroll Modules</h2>
+      <div class="grid three">
+        <article><h3>Salary</h3><p>Salary structure per employee: base, allowances, and deduction components. Payroll run generates payslips in bulk.</p></article>
+        <article><h3>Payslip</h3><p>Monthly payslip generation with downloadable PDF output. Includes earnings, deductions, and net pay summary.</p></article>
+        <article><h3>Loan</h3><p>Loan disbursement and installment-based repayment tracking. Automatic deduction from payslip when linked.</p></article>
+        <article><h3>Advance Salary</h3><p>Salary advance requests with approval workflow. Deducted from next payslip cycle automatically.</p></article>
+        <article><h3>Expense</h3><p>Employee expense claims with receipt attachment, category classification, manager review, and reimbursement tracking.</p></article>
+      </div>
+    </section>
+
+    <section id="module-recruitment" class="card">
+      <h2>15. Recruitment Modules</h2>
+      <div class="grid three">
+        <article><h3>Job</h3><p>Job postings with requirements, department, designation, and open positions count. Published status controls visibility.</p></article>
+        <article><h3>Candidate</h3><p>Candidate master record with contact info, CV, and application history across multiple positions.</p></article>
+        <article><h3>Job Application</h3><p>Link candidates to open jobs. Track application date and current status within the hiring pipeline.</p></article>
+        <article><h3>Pipeline</h3><p>Kanban-style pipeline with configurable stages. Move candidates between stages via drag or status dropdowns.</p></article>
+        <article><h3>Interview</h3><p>Interview scheduling linked to candidates and jobs. Records interviewer, date, outcome, and feedback notes.</p></article>
+        <article><h3>Offer Letter</h3><p>Offer letter generation from templates. Links to candidate and position. Tracks sent and acceptance dates.</p></article>
+      </div>
+    </section>
+
+    <section id="module-config" class="card">
+      <h2>16. Configuration Modules</h2>
+      <p>These modules provide the master data that all operational modules reference.</p>
+      <div class="grid three">
+        <article><h3>Country &amp; City</h3><p>Geographic reference data for employee addresses and office locations.</p></article>
+        <article><h3>Department</h3><p>Organizational hierarchy — departments and sub-departments with manager assignment.</p></article>
+        <article><h3>Designation</h3><p>Job titles mapped to seniority levels and compensation bands.</p></article>
+        <article><h3>Leave Type</h3><p>Define leave categories (annual, sick, parental) with entitlement rules and carry-forward policy.</p></article>
+        <article><h3>Contract Type</h3><p>Employment relationship classifications used across contract and employee modules.</p></article>
+        <article><h3>Training Type</h3><p>Training category taxonomy for organizing training records and reports.</p></article>
+      </div>
+    </section>
+
+    <section id="architecture" class="card">
+      <h2>17. Architecture</h2>
+      <div class="grid two">
+        <article><h3>Frontend — Angular 11</h3><p>SPA at repository root. Builds to <code>dist/my-app-angular</code>. Development proxy at <code>proxy.conf.json</code> forwards <code>/api</code> to port 8080. The <code>URL_BASE</code> in <code>src/app/main/urls/urls.ts</code> resolves to the same origin in production.</p></article>
+        <article><h3>Backend — Spring Boot 2.5</h3><p>REST API in <code>backend/</code>. Spring Data JPA with Hibernate. Spring Security JWT. PostgreSQL default with SQLite and MySQL support via env-var dialect switching.</p></article>
+      </div>
+      <div class="callout warning" style="margin-top:16px;"><strong>Same-origin deployment:</strong> Host the Angular build behind Nginx and proxy <code>/api</code> to the Spring Boot service on port 8080. This avoids CORS and keeps the frontend API base URL working without code changes.</div>
+    </section>
+
+    <section id="api" class="card">
+      <h2>18. API Overview</h2>
+      <p>The Spring Boot backend exposes a REST API on port 8080. Swagger UI is available at <code>http://localhost:8080/swagger-ui.html</code> when running locally.</p>
+      <pre>GET  /api/employees
+POST /api/employees
+GET  /api/employees/{id}
+PUT  /api/employees/{id}
+DELETE /api/employees/{id}
+
+GET  /api/attendances
+POST /api/attendances
+POST /api/attendances/biometric-import
+
+GET  /api/pay-slips
+POST /api/pay-slips
+POST /api/payrolls/run</pre>
+      <p>Authentication uses JWT Bearer tokens. Include <code>Authorization: Bearer &lt;token&gt;</code> in all protected endpoints.</p>
+    </section>
+
+    <section id="faq" class="card">
+      <h2>19. FAQ</h2>
+      <div class="faq-list">
+        <article><h3>Does Humant require PostgreSQL?</h3><p>PostgreSQL is the default and recommended database. The launcher can switch to MySQL or SQLite for zero-configuration local development. Production deployments should use PostgreSQL or MySQL for reliability and concurrent access support.</p></article>
+        <article><h3>Why does npm install fail?</h3><p><code>angular-datatables@10</code> has a peer dependency conflict with Angular 11 on npm 7+. Always install with <code>npm install --legacy-peer-deps</code>. The launcher does this automatically in Step 3.</p></article>
+        <article><h3>What Java version is required?</h3><p>Java 11 is required by Spring Boot 2.5. The Maven wrapper (<code>mvnw</code> / <code>mvnw.cmd</code>) handles Maven automatically — no global Maven installation is needed.</p></article>
+        <article><h3>How do I deploy to a cloud server?</h3><p>Use the Deployment Generator (port 3040) to build a bundle. Then upload the bundle to your server and use the included Nginx config to serve frontend files and proxy <code>/api</code> to the backend JAR.</p></article>
+        <article><h3>How do I change the default admin credentials?</h3><p>Default credentials are seeded via <code>backend/src/main/resources/data.sql</code>. Edit that file before first run or update credentials through the admin panel after the first login.</p></article>
+      </div>
+    </section>
+
+    <section id="changelog" class="card">
+      <h2>20. Change Log</h2>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Version</th><th>Date</th><th>Changes</th></tr></thead>
+          <tbody>
+            <tr><td>1.1.0</td><td>2026-08-02</td><td>Added GUI launcher (3030), deployment generator (3040), multi-database support (SQLite/MySQL/PG), marketing kit, premium docs site, and deployment-aware frontend API base.</td></tr>
+            <tr><td>1.0.0</td><td>Initial</td><td>Angular 11 frontend + Spring Boot 2.5 backend with 35+ HR modules, role-based security, Stripe integration, and PostgreSQL default configuration.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+  </main>
+</div>
+<script src="assets/app.js"></script>
+</body>
+</html>

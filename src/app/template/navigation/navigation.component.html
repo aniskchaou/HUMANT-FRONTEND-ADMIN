@@ -31,7 +31,7 @@
     <div class="sidebar-menu active">
       <ul class="menu">
         <li class="menu-caption">Overview</li>
-        <li class="sidebar-item" *ngIf="accessControlService.canAccessRoute('/dashboard')" [class.active]="isRouteActive('/dashboard')">
+        <li class="sidebar-item" *ngIf="!isSuperAdmin && accessControlService.canAccessRoute('/dashboard')" [class.active]="isRouteActive('/dashboard')">
           <a routerLink="/dashboard" class="sidebar-link">
             <i class="bi bi-grid-fill"></i>
             <span>Executive Dashboard</span>
@@ -39,6 +39,19 @@
         </li>
 
         <li class="menu-caption">Operations</li>
+
+        <!-- SUPER_ADMIN: show only platform management, no HR modules -->
+        <ng-container *ngIf="isSuperAdmin">
+          <li class="sidebar-item" [class.active]="isRouteActive('/super-admin')">
+            <a routerLink="/super-admin" class="sidebar-link">
+              <i class="bi bi-shield-shaded"></i>
+              <span>Platform Admin Portal</span>
+            </a>
+          </li>
+        </ng-container>
+
+        <!-- Regular roles: show filtered HR section menu -->
+        <ng-container *ngIf="!isSuperAdmin">
         <li
           class="sidebar-item has-sub"
           *ngFor="let section of visibleSections"
@@ -65,6 +78,7 @@
             </li>
           </ul>
         </li>
+        </ng-container>
       </ul>
     </div>
 

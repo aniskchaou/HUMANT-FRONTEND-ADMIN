@@ -1,71 +1,2107 @@
-<div class="sa-shell">
-  <div class="sa-header">
-    <h1>Platform Administration</h1>
-    <p>Manage all tenant workspaces.</p>
+<!-- ─── TOPBAR ─────────────────────────────────────────────────────────────── -->
+<div class="sa-topbar">
+  <div class="sa-topbar-brand">
+    <span class="sa-topbar-logo">H</span>
+    <span class="sa-topbar-name">Humant</span>
+    <span class="sa-topbar-sep">|</span>
+    <span class="sa-topbar-label">Super Admin Portal</span>
   </div>
-
-  <div class="sa-metrics">
-    <div class="sa-metric">
-      <strong>{{ tenants.length }}</strong>
-      <span>Total tenants</span>
-    </div>
-    <div class="sa-metric">
-      <strong>{{ activeCount }}</strong>
-      <span>Active</span>
-    </div>
-    <div class="sa-metric">
-      <strong>{{ suspendedCount }}</strong>
-      <span>Suspended</span>
-    </div>
-    <div class="sa-metric">
-      <strong>{{ paidCount }}</strong>
-      <span>Paid plans</span>
-    </div>
-  </div>
-
-  <div class="alert alert-success" *ngIf="successMessage">{{ successMessage }}</div>
-  <div class="alert alert-danger" *ngIf="errorMessage">{{ errorMessage }}</div>
-
-  <div class="sa-loading" *ngIf="loading">Loading tenants...</div>
-
-  <div class="sa-table-wrapper" *ngIf="!loading">
-    <table class="sa-table">
-      <thead>
-        <tr>
-          <th>Code</th>
-          <th>Company</th>
-          <th>Email</th>
-          <th>Plan</th>
-          <th>Status</th>
-          <th>Created</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let tenant of tenants">
-          <td><code>{{ tenant.tenantCode }}</code></td>
-          <td>{{ tenant.companyName }}</td>
-          <td>{{ tenant.adminEmail }}</td>
-          <td>
-            <select class="sa-plan-select" (change)="changePlan(tenant.tenantCode, $any($event.target).value)">
-              <option value="FREE" [selected]="tenant.plan === 'FREE'">Free</option>
-              <option value="STARTER" [selected]="tenant.plan === 'STARTER'">Starter</option>
-              <option value="PROFESSIONAL" [selected]="tenant.plan === 'PROFESSIONAL'">Professional</option>
-              <option value="ENTERPRISE" [selected]="tenant.plan === 'ENTERPRISE'">Enterprise</option>
-            </select>
-          </td>
-          <td>
-            <span class="sa-status-badge" [class.sa-active]="tenant.status === 'ACTIVE'" [class.sa-suspended]="tenant.status === 'SUSPENDED'">
-              {{ tenant.status }}
-            </span>
-          </td>
-          <td>{{ tenant.createdAt | date:'mediumDate' }}</td>
-          <td class="sa-actions">
-            <button class="btn btn-sm btn-light" (click)="activate(tenant.tenantCode)" *ngIf="tenant.status !== 'ACTIVE'">Activate</button>
-            <button class="btn btn-sm btn-outline-danger" (click)="suspend(tenant.tenantCode)" *ngIf="tenant.status === 'ACTIVE'">Suspend</button>
-          </td>
-        </tr>
-      </tbody>
-    </table>
+  <div class="sa-topbar-actions">
+    <button class="sa-topbar-refresh" (click)="loadStats(); loadTenants()" title="Refresh data">
+      <i class="bi bi-arrow-clockwise"></i>
+    </button>
+    <span class="sa-topbar-user"><i class="bi bi-shield-shaded"></i> superadmin</span>
+    <button class="sa-topbar-logout" (click)="doLogout()">
+      <i class="bi bi-box-arrow-right"></i> Sign out
+    </button>
   </div>
 </div>
+
+<!-- ─── PORTAL BODY ──────────────────────────────────────────────────────── -->
+<div class="sa-portal">
+
+  <!-- ─── LEFT SIDEBAR ─────────────────────────────────────────────────── -->
+  <aside class="sa-sidebar">
+    <div class="sa-sidebar-label">Platform</div>
+
+    <button class="sa-nav-item" [class.sa-nav-active]="activeSection==='overview'"   (click)="setSection('overview')">
+      <i class="bi bi-speedometer2"></i><span>Overview</span>
+    </button>
+    <button class="sa-nav-item" [class.sa-nav-active]="activeSection==='analytics'"  (click)="setSection('analytics')">
+      <i class="bi bi-bar-chart-line"></i><span>Analytics</span>
+    </button>
+    <button class="sa-nav-item" [class.sa-nav-active]="activeSection==='tenants'"    (click)="setSection('tenants')">
+      <i class="bi bi-building"></i><span>Tenants</span>
+      <span class="sa-nav-badge">{{ tenants.length }}</span>
+    </button>
+
+    <div class="sa-sidebar-divider"></div>
+
+    <button class="sa-nav-item" [class.sa-nav-active]="activeSection==='subscriptions'" (click)="setSection('subscriptions')">
+      <i class="bi bi-arrow-repeat"></i><span>Subscriptions</span>
+    </button>
+    <button class="sa-nav-item" [class.sa-nav-active]="activeSection==='plans'"      (click)="setSection('plans')">
+      <i class="bi bi-layers"></i><span>Plans &amp; Pricing</span>
+      <span class="sa-nav-badge" *ngIf="saasPlan.length">{{ saasPlan.length }}</span>
+    </button>
+    <button class="sa-nav-item" [class.sa-nav-active]="activeSection==='features'"   (click)="setSection('features')">
+      <i class="bi bi-toggles"></i><span>Feature Flags</span>
+      <span class="sa-nav-badge" *ngIf="featureFlags.length">{{ featureFlags.length }}</span>
+    </button>
+
+    <div class="sa-sidebar-label">Finance</div>
+
+    <button class="sa-nav-item" [class.sa-nav-active]="activeSection==='billing-payments'" (click)="setSection('billing-payments')">
+      <i class="bi bi-receipt"></i><span>Billing &amp; Payments</span>
+    </button>
+
+    <div class="sa-sidebar-label">Customers</div>
+
+    <button class="sa-nav-item" [class.sa-nav-active]="activeSection==='customer360'" (click)="setSection('customer360')">
+      <i class="bi bi-person-lines-fill"></i><span>Customer 360°</span>
+    </button>
+
+    <div class="sa-sidebar-label">Admin</div>
+
+    <button class="sa-nav-item" [class.sa-nav-active]="activeSection==='platform-users'" (click)="setSection('platform-users')">
+      <i class="bi bi-shield-person"></i><span>Platform Users</span>
+    </button>
+    <button class="sa-nav-item" [class.sa-nav-active]="activeSection==='platform-roles'" (click)="setSection('platform-roles')">
+      <i class="bi bi-key"></i><span>Roles &amp; Permissions</span>
+    </button>
+
+    <div class="sa-sidebar-label">Intelligence</div>
+
+    <button class="sa-nav-item" [class.sa-nav-active]="activeSection==='saas-analytics'" (click)="setSection('saas-analytics')">
+      <i class="bi bi-graph-up"></i><span>SaaS Analytics</span>
+    </button>
+    <button class="sa-nav-item" [class.sa-nav-active]="activeSection==='integrations'" (click)="setSection('integrations')">
+      <i class="bi bi-plug"></i><span>Integrations</span>
+      <span class="sa-nav-badge" *ngIf="integrations.length">{{ integrations.length }}</span>
+    </button>
+
+    <div class="sa-sidebar-divider"></div>
+
+    <div class="sa-sidebar-metric" *ngIf="stats">
+      <div class="sa-sm-label"><i class="bi bi-currency-dollar"></i> Est. MRR</div>
+      <div class="sa-sm-value">{{ formatMrr(stats.estimatedMrrCents) }}</div>
+    </div>
+    <div class="sa-sidebar-metric" *ngIf="stats">
+      <div class="sa-sm-label"><i class="bi bi-check-circle-fill" style="color:#10b981"></i> Active</div>
+      <div class="sa-sm-value">{{ stats.activeTenants }} / {{ stats.totalTenants }}</div>
+    </div>
+  </aside>
+
+  <!-- ─── MAIN CONTENT ─────────────────────────────────────────────────── -->
+  <main class="sa-main">
+    <div class="alert alert-success" *ngIf="successMessage"><i class="bi bi-check-circle"></i> {{ successMessage }}</div>
+    <div class="alert alert-danger"  *ngIf="errorMessage"><i class="bi bi-exclamation-triangle"></i> {{ errorMessage }}</div>
+
+    <!-- ══════════════════════════ OVERVIEW ══════════════════════════════ -->
+    <section *ngIf="activeSection==='overview'">
+      <div class="sa-page-header">
+        <div>
+          <h2><i class="bi bi-speedometer2"></i> Platform Overview</h2>
+          <p>Real-time snapshot of tenant activity, subscription health, and revenue signals.</p>
+        </div>
+      </div>
+
+      <!-- KPI GRID -->
+      <div class="sa-kpi-grid" *ngIf="stats; else loadingTpl">
+        <div class="sa-kpi sa-kpi-teal">
+          <div class="sa-kpi-icon"><i class="bi bi-building"></i></div>
+          <div class="sa-kpi-body">
+            <div class="sa-kpi-val">{{ stats.totalTenants }}</div>
+            <div class="sa-kpi-label">Total Tenants</div>
+          </div>
+        </div>
+        <div class="sa-kpi sa-kpi-green">
+          <div class="sa-kpi-icon"><i class="bi bi-check-circle-fill"></i></div>
+          <div class="sa-kpi-body">
+            <div class="sa-kpi-val">{{ stats.activeTenants }}</div>
+            <div class="sa-kpi-label">Active Tenants</div>
+          </div>
+        </div>
+        <div class="sa-kpi sa-kpi-red">
+          <div class="sa-kpi-icon"><i class="bi bi-slash-circle"></i></div>
+          <div class="sa-kpi-body">
+            <div class="sa-kpi-val">{{ stats.suspendedTenants }}</div>
+            <div class="sa-kpi-label">Suspended</div>
+          </div>
+        </div>
+        <div class="sa-kpi sa-kpi-orange">
+          <div class="sa-kpi-icon"><i class="bi bi-x-octagon"></i></div>
+          <div class="sa-kpi-body">
+            <div class="sa-kpi-val">{{ stats.cancelledTenants }}</div>
+            <div class="sa-kpi-label">Cancelled</div>
+          </div>
+        </div>
+        <div class="sa-kpi sa-kpi-cyan">
+          <div class="sa-kpi-icon"><i class="bi bi-hourglass-split"></i></div>
+          <div class="sa-kpi-body">
+            <div class="sa-kpi-val">{{ stats.trialTenants }}</div>
+            <div class="sa-kpi-label">On Trial</div>
+          </div>
+        </div>
+        <div class="sa-kpi sa-kpi-blue">
+          <div class="sa-kpi-icon"><i class="bi bi-award"></i></div>
+          <div class="sa-kpi-body">
+            <div class="sa-kpi-val">{{ stats.paidTenants }}</div>
+            <div class="sa-kpi-label">Paid Plans</div>
+          </div>
+        </div>
+        <div class="sa-kpi sa-kpi-indigo">
+          <div class="sa-kpi-icon"><i class="bi bi-calendar-plus"></i></div>
+          <div class="sa-kpi-body">
+            <div class="sa-kpi-val">{{ stats.newThisMonth }}</div>
+            <div class="sa-kpi-label">New This Month</div>
+          </div>
+        </div>
+        <div class="sa-kpi sa-kpi-yellow">
+          <div class="sa-kpi-icon"><i class="bi bi-exclamation-triangle"></i></div>
+          <div class="sa-kpi-body">
+            <div class="sa-kpi-val">{{ stats.expiringSoon }}</div>
+            <div class="sa-kpi-label">Expiring (30d)</div>
+          </div>
+        </div>
+        <div class="sa-kpi sa-kpi-purple">
+          <div class="sa-kpi-icon"><i class="bi bi-currency-dollar"></i></div>
+          <div class="sa-kpi-body">
+            <div class="sa-kpi-val">{{ formatMrr(stats.estimatedMrrCents) }}</div>
+            <div class="sa-kpi-label">Est. MRR</div>
+          </div>
+        </div>
+        <div class="sa-kpi sa-kpi-teal">
+          <div class="sa-kpi-icon"><i class="bi bi-graph-up"></i></div>
+          <div class="sa-kpi-body">
+            <div class="sa-kpi-val">{{ formatMrr(stats.estimatedArrCents) }}</div>
+            <div class="sa-kpi-label">Est. ARR</div>
+          </div>
+        </div>
+        <div class="sa-kpi sa-kpi-amber">
+          <div class="sa-kpi-icon"><i class="bi bi-graph-up-arrow"></i></div>
+          <div class="sa-kpi-body">
+            <div class="sa-kpi-val">{{ conversionRate }}%</div>
+            <div class="sa-kpi-label">Conversion Rate</div>
+          </div>
+        </div>
+        <div class="sa-kpi sa-kpi-rose">
+          <div class="sa-kpi-icon"><i class="bi bi-percent"></i></div>
+          <div class="sa-kpi-body">
+            <div class="sa-kpi-val">{{ stats.churnRate }}%</div>
+            <div class="sa-kpi-label">Churn Rate</div>
+          </div>
+        </div>
+        <div class="sa-kpi sa-kpi-green">
+          <div class="sa-kpi-icon"><i class="bi bi-person-check"></i></div>
+          <div class="sa-kpi-body">
+            <div class="sa-kpi-val">{{ formatMrr(stats.arpuCents) }}</div>
+            <div class="sa-kpi-label">ARPU</div>
+          </div>
+        </div>
+        <div class="sa-kpi sa-kpi-blue">
+          <div class="sa-kpi-icon"><i class="bi bi-infinity"></i></div>
+          <div class="sa-kpi-body">
+            <div class="sa-kpi-val">{{ formatMrr(stats.clvCents) }}</div>
+            <div class="sa-kpi-label">Est. CLV</div>
+          </div>
+        </div>
+        <div class="sa-kpi sa-kpi-slate">
+          <div class="sa-kpi-icon"><i class="bi bi-people-fill"></i></div>
+          <div class="sa-kpi-body">
+            <div class="sa-kpi-val">{{ stats.totalEmployees | number }}</div>
+            <div class="sa-kpi-label">Total Employees</div>
+          </div>
+        </div>
+        <div class="sa-kpi sa-kpi-slate">
+          <div class="sa-kpi-icon"><i class="bi bi-person-badge"></i></div>
+          <div class="sa-kpi-body">
+            <div class="sa-kpi-val">{{ stats.totalUsers | number }}</div>
+            <div class="sa-kpi-label">Total Users</div>
+          </div>
+        </div>
+        <div class="sa-kpi sa-kpi-slate">
+          <div class="sa-kpi-icon"><i class="bi bi-hdd-stack"></i></div>
+          <div class="sa-kpi-body">
+            <div class="sa-kpi-val">{{ formatStorage(stats.totalStorageMb) }}</div>
+            <div class="sa-kpi-label">Storage Used</div>
+          </div>
+        </div>
+        <div class="sa-kpi sa-kpi-slate">
+          <div class="sa-kpi-icon"><i class="bi bi-lightning-charge"></i></div>
+          <div class="sa-kpi-body">
+            <div class="sa-kpi-val">{{ stats.totalApiCallsThisMonth | number }}</div>
+            <div class="sa-kpi-label">API Calls / Mo</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SECOND ROW: HEALTH + PLAN DISTRIBUTION -->
+      <div class="sa-ov-row-2" *ngIf="stats">
+        <!-- Platform Health -->
+        <div class="sa-widget">
+          <div class="sa-widget-header">
+            <span><i class="bi bi-heart-pulse"></i> Platform Health</span>
+            <span class="sa-health-score" [class.sa-health-good]="healthScore>=75" [class.sa-health-warn]="healthScore>=50 && healthScore<75" [class.sa-health-bad]="healthScore<50">
+              {{ healthScore }}%
+            </span>
+          </div>
+          <div class="sa-health-bar-wrap">
+            <div class="sa-health-bar" [style.width.%]="healthScore"
+                 [class.sa-hb-good]="healthScore>=75"
+                 [class.sa-hb-warn]="healthScore>=50 && healthScore<75"
+                 [class.sa-hb-bad]="healthScore<50"></div>
+          </div>
+          <div class="sa-health-items">
+            <div class="sa-health-row">
+              <i class="bi bi-circle-fill" [style.color]="stats.activeTenants===stats.totalTenants ? '#10b981' : '#f59e0b'"></i>
+              <span>Active tenants</span>
+              <strong>{{ stats.activeTenants }} / {{ stats.totalTenants }}</strong>
+            </div>
+            <div class="sa-health-row">
+              <i class="bi bi-circle-fill" [style.color]="stats.suspendedTenants===0 ? '#10b981' : '#ef4444'"></i>
+              <span>Suspended workspaces</span>
+              <strong>{{ stats.suspendedTenants }}</strong>
+            </div>
+            <div class="sa-health-row">
+              <i class="bi bi-circle-fill" [style.color]="stats.paidTenants>0 ? '#10b981' : '#9ca3af'"></i>
+              <span>Paying customers</span>
+              <strong>{{ stats.paidTenants }}</strong>
+            </div>
+            <div class="sa-health-row">
+              <i class="bi bi-circle-fill" style="color:#3b82f6"></i>
+              <span>Conversion rate</span>
+              <strong>{{ conversionRate }}%</strong>
+            </div>
+          </div>
+        </div>
+
+        <!-- Plan Distribution -->
+        <div class="sa-widget">
+          <div class="sa-widget-header">
+            <span><i class="bi bi-pie-chart"></i> Plan Distribution</span>
+            <span class="sa-muted-sm">{{ stats.totalTenants }} total</span>
+          </div>
+          <div class="sa-plan-dist">
+            <div class="sa-pd-row" *ngFor="let p of planDistribution">
+              <div class="sa-pd-meta">
+                <span class="sa-plan-badge" [ngClass]="p.badgeClass">{{ p.plan }}</span>
+                <span class="sa-pd-count">{{ p.count }}</span>
+              </div>
+              <div class="sa-pd-bar-wrap">
+                <div class="sa-pd-bar" [style.width.%]="p.pct" [style.background]="p.barColor"></div>
+              </div>
+              <span class="sa-pd-pct">{{ p.pct }}%</span>
+            </div>
+            <div class="sa-empty-sm" *ngIf="!planDistribution.length">No plan data yet.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RECENT TENANTS -->
+      <div class="sa-widget sa-widget-full" *ngIf="tenants.length">
+        <div class="sa-widget-header">
+          <span><i class="bi bi-clock-history"></i> Recent Tenants</span>
+          <button class="sa-widget-link" (click)="setSection('tenants')">View all <i class="bi bi-arrow-right"></i></button>
+        </div>
+        <div class="sa-table-wrapper">
+          <table class="sa-table">
+            <thead><tr>
+              <th><i class="bi bi-hash"></i> Code</th>
+              <th><i class="bi bi-building"></i> Company</th>
+              <th><i class="bi bi-envelope"></i> Email</th>
+              <th><i class="bi bi-award"></i> Plan</th>
+              <th><i class="bi bi-activity"></i> Status</th>
+              <th><i class="bi bi-calendar3"></i> Created</th>
+              <th>Actions</th>
+            </tr></thead>
+            <tbody>
+              <tr *ngFor="let t of tenants | slice:0:8">
+                <td><code class="sa-code">{{ t.tenantCode }}</code></td>
+                <td><strong>{{ t.companyName }}</strong></td>
+                <td class="sa-muted-sm">{{ t.adminEmail }}</td>
+                <td><span class="sa-plan-badge" [ngClass]="planClass(t.plan)">{{ t.plan }}</span></td>
+                <td><span class="sa-status-badge" [ngClass]="statusClass(t.status)">{{ t.status }}</span></td>
+                <td class="sa-muted-sm">{{ t.createdAt | date:'MMM d, y' }}</td>
+                <td>
+                  <button class="btn-sa-sm btn-sa-primary" (click)="viewBilling(t)" title="Billing detail"><i class="bi bi-credit-card"></i></button>
+                  <button class="btn-sa-sm btn-sa-success" (click)="activate(t.tenantCode)" *ngIf="t.status!=='ACTIVE'"  title="Activate"><i class="bi bi-play-fill"></i></button>
+                  <button class="btn-sa-sm btn-sa-warning" (click)="suspend(t.tenantCode)"  *ngIf="t.status==='ACTIVE'"  title="Suspend"><i class="bi bi-pause-fill"></i></button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════════════════════ ANALYTICS ═════════════════════════════ -->
+    <section *ngIf="activeSection==='analytics'">
+      <div class="sa-page-header">
+        <div>
+          <h2><i class="bi bi-bar-chart-line"></i> Analytics</h2>
+          <p>Deep-dive into user activity, role distribution, and subscription signals.</p>
+        </div>
+      </div>
+
+      <!-- TOP METRICS -->
+      <div class="sa-analytics-metrics" *ngIf="stats">
+        <div class="sa-am-card">
+          <div class="sa-am-icon sa-am-teal"><i class="bi bi-people-fill"></i></div>
+          <div>
+            <div class="sa-am-val">{{ platformUsers.length }}</div>
+            <div class="sa-am-label">Total Users</div>
+            <div class="sa-am-sub">{{ activeUsersCount }} active</div>
+          </div>
+        </div>
+        <div class="sa-am-card">
+          <div class="sa-am-icon sa-am-blue"><i class="bi bi-building-check"></i></div>
+          <div>
+            <div class="sa-am-val">{{ stats.activeTenants }}</div>
+            <div class="sa-am-label">Active Workspaces</div>
+            <div class="sa-am-sub">{{ healthScore }}% healthy</div>
+          </div>
+        </div>
+        <div class="sa-am-card">
+          <div class="sa-am-icon sa-am-purple"><i class="bi bi-graph-up-arrow"></i></div>
+          <div>
+            <div class="sa-am-val">{{ conversionRate }}%</div>
+            <div class="sa-am-label">Free → Paid</div>
+            <div class="sa-am-sub">{{ stats.paidTenants }} converted</div>
+          </div>
+        </div>
+        <div class="sa-am-card">
+          <div class="sa-am-icon sa-am-green"><i class="bi bi-currency-dollar"></i></div>
+          <div>
+            <div class="sa-am-val">{{ formatMrr(stats.estimatedMrrCents) }}</div>
+            <div class="sa-am-label">Monthly Revenue</div>
+            <div class="sa-am-sub">{{ formatMrr(stats.estimatedMrrCents * 12) }} ARR</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="sa-analytics-grid">
+        <!-- User role distribution -->
+        <div class="sa-widget">
+          <div class="sa-widget-header">
+            <span><i class="bi bi-person-badge"></i> User Role Distribution</span>
+            <span class="sa-muted-sm">{{ platformUsers.length }} users</span>
+          </div>
+          <div *ngIf="usersLoading" class="sa-loading-sm"><i class="bi bi-hourglass-split"></i> Loading...</div>
+          <div *ngIf="!usersLoading && userRoleDistribution.length">
+            <div class="sa-role-dist-row" *ngFor="let r of userRoleDistribution">
+              <div class="sa-rdr-meta">
+                <span class="sa-role-badge sa-role-{{ r.role.toLowerCase().replace('_','-') }}">{{ r.role }}</span>
+                <span class="sa-rdr-count">{{ r.count }}</span>
+              </div>
+              <div class="sa-pd-bar-wrap">
+                <div class="sa-pd-bar" [style.width.%]="r.pct" style="background:#0f766e"></div>
+              </div>
+              <span class="sa-pd-pct">{{ r.pct }}%</span>
+            </div>
+          </div>
+          <div class="sa-empty-sm" *ngIf="!usersLoading && !userRoleDistribution.length">
+            <i class="bi bi-info-circle"></i> No user data. Click Users section first.
+          </div>
+        </div>
+
+        <!-- Subscription health -->
+        <div class="sa-widget">
+          <div class="sa-widget-header">
+            <span><i class="bi bi-shield-check"></i> Subscription Health</span>
+          </div>
+          <div class="sa-sub-health-list" *ngIf="stats">
+            <div class="sa-sh-item">
+              <div class="sa-sh-dot sa-sh-green"></div>
+              <div class="sa-sh-meta">
+                <span>Active &amp; Paid</span>
+                <strong>{{ stats.activeTenants > stats.paidTenants ? stats.paidTenants : stats.activeTenants }}</strong>
+              </div>
+              <div class="sa-sh-bar-wrap">
+                <div class="sa-sh-bar" style="background:#10b981"
+                     [style.width.%]="stats.totalTenants ? (stats.paidTenants / stats.totalTenants * 100) : 0"></div>
+              </div>
+            </div>
+            <div class="sa-sh-item">
+              <div class="sa-sh-dot sa-sh-gray"></div>
+              <div class="sa-sh-meta">
+                <span>Free Plan</span>
+                <strong>{{ stats.byPlan?.FREE || 0 }}</strong>
+              </div>
+              <div class="sa-sh-bar-wrap">
+                <div class="sa-sh-bar" style="background:#9ca3af"
+                     [style.width.%]="stats.totalTenants ? ((stats.byPlan?.FREE || 0) / stats.totalTenants * 100) : 0"></div>
+              </div>
+            </div>
+            <div class="sa-sh-item">
+              <div class="sa-sh-dot sa-sh-red"></div>
+              <div class="sa-sh-meta">
+                <span>Suspended</span>
+                <strong>{{ stats.suspendedTenants }}</strong>
+              </div>
+              <div class="sa-sh-bar-wrap">
+                <div class="sa-sh-bar" style="background:#ef4444"
+                     [style.width.%]="stats.totalTenants ? (stats.suspendedTenants / stats.totalTenants * 100) : 0"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="sa-kpi-mini-grid" *ngIf="stats" style="margin-top:18px;">
+            <div class="sa-kpi-mini">
+              <div class="sa-kpi-mini-val">{{ formatMrr(arr) }}</div>
+              <div class="sa-kpi-mini-lbl">Annual Run Rate</div>
+            </div>
+            <div class="sa-kpi-mini">
+              <div class="sa-kpi-mini-val">{{ formatMrr(avgRevenuePerTenant) }}</div>
+              <div class="sa-kpi-mini-lbl">ARPU</div>
+            </div>
+            <div class="sa-kpi-mini">
+              <div class="sa-kpi-mini-val">{{ stats.byPlan?.ENTERPRISE || 0 }}</div>
+              <div class="sa-kpi-mini-lbl">Enterprise</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Plan revenue waterfall -->
+        <div class="sa-widget sa-widget-wide">
+          <div class="sa-widget-header">
+            <span><i class="bi bi-bar-chart-steps"></i> Revenue by Plan</span>
+            <span class="sa-muted-sm">{{ formatMrr(stats?.estimatedMrrCents || 0) }} total MRR</span>
+          </div>
+          <div class="sa-rev-rows" *ngIf="revenueBreakdown.length; else noRevTpl">
+            <div class="sa-rev-row" *ngFor="let r of revenueBreakdown">
+              <div class="sa-rr-plan">
+                <span class="sa-plan-badge" [ngClass]="planClass(r.plan.toUpperCase())">{{ r.plan }}</span>
+                <span class="sa-muted-sm">{{ r.count }} tenant{{ r.count!==1 ? 's' : '' }}</span>
+              </div>
+              <div class="sa-rr-bar-wrap">
+                <div class="sa-rr-bar" [style.background]="r.color"
+                     [style.width.%]="stats?.estimatedMrrCents ? (r.totalCents / stats!.estimatedMrrCents * 100) : 0"></div>
+              </div>
+              <div class="sa-rr-amounts">
+                <strong>{{ formatMrr(r.totalCents) }}</strong>
+                <span class="sa-muted-sm">{{ formatMrr(r.unitCents) }}/mo each</span>
+              </div>
+            </div>
+          </div>
+          <ng-template #noRevTpl>
+            <div class="sa-empty-sm"><i class="bi bi-info-circle"></i> No paid plans active yet.</div>
+          </ng-template>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════════════════════ TENANTS ═══════════════════════════════ -->
+    <section *ngIf="activeSection==='tenants'">
+      <div class="sa-page-header">
+        <div>
+          <h2><i class="bi bi-building"></i> Tenant Workspaces</h2>
+          <p>Create, edit, and manage all registered organizations and their subscriptions.</p>
+        </div>
+        <div class="sa-page-header-actions">
+          <button class="btn-sa-primary-lg" (click)="openCreateTenant()">
+            <i class="bi bi-plus-circle"></i> New Tenant
+          </button>
+        </div>
+      </div>
+
+      <!-- Filter bar -->
+      <div class="sa-filter-bar">
+        <input class="sa-search-input" type="text" placeholder="Search by code, company or email…" [(ngModel)]="tenantFilter" />
+        <select class="sa-filter-select" [(ngModel)]="tenantStatusFilter">
+          <option value="ALL">All Statuses</option>
+          <option value="ACTIVE">Active</option>
+          <option value="TRIAL">Trial</option>
+          <option value="PENDING">Pending</option>
+          <option value="SUSPENDED">Suspended</option>
+          <option value="CANCELLED">Cancelled</option>
+          <option value="ARCHIVED">Archived</option>
+        </select>
+        <select class="sa-filter-select" [(ngModel)]="tenantPlanFilter">
+          <option value="ALL">All Plans</option>
+          <option value="FREE">Free</option>
+          <option value="STARTER">Starter</option>
+          <option value="PROFESSIONAL">Professional</option>
+          <option value="ENTERPRISE">Enterprise</option>
+        </select>
+        <span class="sa-filter-count">{{ filteredTenants.length }} of {{ tenants.length }}</span>
+      </div>
+
+      <div class="sa-loading" *ngIf="loading"><i class="bi bi-hourglass-split"></i> Loading tenants...</div>
+      <div class="sa-card" *ngIf="!loading">
+        <div class="sa-table-wrapper">
+          <table class="sa-table">
+            <thead><tr>
+              <th>Code</th><th>Company</th><th>Industry / Size</th><th>Plan</th>
+              <th>Status</th><th>Seats</th><th>Sub. Ends</th><th>Trial Ends</th><th>Created</th><th>Actions</th>
+            </tr></thead>
+            <tbody>
+              <tr *ngFor="let tenant of filteredTenants">
+                <td><code class="sa-code">{{ tenant.tenantCode }}</code></td>
+                <td>
+                  <div class="sa-tenant-cell">
+                    <img *ngIf="tenant.logoUrl" [src]="tenant.logoUrl" class="sa-tenant-logo" alt="" />
+                    <div>
+                      <strong>{{ tenant.companyName }}</strong>
+                      <div class="sa-muted-sm">{{ tenant.adminEmail }}</div>
+                      <div class="sa-muted-sm" *ngIf="tenant.country">{{ tenant.country }}</div>
+                    </div>
+                  </div>
+                </td>
+                <td class="sa-muted-sm">
+                  <div>{{ tenant.industry || '—' }}</div>
+                  <div>{{ tenant.companySize || '' }}</div>
+                </td>
+                <td>
+                  <div class="sa-plan-row">
+                    <span class="sa-plan-badge" [ngClass]="planClass(tenant.plan)">{{ tenant.plan }}</span>
+                    <select class="sa-plan-select" (change)="changePlan(tenant.tenantCode, $any($event.target).value)">
+                      <option value="FREE"         [selected]="tenant.plan==='FREE'">Free</option>
+                      <option value="STARTER"      [selected]="tenant.plan==='STARTER'">Starter</option>
+                      <option value="PROFESSIONAL" [selected]="tenant.plan==='PROFESSIONAL'">Pro</option>
+                      <option value="ENTERPRISE"   [selected]="tenant.plan==='ENTERPRISE'">Enterprise</option>
+                    </select>
+                  </div>
+                </td>
+                <td><span class="sa-status-badge" [ngClass]="statusClass(tenant.status)">{{ tenant.status }}</span></td>
+                <td>
+                  <div class="sa-max-users-row">
+                    <input class="sa-input-sm" type="number" min="1" max="9999" [(ngModel)]="maxUsersInput[tenant.tenantCode]" />
+                    <button class="btn-sa-sm btn-sa-neutral" (click)="setMaxUsers(tenant.tenantCode)" title="Save"><i class="bi bi-check-lg"></i></button>
+                  </div>
+                  <div class="sa-muted-sm">{{ tenant.seatsConsumed || 0 }} used</div>
+                </td>
+                <td class="sa-muted-sm">{{ (tenant.subscriptionEndsAt | date:'MMM d, y') || '—' }}</td>
+                <td class="sa-muted-sm">{{ (tenant.trialEndsAt | date:'MMM d, y') || '—' }}</td>
+                <td class="sa-muted-sm">{{ tenant.createdAt | date:'MMM d, y' }}</td>
+                <td class="sa-actions">
+                  <button class="btn-sa-sm btn-sa-info"     (click)="openEditTenant(tenant)"          title="Edit"><i class="bi bi-pencil"></i></button>
+                  <button class="btn-sa-sm btn-sa-primary"  (click)="viewBilling(tenant)"             title="Billing"><i class="bi bi-credit-card"></i></button>
+                  <button class="btn-sa-sm btn-sa-success"  (click)="activate(tenant.tenantCode)"     *ngIf="tenant.status!=='ACTIVE' && tenant.status!=='TRIAL'"  title="Activate"><i class="bi bi-play-fill"></i></button>
+                  <button class="btn-sa-sm btn-sa-warning"  (click)="suspend(tenant.tenantCode)"      *ngIf="tenant.status==='ACTIVE' || tenant.status==='TRIAL'"  title="Suspend"><i class="bi bi-pause-fill"></i></button>
+                  <button class="btn-sa-sm btn-sa-neutral"  (click)="extendTrial(tenant.tenantCode)"  *ngIf="tenant.status==='TRIAL'"  title="Extend trial">+{{ trialDays }}d</button>
+                  <button class="btn-sa-sm btn-sa-neutral"  (click)="startTrial(tenant.tenantCode)"   *ngIf="tenant.status!=='TRIAL'"  title="Start trial"><i class="bi bi-hourglass-split"></i></button>
+                  <button class="btn-sa-sm btn-sa-danger"   (click)="cancelSubscription(tenant.tenantCode)" *ngIf="tenant.plan!=='FREE'" title="Cancel sub"><i class="bi bi-x-circle"></i></button>
+                  <button class="btn-sa-sm btn-sa-neutral"  (click)="archiveTenant(tenant.tenantCode)" *ngIf="tenant.status!=='ARCHIVED'" title="Archive"><i class="bi bi-archive"></i></button>
+                  <button class="btn-sa-sm btn-sa-success"  (click)="restoreTenant(tenant.tenantCode)" *ngIf="tenant.status==='ARCHIVED'" title="Restore"><i class="bi bi-arrow-counterclockwise"></i></button>
+                  <button class="btn-sa-sm btn-sa-delete"   (click)="deleteTenant(tenant.tenantCode)" title="Delete"><i class="bi bi-trash3"></i></button>
+                </td>
+              </tr>
+              <tr *ngIf="!filteredTenants.length">
+                <td colspan="10" class="sa-empty-row"><i class="bi bi-inbox"></i> No tenants match the filter.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════════════════════ BILLING ═══════════════════════════════ -->
+    <section *ngIf="activeSection==='billing'">
+      <div class="sa-page-header">
+        <div>
+          <h2><i class="bi bi-credit-card"></i> Billing Management</h2>
+          <p>Review Stripe subscriptions, override plans, manage trials, and seat limits per tenant.</p>
+        </div>
+      </div>
+
+      <div class="sa-billing-grid" *ngIf="!loading">
+        <div class="sa-billing-card" *ngFor="let t of tenants">
+          <div class="sa-bc-head">
+            <div>
+              <code class="sa-code">{{ t.tenantCode }}</code>
+              <strong class="sa-bc-name">{{ t.companyName }}</strong>
+              <span class="sa-muted-sm">{{ t.adminEmail }}</span>
+            </div>
+            <span class="sa-plan-badge" [ngClass]="planClass(t.plan)">{{ t.plan }}</span>
+          </div>
+          <div class="sa-bc-rows">
+            <div class="sa-bc-row">
+              <span><i class="bi bi-activity"></i> Status</span>
+              <span class="sa-status-badge" [ngClass]="statusClass(t.status)">{{ t.status }}</span>
+            </div>
+            <div class="sa-bc-row">
+              <span><i class="bi bi-stripe"></i> Stripe customer</span>
+              <code class="sa-code-sm">{{ t.stripeCustomerId || '—' }}</code>
+            </div>
+            <div class="sa-bc-row">
+              <span><i class="bi bi-receipt"></i> Subscription ID</span>
+              <code class="sa-code-sm">{{ t.stripeSubscriptionId || '—' }}</code>
+            </div>
+            <div class="sa-bc-row">
+              <span><i class="bi bi-calendar-check"></i> Sub. ends</span>
+              <strong>{{ (t.subscriptionEndsAt | date:'MMM d, y') || '—' }}</strong>
+            </div>
+            <div class="sa-bc-row">
+              <span><i class="bi bi-hourglass"></i> Trial ends</span>
+              <strong>{{ (t.trialEndsAt | date:'MMM d, y') || '—' }}</strong>
+            </div>
+            <div class="sa-bc-row">
+              <span><i class="bi bi-people"></i> Max seats</span>
+              <strong>{{ t.maxUsers }}</strong>
+            </div>
+          </div>
+          <div class="sa-bc-actions">
+            <button class="btn-sa-sm btn-sa-success"  (click)="activate(t.tenantCode)"         *ngIf="t.status!=='ACTIVE'"><i class="bi bi-play-fill"></i> Activate</button>
+            <button class="btn-sa-sm btn-sa-warning"  (click)="suspend(t.tenantCode)"           *ngIf="t.status==='ACTIVE'"><i class="bi bi-pause-fill"></i> Suspend</button>
+            <button class="btn-sa-sm btn-sa-danger"   (click)="cancelSubscription(t.tenantCode)" *ngIf="t.plan!=='FREE'"><i class="bi bi-x-circle"></i> Cancel</button>
+            <button class="btn-sa-sm btn-sa-neutral"  (click)="extendTrial(t.tenantCode)"><i class="bi bi-plus-circle"></i> +{{ trialDays }}d trial</button>
+          </div>
+        </div>
+        <div class="sa-empty" *ngIf="!tenants.length">
+          <i class="bi bi-inbox" style="font-size:2rem;color:#d1d5db"></i><br>No tenants registered yet.
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════════════════════ REVENUES ══════════════════════════════ -->
+    <section *ngIf="activeSection==='revenues'">
+      <div class="sa-page-header">
+        <div>
+          <h2><i class="bi bi-graph-up-arrow"></i> Revenues &amp; MRR</h2>
+          <p>Monthly recurring revenue estimates based on active paid subscriptions.</p>
+        </div>
+      </div>
+
+      <div *ngIf="stats">
+        <!-- Revenue KPIs -->
+        <div class="sa-rev-kpis">
+          <div class="sa-rev-kpi sa-rev-primary">
+            <i class="bi bi-currency-dollar"></i>
+            <div class="sa-rk-val">{{ formatMrr(stats.estimatedMrrCents) }}</div>
+            <div class="sa-rk-label">Monthly Recurring Revenue</div>
+          </div>
+          <div class="sa-rev-kpi">
+            <i class="bi bi-graph-up"></i>
+            <div class="sa-rk-val">{{ formatMrr(arr) }}</div>
+            <div class="sa-rk-label">Annual Run Rate</div>
+          </div>
+          <div class="sa-rev-kpi">
+            <i class="bi bi-person-check"></i>
+            <div class="sa-rk-val">{{ formatMrr(avgRevenuePerTenant) }}</div>
+            <div class="sa-rk-label">ARPU</div>
+          </div>
+          <div class="sa-rev-kpi">
+            <i class="bi bi-percent"></i>
+            <div class="sa-rk-val">{{ conversionRate }}%</div>
+            <div class="sa-rk-label">Conversion Rate</div>
+          </div>
+        </div>
+
+        <!-- Revenue breakdown table -->
+        <div class="sa-card" style="margin-top:20px;">
+          <div class="sa-card-header">
+            <h3><i class="bi bi-bar-chart-steps"></i> Plan Revenue Breakdown</h3>
+          </div>
+          <div class="sa-table-wrapper">
+            <table class="sa-table">
+              <thead><tr>
+                <th>Plan</th><th>Tenants</th><th>Unit Price / mo</th><th>Total MRR</th><th>Share of Revenue</th>
+              </tr></thead>
+              <tbody>
+                <tr *ngFor="let r of revenueBreakdown">
+                  <td><span class="sa-plan-badge" [ngClass]="planClass(r.plan.toUpperCase())">{{ r.plan }}</span></td>
+                  <td><strong>{{ r.count }}</strong></td>
+                  <td>{{ formatMrr(r.unitCents) }}</td>
+                  <td><strong>{{ formatMrr(r.totalCents) }}</strong></td>
+                  <td>
+                    <div class="sa-rev-bar-row">
+                      <div class="sa-rev-bar-track">
+                        <div class="sa-rev-bar-fill" [style.background]="r.color"
+                             [style.width.%]="stats.estimatedMrrCents ? (r.totalCents / stats.estimatedMrrCents * 100) : 0"></div>
+                      </div>
+                      <span class="sa-muted-sm">{{ stats.estimatedMrrCents ? ((r.totalCents / stats.estimatedMrrCents * 100) | number:'1.0-0') + '%' : '0%' }}</span>
+                    </div>
+                  </td>
+                </tr>
+                <tr *ngIf="!revenueBreakdown.length">
+                  <td colspan="5" style="text-align:center;color:#9ca3af;padding:24px">
+                    <i class="bi bi-info-circle"></i> No paid subscriptions active yet.
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Plan summary cards -->
+        <div class="sa-plan-summary-grid" style="margin-top:20px;">
+          <div class="sa-plan-sum-card">
+            <div class="sa-psc-header sa-psc-free"><i class="bi bi-gift"></i> Free</div>
+            <div class="sa-psc-count">{{ stats.byPlan?.FREE || 0 }}</div>
+            <div class="sa-psc-price">$0 / mo</div>
+            <div class="sa-psc-mrr">$0 MRR</div>
+          </div>
+          <div class="sa-plan-sum-card">
+            <div class="sa-psc-header sa-psc-starter"><i class="bi bi-stars"></i> Starter</div>
+            <div class="sa-psc-count">{{ stats.byPlan?.STARTER || 0 }}</div>
+            <div class="sa-psc-price">$29 / mo</div>
+            <div class="sa-psc-mrr">{{ formatMrr((stats.byPlan?.STARTER || 0) * 2900) }} MRR</div>
+          </div>
+          <div class="sa-plan-sum-card">
+            <div class="sa-psc-header sa-psc-pro"><i class="bi bi-briefcase"></i> Professional</div>
+            <div class="sa-psc-count">{{ stats.byPlan?.PROFESSIONAL || 0 }}</div>
+            <div class="sa-psc-price">$79 / mo</div>
+            <div class="sa-psc-mrr">{{ formatMrr((stats.byPlan?.PROFESSIONAL || 0) * 7900) }} MRR</div>
+          </div>
+          <div class="sa-plan-sum-card">
+            <div class="sa-psc-header sa-psc-ent"><i class="bi bi-gem"></i> Enterprise</div>
+            <div class="sa-psc-count">{{ stats.byPlan?.ENTERPRISE || 0 }}</div>
+            <div class="sa-psc-price">$199 / mo</div>
+            <div class="sa-psc-mrr">{{ formatMrr((stats.byPlan?.ENTERPRISE || 0) * 19900) }} MRR</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════════════════════ USERS ═════════════════════════════════ -->
+    <section *ngIf="activeSection==='users'">
+      <div class="sa-page-header">
+        <div>
+          <h2><i class="bi bi-people"></i> Platform Users</h2>
+          <p>All user accounts registered across every tenant workspace.</p>
+        </div>
+        <div class="sa-page-header-meta">
+          <span class="sa-pill sa-pill-green" *ngIf="platformUsers.length"><i class="bi bi-person-check-fill"></i> {{ activeUsersCount }} Active</span>
+          <span class="sa-pill sa-pill-gray"  *ngIf="platformUsers.length"><i class="bi bi-people-fill"></i> {{ platformUsers.length }} Total</span>
+        </div>
+      </div>
+
+      <div class="sa-loading" *ngIf="usersLoading"><i class="bi bi-hourglass-split"></i> Loading users...</div>
+
+      <div class="sa-card" *ngIf="!usersLoading">
+        <div class="sa-card-header">
+          <h3><i class="bi bi-list-check"></i> All Users</h3>
+          <span class="sa-count">{{ platformUsers.length }} users</span>
+        </div>
+        <div class="sa-table-wrapper">
+          <table class="sa-table">
+            <thead><tr>
+              <th><i class="bi bi-person"></i> Username</th>
+              <th>Display Name</th>
+              <th><i class="bi bi-shield"></i> Role</th>
+              <th><i class="bi bi-building"></i> Tenant</th>
+              <th><i class="bi bi-circle-fill"></i> Status</th>
+            </tr></thead>
+            <tbody>
+              <tr *ngFor="let u of platformUsers">
+                <td><code class="sa-code">{{ u.username }}</code></td>
+                <td><strong>{{ u.displayName }}</strong></td>
+                <td><span class="sa-role-badge sa-role-{{ u.role.toLowerCase().replace('_','-') }}">{{ u.role }}</span></td>
+                <td>
+                  <code class="sa-code" *ngIf="u.tenantCode">{{ u.tenantCode }}</code>
+                  <span class="sa-muted-sm" *ngIf="!u.tenantCode"><i class="bi bi-shield-shaded"></i> Platform</span>
+                </td>
+                <td>
+                  <span class="sa-status-badge" [class.sa-active]="u.active" [class.sa-suspended]="!u.active">
+                    <i class="bi" [class.bi-check-circle-fill]="u.active" [class.bi-x-circle-fill]="!u.active"></i>
+                    {{ u.active ? 'Active' : 'Inactive' }}
+                  </span>
+                </td>
+              </tr>
+              <tr *ngIf="!platformUsers.length">
+                <td colspan="5" style="text-align:center;color:#9ca3af;padding:32px">
+                  <i class="bi bi-inbox" style="font-size:1.8rem;display:block;margin-bottom:8px"></i>
+                  No users found. Make sure the backend is running.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════════════════════ SUBSCRIPTIONS ═════════════════════════ -->
+    <section *ngIf="activeSection==='subscriptions'">
+      <div class="sa-page-header">
+        <div>
+          <h2><i class="bi bi-arrow-repeat"></i> Subscription Management</h2>
+          <p>Manage subscription lifecycle: trials, upgrades, pauses, cancellations and billing cycles.</p>
+        </div>
+      </div>
+
+      <div class="sa-loading" *ngIf="loading"><i class="bi bi-hourglass-split"></i> Loading...</div>
+      <div *ngIf="!loading">
+        <div class="sa-sub-cards">
+          <ng-container *ngFor="let t of tenants">
+            <div class="sa-sub-card" [class.sa-sub-card-trial]="t.status==='TRIAL'" [class.sa-sub-card-suspended]="t.status==='SUSPENDED'" [class.sa-sub-card-cancelled]="t.status==='CANCELLED'">
+              <div class="sa-sub-card-head">
+                <div>
+                  <code class="sa-code">{{ t.tenantCode }}</code>
+                  <strong class="sa-sub-company">{{ t.companyName }}</strong>
+                </div>
+                <span class="sa-plan-badge" [ngClass]="planClass(t.plan)">{{ t.plan }}</span>
+              </div>
+              <div class="sa-sub-info-grid">
+                <div><span class="sa-sub-lbl">Status</span><span class="sa-status-badge" [ngClass]="statusClass(t.status)">{{ t.status }}</span></div>
+                <div><span class="sa-sub-lbl">Billing</span><span class="sa-sub-val">{{ t.billingCycle || 'MONTHLY' }}</span></div>
+                <div><span class="sa-sub-lbl">Seats</span><span class="sa-sub-val">{{ t.seatsConsumed || 0 }} / {{ t.maxUsers }}</span></div>
+                <div><span class="sa-sub-lbl">Employees</span><span class="sa-sub-val">{{ t.totalEmployees || 0 }}</span></div>
+                <div><span class="sa-sub-lbl">Sub. Ends</span><span class="sa-sub-val">{{ (t.subscriptionEndsAt | date:'MMM d, y') || '—' }}</span></div>
+                <div><span class="sa-sub-lbl">Trial Ends</span><span class="sa-sub-val">{{ (t.trialEndsAt | date:'MMM d, y') || '—' }}</span></div>
+                <div><span class="sa-sub-lbl">Coupon</span><span class="sa-sub-val">{{ t.couponCode || '—' }}</span></div>
+                <div><span class="sa-sub-lbl">Discount</span><span class="sa-sub-val">{{ t.discountPercent || 0 }}%</span></div>
+              </div>
+              <div class="sa-sub-lifecycle">
+                <button class="btn-sa-sm btn-sa-success"  (click)="activate(t.tenantCode)"          *ngIf="t.status!=='ACTIVE' && t.status!=='TRIAL'"  title="Activate"><i class="bi bi-play-fill"></i></button>
+                <button class="btn-sa-sm btn-sa-neutral"  (click)="pauseSubscription(t.tenantCode)" *ngIf="t.status==='ACTIVE'"  title="Pause"><i class="bi bi-pause-fill"></i></button>
+                <button class="btn-sa-sm btn-sa-success"  (click)="resumeSubscription(t.tenantCode)" *ngIf="t.status==='SUSPENDED'" title="Resume"><i class="bi bi-play-circle"></i></button>
+                <button class="btn-sa-sm btn-sa-info"     (click)="startTrial(t.tenantCode)"         *ngIf="t.status!=='TRIAL'"  title="Start Trial"><i class="bi bi-hourglass-split"></i></button>
+                <button class="btn-sa-sm btn-sa-neutral"  (click)="extendTrial(t.tenantCode)"        *ngIf="t.status==='TRIAL'"  title="Extend Trial">+{{ trialDays }}d</button>
+                <button class="btn-sa-sm btn-sa-primary"  (click)="convertTrial(t.tenantCode,'STARTER')" *ngIf="t.status==='TRIAL'" title="Convert → Starter">→ S</button>
+                <button class="btn-sa-sm btn-sa-primary"  (click)="convertTrial(t.tenantCode,'PROFESSIONAL')" *ngIf="t.status==='TRIAL'" title="Convert → Pro">→ P</button>
+                <button class="btn-sa-sm btn-sa-danger"   (click)="cancelSubscription(t.tenantCode)" *ngIf="t.plan!=='FREE'"  title="Cancel Subscription"><i class="bi bi-x-circle"></i></button>
+              </div>
+            </div>
+          </ng-container>
+          <div class="sa-empty" *ngIf="!tenants.length">No tenants yet.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════════════════════ PLANS ═════════════════════════════════ -->
+    <section *ngIf="activeSection==='plans'">
+      <div class="sa-page-header">
+        <div>
+          <h2><i class="bi bi-layers"></i> Plans &amp; Pricing</h2>
+          <p>Define SaaS subscription plans, pricing, feature sets, and limits.</p>
+        </div>
+        <div class="sa-page-header-actions">
+          <button class="btn-sa-primary-lg" (click)="openCreatePlan()"><i class="bi bi-plus-circle"></i> New Plan</button>
+        </div>
+      </div>
+
+      <div *ngIf="plansLoading" class="sa-loading"><i class="bi bi-hourglass-split"></i> Loading plans...</div>
+      <div class="sa-plan-grid" *ngIf="!plansLoading">
+        <div class="sa-plan-card" *ngFor="let p of saasPlan" [class.sa-plan-popular]="p.popular" [class.sa-plan-disabled]="!p.enabled">
+          <div class="sa-plan-card-head">
+            <div>
+              <div class="sa-plan-card-name">
+                {{ p.name }}
+                <span class="sa-badge-popular" *ngIf="p.popular"><i class="bi bi-star-fill"></i> Popular</span>
+              </div>
+              <code class="sa-code">{{ p.planKey }}</code>
+            </div>
+            <div class="sa-plan-toggles">
+              <button class="btn-sa-toggle" [class.active]="p.enabled" (click)="togglePlanEnabled(p)" title="Enable/Disable">{{ p.enabled ? 'ON' : 'OFF' }}</button>
+              <button class="btn-sa-sm btn-sa-neutral" (click)="togglePlanHidden(p)"  title="Hide/Show"><i class="bi" [class.bi-eye]="!p.hidden" [class.bi-eye-slash]="p.hidden"></i></button>
+              <button class="btn-sa-sm btn-sa-neutral" (click)="togglePlanPopular(p)" title="Mark Popular"><i class="bi bi-star" [class.bi-star-fill]="p.popular"></i></button>
+            </div>
+          </div>
+          <div class="sa-plan-pricing">
+            <div class="sa-plan-price-item">
+              <span class="sa-plan-price-val">${{ (p.monthlyPriceCents / 100) | number:'1.0-0' }}</span>
+              <span class="sa-plan-price-lbl">/mo</span>
+            </div>
+            <div class="sa-plan-price-item sa-plan-price-annual">
+              <span class="sa-plan-price-val">${{ (p.annualPriceCents / 100) | number:'1.0-0' }}</span>
+              <span class="sa-plan-price-lbl">/yr</span>
+            </div>
+          </div>
+          <div class="sa-plan-limits">
+            <div class="sa-plan-limit-row"><i class="bi bi-people"></i> Up to {{ p.maxUsers }} users</div>
+            <div class="sa-plan-limit-row"><i class="bi bi-person-badge"></i> Up to {{ p.maxEmployees }} employees</div>
+            <div class="sa-plan-limit-row"><i class="bi bi-hdd-stack"></i> {{ p.maxStorageMb >= 1024 ? (p.maxStorageMb/1024 | number:'1.0-1') + ' GB' : p.maxStorageMb + ' MB' }} storage</div>
+            <div class="sa-plan-limit-row"><i class="bi bi-lightning-charge"></i> {{ p.apiLimitPerMonth | number }} API calls/mo</div>
+            <div class="sa-plan-limit-row"><i class="bi bi-hourglass-split"></i> {{ p.trialDays }}d trial</div>
+          </div>
+          <div class="sa-plan-features-list" *ngIf="planFeaturesArray(p).length">
+            <div class="sa-pf-row" *ngFor="let f of planFeaturesArray(p)"><i class="bi bi-check-lg"></i> {{ f }}</div>
+          </div>
+          <div class="sa-plan-card-actions">
+            <button class="btn-sa-sm btn-sa-info"   (click)="openEditPlan(p)"><i class="bi bi-pencil"></i> Edit</button>
+            <button class="btn-sa-sm btn-sa-delete" (click)="deletePlan(p.id)"><i class="bi bi-trash3"></i></button>
+          </div>
+          <div class="sa-plan-flags">
+            <span *ngIf="p.hidden" class="sa-plan-flag sa-flag-hidden"><i class="bi bi-eye-slash"></i> Hidden</span>
+            <span *ngIf="!p.publicPlan" class="sa-plan-flag sa-flag-private"><i class="bi bi-lock"></i> Private</span>
+          </div>
+        </div>
+        <div class="sa-empty" *ngIf="!saasPlan.length">
+          <i class="bi bi-layers" style="font-size:2rem;color:#d1d5db;display:block;margin-bottom:8px"></i>
+          No plans configured. Click <strong>New Plan</strong> to create one.
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════════════════════ FEATURE FLAGS ══════════════════════════ -->
+    <section *ngIf="activeSection==='features'">
+      <div class="sa-page-header">
+        <div>
+          <h2><i class="bi bi-toggles"></i> Feature Flags</h2>
+          <p>Control feature availability per plan, per tenant, globally, or via gradual rollout.</p>
+        </div>
+        <div class="sa-page-header-actions">
+          <button class="btn-sa-primary-lg" (click)="openCreateFeature()"><i class="bi bi-plus-circle"></i> New Flag</button>
+        </div>
+      </div>
+
+      <div *ngIf="featuresLoading" class="sa-loading"><i class="bi bi-hourglass-split"></i> Loading feature flags...</div>
+      <div *ngIf="!featuresLoading">
+        <div *ngFor="let mod of featureModules">
+          <div class="sa-ff-module-header"><i class="bi bi-grid-3x3-gap"></i> {{ mod }}</div>
+          <div class="sa-ff-table-wrap">
+            <table class="sa-table sa-ff-table">
+              <thead><tr>
+                <th>Feature</th>
+                <th>Description</th>
+                <th class="sa-ff-th-center">Global</th>
+                <th class="sa-ff-th-center">Starter</th>
+                <th class="sa-ff-th-center">Pro</th>
+                <th class="sa-ff-th-center">Enterprise</th>
+                <th class="sa-ff-th-center">Beta</th>
+                <th class="sa-ff-th-center">Rollout</th>
+                <th>Actions</th>
+              </tr></thead>
+              <tbody>
+                <tr *ngFor="let f of flagsForModule(mod)">
+                  <td>
+                    <div class="sa-ff-name">{{ f.featureName }}</div>
+                    <code class="sa-code-sm">{{ f.featureKey }}</code>
+                  </td>
+                  <td class="sa-muted-sm">{{ f.description || '—' }}</td>
+                  <td class="sa-ff-td-center">
+                    <button class="sa-ff-toggle" [class.sa-ff-on]="f.enabledGlobally" (click)="toggleGlobal(f)" title="Toggle global">
+                      <i class="bi" [class.bi-toggle-on]="f.enabledGlobally" [class.bi-toggle-off]="!f.enabledGlobally"></i>
+                    </button>
+                  </td>
+                  <td class="sa-ff-td-center">
+                    <button class="sa-ff-toggle" [class.sa-ff-on]="isFlagForPlan(f,'STARTER')" (click)="toggleFlagForPlan(f,'STARTER',!isFlagForPlan(f,'STARTER'))" title="Starter">
+                      <i class="bi" [class.bi-check-circle-fill]="isFlagForPlan(f,'STARTER')" [class.bi-circle]="!isFlagForPlan(f,'STARTER')"></i>
+                    </button>
+                  </td>
+                  <td class="sa-ff-td-center">
+                    <button class="sa-ff-toggle" [class.sa-ff-on]="isFlagForPlan(f,'PROFESSIONAL')" (click)="toggleFlagForPlan(f,'PROFESSIONAL',!isFlagForPlan(f,'PROFESSIONAL'))" title="Professional">
+                      <i class="bi" [class.bi-check-circle-fill]="isFlagForPlan(f,'PROFESSIONAL')" [class.bi-circle]="!isFlagForPlan(f,'PROFESSIONAL')"></i>
+                    </button>
+                  </td>
+                  <td class="sa-ff-td-center">
+                    <button class="sa-ff-toggle" [class.sa-ff-on]="isFlagForPlan(f,'ENTERPRISE')" (click)="toggleFlagForPlan(f,'ENTERPRISE',!isFlagForPlan(f,'ENTERPRISE'))" title="Enterprise">
+                      <i class="bi" [class.bi-check-circle-fill]="isFlagForPlan(f,'ENTERPRISE')" [class.bi-circle]="!isFlagForPlan(f,'ENTERPRISE')"></i>
+                    </button>
+                  </td>
+                  <td class="sa-ff-td-center">
+                    <span class="sa-badge-beta" *ngIf="f.betaFeature"><i class="bi bi-cone-striped"></i> Beta</span>
+                    <span class="sa-muted-sm" *ngIf="!f.betaFeature">—</span>
+                  </td>
+                  <td class="sa-ff-td-center">
+                    <span *ngIf="f.rolloutPercent > 0" class="sa-rollout-pill">{{ f.rolloutPercent }}%</span>
+                    <span class="sa-muted-sm" *ngIf="!f.rolloutPercent">—</span>
+                  </td>
+                  <td class="sa-actions">
+                    <button class="btn-sa-sm btn-sa-info"   (click)="openEditFeature(f)"><i class="bi bi-pencil"></i></button>
+                    <button class="btn-sa-sm btn-sa-delete" (click)="deleteFeature(f.id)"><i class="bi bi-trash3"></i></button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="sa-empty" *ngIf="!featureFlags.length">
+          <i class="bi bi-toggles" style="font-size:2rem;color:#d1d5db;display:block;margin-bottom:8px"></i>
+          No feature flags configured. Click <strong>New Flag</strong> to add one.
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════════════════════ BILLING & PAYMENTS ════════════════════ -->
+    <section *ngIf="activeSection==='billing-payments'">
+      <div class="sa-page-header">
+        <div>
+          <h2><i class="bi bi-receipt"></i> Billing &amp; Payments</h2>
+          <p>Revenue overview, invoice management, payment history and refunds.</p>
+        </div>
+        <div class="sa-page-header-actions">
+          <button class="btn-sa-primary-lg" (click)="openGenerateInvoice()"><i class="bi bi-plus-circle"></i> Generate Invoice</button>
+        </div>
+      </div>
+
+      <!-- Billing KPI cards -->
+      <div class="sa-kpi-grid" *ngIf="billingStats">
+        <div class="sa-kpi sa-kpi-green">
+          <div class="sa-kpi-icon"><i class="bi bi-currency-dollar"></i></div>
+          <div class="sa-kpi-body"><div class="sa-kpi-val">{{ formatMrr(billingStats.totalRevenueCents) }}</div><div class="sa-kpi-label">Total Revenue</div></div>
+        </div>
+        <div class="sa-kpi sa-kpi-teal">
+          <div class="sa-kpi-icon"><i class="bi bi-calendar-check"></i></div>
+          <div class="sa-kpi-body"><div class="sa-kpi-val">{{ formatMrr(billingStats.paymentsThisMonthCents) }}</div><div class="sa-kpi-label">This Month</div></div>
+        </div>
+        <div class="sa-kpi sa-kpi-blue">
+          <div class="sa-kpi-icon"><i class="bi bi-sun"></i></div>
+          <div class="sa-kpi-body"><div class="sa-kpi-val">{{ formatMrr(billingStats.paymentsTodayCents) }}</div><div class="sa-kpi-label">Today</div></div>
+        </div>
+        <div class="sa-kpi sa-kpi-yellow">
+          <div class="sa-kpi-icon"><i class="bi bi-hourglass"></i></div>
+          <div class="sa-kpi-body"><div class="sa-kpi-val">{{ formatMrr(billingStats.outstandingCents) }}</div><div class="sa-kpi-label">Outstanding</div></div>
+        </div>
+        <div class="sa-kpi sa-kpi-red">
+          <div class="sa-kpi-icon"><i class="bi bi-exclamation-triangle"></i></div>
+          <div class="sa-kpi-body"><div class="sa-kpi-val">{{ billingStats.failedPayments }}</div><div class="sa-kpi-label">Failed Payments</div></div>
+        </div>
+        <div class="sa-kpi sa-kpi-orange">
+          <div class="sa-kpi-icon"><i class="bi bi-arrow-counterclockwise"></i></div>
+          <div class="sa-kpi-body"><div class="sa-kpi-val">{{ formatMrr(billingStats.totalRefundedCents) }}</div><div class="sa-kpi-label">Refunded</div></div>
+        </div>
+        <div class="sa-kpi sa-kpi-rose">
+          <div class="sa-kpi-icon"><i class="bi bi-file-earmark-x"></i></div>
+          <div class="sa-kpi-body"><div class="sa-kpi-val">{{ billingStats.overdueInvoices }}</div><div class="sa-kpi-label">Overdue Invoices</div></div>
+        </div>
+        <div class="sa-kpi sa-kpi-slate">
+          <div class="sa-kpi-icon"><i class="bi bi-file-earmark-text"></i></div>
+          <div class="sa-kpi-body"><div class="sa-kpi-val">{{ billingStats.totalInvoices }}</div><div class="sa-kpi-label">Total Invoices</div></div>
+        </div>
+      </div>
+      <div class="sa-loading" *ngIf="!billingStats"><i class="bi bi-hourglass-split"></i> Loading billing stats...</div>
+
+      <!-- Invoices table -->
+      <div class="sa-widget sa-widget-full" style="margin-top:20px">
+        <div class="sa-widget-header">
+          <span><i class="bi bi-file-earmark-text"></i> Invoices</span>
+          <div style="display:flex;gap:8px;align-items:center">
+            <select class="sa-filter-select" [(ngModel)]="invoiceStatusFilter">
+              <option value="ALL">All</option>
+              <option value="DRAFT">Draft</option>
+              <option value="SENT">Sent</option>
+              <option value="PAID">Paid</option>
+              <option value="OVERDUE">Overdue</option>
+              <option value="VOID">Void</option>
+              <option value="REFUNDED">Refunded</option>
+            </select>
+            <span class="sa-muted-sm">{{ filteredInvoices.length }}</span>
+          </div>
+        </div>
+        <div *ngIf="billingLoading2" class="sa-loading-sm"><i class="bi bi-hourglass-split"></i> Loading...</div>
+        <div class="sa-table-wrapper" *ngIf="!billingLoading2">
+          <table class="sa-table">
+            <thead><tr>
+              <th>Invoice #</th><th>Tenant</th><th>Amount</th><th>Tax</th><th>Status</th><th>Issued</th><th>Due</th><th>Actions</th>
+            </tr></thead>
+            <tbody>
+              <tr *ngFor="let inv of filteredInvoices">
+                <td><code class="sa-code">{{ inv.invoiceNumber }}</code></td>
+                <td><strong>{{ inv.companyName }}</strong><div class="sa-muted-sm">{{ inv.tenantCode }}</div></td>
+                <td><strong>{{ formatMrr(inv.amountCents) }}</strong></td>
+                <td class="sa-muted-sm">{{ formatMrr(inv.taxAmountCents) }}</td>
+                <td><span class="sa-inv-badge sa-inv-{{ inv.status.toLowerCase() }}">{{ inv.status }}</span></td>
+                <td class="sa-muted-sm">{{ inv.issuedAt | date:'MMM d, y' }}</td>
+                <td class="sa-muted-sm">{{ (inv.dueAt | date:'MMM d, y') || '—' }}</td>
+                <td class="sa-actions">
+                  <button class="btn-sa-sm btn-sa-info"    (click)="invoiceAction(inv,'send')"     *ngIf="inv.status==='DRAFT'"  title="Send"><i class="bi bi-send"></i></button>
+                  <button class="btn-sa-sm btn-sa-success" (click)="invoiceAction(inv,'mark-paid')" *ngIf="inv.status==='SENT' || inv.status==='OVERDUE'" title="Mark Paid"><i class="bi bi-check-circle"></i></button>
+                  <button class="btn-sa-sm btn-sa-neutral" (click)="invoiceAction(inv,'refund')"   *ngIf="inv.status==='PAID'"   title="Refund"><i class="bi bi-arrow-counterclockwise"></i></button>
+                  <button class="btn-sa-sm btn-sa-danger"  (click)="invoiceAction(inv,'void')"     *ngIf="inv.status!=='PAID' && inv.status!=='VOID'" title="Void"><i class="bi bi-slash-circle"></i></button>
+                </td>
+              </tr>
+              <tr *ngIf="!filteredInvoices.length">
+                <td colspan="8" class="sa-empty-row"><i class="bi bi-inbox"></i> No invoices yet. Click <strong>Generate Invoice</strong> to create one.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Payments table -->
+      <div class="sa-widget sa-widget-full" style="margin-top:20px">
+        <div class="sa-widget-header">
+          <span><i class="bi bi-credit-card-2-front"></i> Payment History</span>
+          <select class="sa-filter-select" [(ngModel)]="paymentStatusFilter">
+            <option value="ALL">All</option>
+            <option value="COMPLETED">Completed</option>
+            <option value="PENDING">Pending</option>
+            <option value="FAILED">Failed</option>
+            <option value="REFUNDED">Refunded</option>
+            <option value="CHARGEBACK">Chargeback</option>
+          </select>
+        </div>
+        <div *ngIf="paymentsLoading" class="sa-loading-sm"><i class="bi bi-hourglass-split"></i> Loading...</div>
+        <div class="sa-table-wrapper" *ngIf="!paymentsLoading">
+          <table class="sa-table">
+            <thead><tr>
+              <th>Tenant</th><th>Amount</th><th>Refunded</th><th>Method</th><th>Status</th><th>Date</th><th>Actions</th>
+            </tr></thead>
+            <tbody>
+              <tr *ngFor="let p of filteredPayments">
+                <td><strong>{{ p.companyName }}</strong><div class="sa-muted-sm">{{ p.tenantCode }}</div></td>
+                <td><strong>{{ formatMrr(p.amountCents) }}</strong></td>
+                <td class="sa-muted-sm">{{ p.refundedAmountCents > 0 ? formatMrr(p.refundedAmountCents) : '—' }}</td>
+                <td class="sa-muted-sm">{{ p.method }}</td>
+                <td><span class="sa-pay-badge sa-pay-{{ p.status.toLowerCase() }}">{{ p.status }}</span></td>
+                <td class="sa-muted-sm">{{ p.createdAt | date:'MMM d, y' }}</td>
+                <td class="sa-actions">
+                  <button class="btn-sa-sm btn-sa-info"    (click)="retryPayment(p)"   *ngIf="p.status==='FAILED'" title="Retry"><i class="bi bi-arrow-clockwise"></i></button>
+                  <div class="sa-refund-row" *ngIf="p.status==='COMPLETED'">
+                    <input class="sa-input-sm" type="number" min="0" [(ngModel)]="refundForm[p.id]" placeholder="$" style="width:64px" />
+                    <button class="btn-sa-sm btn-sa-neutral" (click)="refundPayment(p)" title="Refund"><i class="bi bi-arrow-counterclockwise"></i></button>
+                  </div>
+                  <div *ngIf="p.failureReason" class="sa-muted-sm" style="max-width:160px;word-break:break-word">{{ p.failureReason }}</div>
+                </td>
+              </tr>
+              <tr *ngIf="!filteredPayments.length">
+                <td colspan="7" class="sa-empty-row"><i class="bi bi-inbox"></i> No payments yet.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════════════════════ CUSTOMER 360° ══════════════════════════ -->
+    <section *ngIf="activeSection==='customer360'">
+      <div class="sa-page-header">
+        <div>
+          <h2><i class="bi bi-person-lines-fill"></i> Customer 360°</h2>
+          <p>Full customer profile: company, subscription, billing, usage and health.</p>
+        </div>
+      </div>
+
+      <!-- Search bar -->
+      <div class="sa-filter-bar" style="margin-bottom:20px">
+        <input class="sa-search-input" type="text" placeholder="Enter tenant code…" [(ngModel)]="customer360Code" (keyup.enter)="loadCustomer360(customer360Code)" />
+        <button class="btn-sa-primary-lg" (click)="loadCustomer360(customer360Code)" [disabled]="!customer360Code">
+          <i class="bi bi-search"></i> Load Profile
+        </button>
+      </div>
+      <div class="sa-loading" *ngIf="customer360Loading"><i class="bi bi-hourglass-split"></i> Loading profile...</div>
+
+      <div class="sa-c360-layout" *ngIf="customer360 && !customer360Loading">
+        <!-- Header card -->
+        <div class="sa-c360-header">
+          <img *ngIf="customer360.logoUrl" [src]="customer360.logoUrl" class="sa-c360-logo" alt="" />
+          <div class="sa-c360-title">
+            <h3>{{ customer360.companyName }}</h3>
+            <div class="sa-muted-sm">{{ customer360.tenantCode }} · {{ customer360.adminEmail }}</div>
+            <div class="sa-muted-sm" *ngIf="customer360.ownerName">Owner: {{ customer360.ownerName }} · {{ customer360.phone }}</div>
+          </div>
+          <div class="sa-c360-health-badge" [ngClass]="healthClass(customer360.healthScore)">
+            {{ customer360.healthScore }}
+          </div>
+        </div>
+
+        <!-- Grid of info widgets -->
+        <div class="sa-c360-grid">
+          <div class="sa-c360-card">
+            <div class="sa-c360-card-title"><i class="bi bi-award"></i> Subscription</div>
+            <div class="sa-c360-rows">
+              <div class="sa-c360-row"><span>Plan</span><span class="sa-plan-badge" [ngClass]="planClass(customer360.plan)">{{ customer360.plan }}</span></div>
+              <div class="sa-c360-row"><span>Status</span><span class="sa-status-badge" [ngClass]="statusClass(customer360.status)">{{ customer360.status }}</span></div>
+              <div class="sa-c360-row"><span>Billing</span><strong>{{ customer360.billingCycle }}</strong></div>
+              <div class="sa-c360-row"><span>Seats</span><strong>{{ customer360.seatsConsumed }} / {{ customer360.maxUsers }}</strong></div>
+              <div class="sa-c360-row"><span>Renewal</span><strong>{{ (customer360.subscriptionEndsAt | date:'MMM d, y') || '—' }}</strong></div>
+              <div class="sa-c360-row"><span>Trial ends</span><strong>{{ (customer360.trialEndsAt | date:'MMM d, y') || '—' }}</strong></div>
+              <div class="sa-c360-row"><span>Created</span><strong>{{ customer360.createdAt | date:'MMM d, y' }}</strong></div>
+            </div>
+          </div>
+
+          <div class="sa-c360-card">
+            <div class="sa-c360-card-title"><i class="bi bi-building"></i> Company Profile</div>
+            <div class="sa-c360-rows">
+              <div class="sa-c360-row"><span>Industry</span><strong>{{ customer360.industry || '—' }}</strong></div>
+              <div class="sa-c360-row"><span>Size</span><strong>{{ customer360.companySize || '—' }}</strong></div>
+              <div class="sa-c360-row"><span>Country</span><strong>{{ customer360.country || '—' }}</strong></div>
+              <div class="sa-c360-row"><span>Currency</span><strong>{{ customer360.currency }}</strong></div>
+            </div>
+          </div>
+
+          <div class="sa-c360-card">
+            <div class="sa-c360-card-title"><i class="bi bi-bar-chart"></i> Usage</div>
+            <div class="sa-c360-rows">
+              <div class="sa-c360-row"><span>Employees</span><strong>{{ customer360.totalEmployees | number }}</strong></div>
+              <div class="sa-c360-row"><span>Users</span><strong>{{ customer360.totalUsers | number }}</strong></div>
+              <div class="sa-c360-row"><span>Platform users</span><strong>{{ customer360.platformUserCount | number }}</strong></div>
+              <div class="sa-c360-row"><span>Storage</span><strong>{{ formatStorage(customer360.storageUsageMb) }}</strong></div>
+              <div class="sa-c360-row"><span>API calls / mo</span><strong>{{ customer360.apiCallsThisMonth | number }}</strong></div>
+            </div>
+          </div>
+
+          <div class="sa-c360-card">
+            <div class="sa-c360-card-title"><i class="bi bi-credit-card"></i> Billing</div>
+            <div class="sa-c360-rows">
+              <div class="sa-c360-row"><span>Stripe customer</span><code class="sa-code-sm">{{ customer360.stripeCustomerId || '—' }}</code></div>
+              <div class="sa-c360-row"><span>Coupon</span><strong>{{ customer360.couponCode || '—' }}</strong></div>
+              <div class="sa-c360-row"><span>Discount</span><strong>{{ customer360.discountPercent || 0 }}%</strong></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick actions for this tenant -->
+        <div class="sa-c360-actions">
+          <button class="btn-sa-sm btn-sa-info"    (click)="openEditTenant(getTenantByCode(customer360.tenantCode)!)" *ngIf="getTenantByCode(customer360.tenantCode)"><i class="bi bi-pencil"></i> Edit Tenant</button>
+          <button class="btn-sa-sm btn-sa-success" (click)="activate(customer360.tenantCode)"  *ngIf="customer360.status!=='ACTIVE'"><i class="bi bi-play-fill"></i> Activate</button>
+          <button class="btn-sa-sm btn-sa-warning" (click)="suspend(customer360.tenantCode)"   *ngIf="customer360.status==='ACTIVE'"><i class="bi bi-pause-fill"></i> Suspend</button>
+          <button class="btn-sa-sm btn-sa-neutral" (click)="extendTrial(customer360.tenantCode)" *ngIf="customer360.status==='TRIAL'"><i class="bi bi-hourglass-split"></i> Extend Trial</button>
+          <button class="btn-sa-sm btn-sa-danger"  (click)="cancelSubscription(customer360.tenantCode)" *ngIf="customer360.plan!=='FREE'"><i class="bi bi-x-circle"></i> Cancel Subscription</button>
+        </div>
+      </div>
+
+      <div class="sa-empty" *ngIf="!customer360 && !customer360Loading">
+        <i class="bi bi-person-lines-fill" style="font-size:2.5rem;color:#d1d5db;display:block;margin-bottom:12px"></i>
+        Enter a tenant code above to load the full customer profile.
+      </div>
+    </section>
+
+    <!-- ══════════════════════════ PLATFORM USERS ═════════════════════════ -->
+    <section *ngIf="activeSection==='platform-users'">
+      <div class="sa-page-header">
+        <div>
+          <h2><i class="bi bi-shield-person"></i> Platform User Management</h2>
+          <p>Manage super admins, support agents, billing managers and other platform staff.</p>
+        </div>
+        <div class="sa-page-header-actions">
+          <button class="btn-sa-primary-lg" (click)="openCreatePlatformUser()"><i class="bi bi-plus-circle"></i> Create User</button>
+        </div>
+      </div>
+
+      <div *ngIf="usersLoading" class="sa-loading"><i class="bi bi-hourglass-split"></i> Loading users...</div>
+      <div class="sa-card" *ngIf="!usersLoading">
+        <div class="sa-table-wrapper">
+          <table class="sa-table">
+            <thead><tr>
+              <th>Username</th><th>Display Name</th><th>Role</th><th>Tenant</th><th>Status</th><th>Actions</th>
+            </tr></thead>
+            <tbody>
+              <tr *ngFor="let u of platformUsers">
+                <td><code class="sa-code">{{ u.username }}</code></td>
+                <td><strong>{{ u.displayName }}</strong></td>
+                <td>
+                  <span class="sa-role-badge sa-role-{{ u.role.toLowerCase().replace('_','-') }}">{{ u.role }}</span>
+                </td>
+                <td>
+                  <code class="sa-code" *ngIf="u.tenantCode">{{ u.tenantCode }}</code>
+                  <span class="sa-muted-sm" *ngIf="!u.tenantCode"><i class="bi bi-shield-shaded"></i> Platform</span>
+                </td>
+                <td>
+                  <span class="sa-status-badge" [class.sa-active]="u.active" [class.sa-suspended]="!u.active">
+                    {{ u.active ? 'Active' : 'Inactive' }}
+                  </span>
+                </td>
+                <td class="sa-actions">
+                  <button class="btn-sa-sm btn-sa-neutral" (click)="toggleUser(u.id)" title="Toggle active"><i class="bi bi-toggle-on"></i></button>
+                  <button class="btn-sa-sm btn-sa-delete"  (click)="deletePlatformUser(u.id)" title="Delete"><i class="bi bi-trash3"></i></button>
+                </td>
+              </tr>
+              <tr *ngIf="!platformUsers.length">
+                <td colspan="6" class="sa-empty-row"><i class="bi bi-inbox"></i> No platform users found.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════════════════════ ROLES & PERMISSIONS ════════════════════ -->
+    <section *ngIf="activeSection==='platform-roles'">
+      <div class="sa-page-header">
+        <div>
+          <h2><i class="bi bi-key"></i> Roles &amp; Permissions</h2>
+          <p>Define custom platform roles with granular access control permissions.</p>
+        </div>
+        <div class="sa-page-header-actions">
+          <button class="btn-sa-primary-lg" (click)="openCreateRole()"><i class="bi bi-plus-circle"></i> New Role</button>
+        </div>
+      </div>
+
+      <div *ngIf="rolesLoading" class="sa-loading"><i class="bi bi-hourglass-split"></i> Loading roles...</div>
+      <div class="sa-roles-grid" *ngIf="!rolesLoading">
+        <div class="sa-role-card" *ngFor="let r of platformRoles" [class.sa-role-system]="r.systemRole" [class.sa-role-inactive]="!r.active">
+          <div class="sa-role-card-head">
+            <div>
+              <div class="sa-role-name">{{ r.roleName }}
+                <span class="sa-badge-system" *ngIf="r.systemRole"><i class="bi bi-lock-fill"></i> System</span>
+              </div>
+              <div class="sa-muted-sm">{{ r.description }}</div>
+            </div>
+            <button class="btn-sa-toggle" [class.active]="r.active" (click)="toggleRoleActive(r)">{{ r.active ? 'ON' : 'OFF' }}</button>
+          </div>
+          <div class="sa-role-perms">
+            <div class="sa-role-perm" *ngFor="let perm of ALL_PERMISSIONS" [class.sa-perm-on]="hasPermission(r, perm)">
+              <i class="bi" [class.bi-check-circle-fill]="hasPermission(r, perm)" [class.bi-circle]="!hasPermission(r, perm)"></i>
+              {{ formatPermLabel(perm) }}
+            </div>
+          </div>
+          <div class="sa-role-card-actions">
+            <button class="btn-sa-sm btn-sa-info"  (click)="openEditRole(r)"><i class="bi bi-pencil"></i> Edit</button>
+            <button class="btn-sa-sm btn-sa-delete" (click)="deleteRole(r.id)" [disabled]="r.systemRole" title="Cannot delete system roles"><i class="bi bi-trash3"></i></button>
+          </div>
+        </div>
+        <div class="sa-empty" *ngIf="!platformRoles.length">
+          No roles configured yet.
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════════════════════ SAAS ANALYTICS ════════════════════════ -->
+    <section *ngIf="activeSection==='saas-analytics'">
+      <div class="sa-page-header">
+        <div>
+          <h2><i class="bi bi-graph-up"></i> SaaS Analytics</h2>
+          <p>Customer growth, subscription health, revenue trends and product engagement.</p>
+        </div>
+        <div class="sa-page-header-actions">
+          <button class="btn-sa-primary-lg" (click)="loadAnalytics()"><i class="bi bi-arrow-clockwise"></i> Refresh</button>
+        </div>
+      </div>
+      <div *ngIf="analyticsLoading" class="sa-loading"><i class="bi bi-hourglass-split"></i> Computing analytics...</div>
+
+      <div *ngIf="analyticsData && !analyticsLoading">
+
+        <!-- ── Customer analytics row ───────────────────────────────── -->
+        <div class="sa-analytics-section-title"><i class="bi bi-people-fill"></i> Customer Analytics</div>
+        <div class="sa-kpi-grid sa-kpi-grid-sm">
+          <div class="sa-kpi sa-kpi-teal">
+            <div class="sa-kpi-icon"><i class="bi bi-building"></i></div>
+            <div class="sa-kpi-body"><div class="sa-kpi-val">{{ analyticsData.customer.total }}</div><div class="sa-kpi-label">Total Customers</div></div>
+          </div>
+          <div class="sa-kpi sa-kpi-green">
+            <div class="sa-kpi-icon"><i class="bi bi-check-circle-fill"></i></div>
+            <div class="sa-kpi-body"><div class="sa-kpi-val">{{ analyticsData.customer.active }}</div><div class="sa-kpi-label">Active</div></div>
+          </div>
+          <div class="sa-kpi sa-kpi-cyan">
+            <div class="sa-kpi-icon"><i class="bi bi-hourglass-split"></i></div>
+            <div class="sa-kpi-body"><div class="sa-kpi-val">{{ analyticsData.customer.trial }}</div><div class="sa-kpi-label">On Trial</div></div>
+          </div>
+          <div class="sa-kpi sa-kpi-indigo">
+            <div class="sa-kpi-icon"><i class="bi bi-calendar-plus"></i></div>
+            <div class="sa-kpi-body"><div class="sa-kpi-val">{{ analyticsData.customer.newThisMonth }}</div><div class="sa-kpi-label">New This Month</div></div>
+          </div>
+          <div class="sa-kpi sa-kpi-rose">
+            <div class="sa-kpi-icon"><i class="bi bi-percent"></i></div>
+            <div class="sa-kpi-body"><div class="sa-kpi-val">{{ analyticsData.customer.churnRate }}%</div><div class="sa-kpi-label">Churn Rate</div></div>
+          </div>
+          <div class="sa-kpi sa-kpi-green">
+            <div class="sa-kpi-icon"><i class="bi bi-arrow-repeat"></i></div>
+            <div class="sa-kpi-body"><div class="sa-kpi-val">{{ analyticsData.customer.retentionRate }}%</div><div class="sa-kpi-label">Retention Rate</div></div>
+          </div>
+          <div class="sa-kpi sa-kpi-orange">
+            <div class="sa-kpi-icon"><i class="bi bi-slash-circle"></i></div>
+            <div class="sa-kpi-body"><div class="sa-kpi-val">{{ analyticsData.customer.cancelled }}</div><div class="sa-kpi-label">Churned</div></div>
+          </div>
+          <div class="sa-kpi sa-kpi-amber">
+            <div class="sa-kpi-icon"><i class="bi bi-graph-up-arrow"></i></div>
+            <div class="sa-kpi-body"><div class="sa-kpi-val">{{ analyticsData.subscription.trialConversionRate }}%</div><div class="sa-kpi-label">Trial Conversion</div></div>
+          </div>
+        </div>
+
+        <!-- ── Revenue analytics row ───────────────────────────────── -->
+        <div class="sa-analytics-section-title"><i class="bi bi-currency-dollar"></i> Revenue Analytics</div>
+        <div class="sa-kpi-grid sa-kpi-grid-sm">
+          <div class="sa-kpi sa-kpi-purple">
+            <div class="sa-kpi-icon"><i class="bi bi-calendar-month"></i></div>
+            <div class="sa-kpi-body"><div class="sa-kpi-val">{{ formatMrr(analyticsData.revenue.mrrCents) }}</div><div class="sa-kpi-label">MRR</div></div>
+          </div>
+          <div class="sa-kpi sa-kpi-purple">
+            <div class="sa-kpi-icon"><i class="bi bi-graph-up"></i></div>
+            <div class="sa-kpi-body"><div class="sa-kpi-val">{{ formatMrr(analyticsData.revenue.arrCents) }}</div><div class="sa-kpi-label">ARR</div></div>
+          </div>
+          <div class="sa-kpi sa-kpi-green">
+            <div class="sa-kpi-icon"><i class="bi bi-person-check"></i></div>
+            <div class="sa-kpi-body"><div class="sa-kpi-val">{{ formatMrr(analyticsData.revenue.arpuCents) }}</div><div class="sa-kpi-label">ARPU</div></div>
+          </div>
+          <div class="sa-kpi sa-kpi-teal">
+            <div class="sa-kpi-icon"><i class="bi bi-cash-stack"></i></div>
+            <div class="sa-kpi-body"><div class="sa-kpi-val">{{ formatMrr(analyticsData.revenue.totalRevenueCents) }}</div><div class="sa-kpi-label">Total Revenue</div></div>
+          </div>
+          <div class="sa-kpi sa-kpi-slate">
+            <div class="sa-kpi-icon"><i class="bi bi-arrow-counterclockwise"></i></div>
+            <div class="sa-kpi-body"><div class="sa-kpi-val">{{ formatMrr(analyticsData.revenue.refundedCents) }}</div><div class="sa-kpi-label">Refunds</div></div>
+          </div>
+          <div class="sa-kpi sa-kpi-green">
+            <div class="sa-kpi-icon"><i class="bi bi-currency-dollar"></i></div>
+            <div class="sa-kpi-body"><div class="sa-kpi-val">{{ formatMrr(analyticsData.revenue.netRevenueCents) }}</div><div class="sa-kpi-label">Net Revenue</div></div>
+          </div>
+          <div class="sa-kpi sa-kpi-yellow">
+            <div class="sa-kpi-icon"><i class="bi bi-alarm"></i></div>
+            <div class="sa-kpi-body"><div class="sa-kpi-val">{{ analyticsData.subscription.renewalsDue30d }}</div><div class="sa-kpi-label">Renewals Due 30d</div></div>
+          </div>
+        </div>
+
+        <!-- Revenue charts row -->
+        <div class="sa-analytics-grid-2">
+          <!-- Revenue by Plan -->
+          <div class="sa-widget">
+            <div class="sa-widget-header"><span><i class="bi bi-pie-chart"></i> Revenue by Plan</span></div>
+            <div class="sa-plan-dist">
+              <div class="sa-pd-row" *ngFor="let item of revenueByPlanList()">
+                <div class="sa-pd-meta">
+                  <span class="sa-plan-badge" [ngClass]="planClass(item.plan)">{{ item.plan }}</span>
+                  <span class="sa-pd-count">{{ formatMrr(item.cents) }}</span>
+                </div>
+                <div class="sa-pd-bar-wrap">
+                  <div class="sa-pd-bar" [style.width.%]="item.pct" [style.background]="item.color"></div>
+                </div>
+                <span class="sa-pd-pct">{{ item.pct }}%</span>
+              </div>
+            </div>
+          </div>
+          <!-- Revenue by Country -->
+          <div class="sa-widget">
+            <div class="sa-widget-header"><span><i class="bi bi-globe"></i> Revenue by Country</span></div>
+            <div class="sa-plan-dist">
+              <div class="sa-pd-row" *ngFor="let item of revenueByCountryList()">
+                <div class="sa-pd-meta">
+                  <span class="sa-muted-sm">{{ item.country }}</span>
+                  <span class="sa-pd-count">{{ formatMrr(item.cents) }}</span>
+                </div>
+                <div class="sa-pd-bar-wrap">
+                  <div class="sa-pd-bar" style="background:#0f766e"
+                       [style.width.%]="trendBarHeight(item.cents, revenueByCountryList()[0]?.cents || 1)"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Monthly trend bar chart -->
+        <div class="sa-widget sa-widget-full" style="margin-top:20px">
+          <div class="sa-widget-header">
+            <span><i class="bi bi-bar-chart"></i> 12-Month Trend</span>
+            <span class="sa-muted-sm">Revenue &amp; Tenant Growth</span>
+          </div>
+          <div class="sa-trend-chart">
+            <div class="sa-trend-bar-wrap" *ngFor="let m of analyticsData.monthlyTrend">
+              <div class="sa-trend-bars">
+                <div class="sa-trend-bar sa-trend-rev" [style.height.px]="trendBarHeight(m.revenueCents, trendMaxRevenue)"
+                     [title]="m.month + ': ' + formatMrr(m.revenueCents)"></div>
+                <div class="sa-trend-bar sa-trend-ten" [style.height.px]="trendBarHeight(m.totalTenants, trendMaxTenants)"
+                     [title]="m.month + ': ' + m.totalTenants + ' tenants'"></div>
+              </div>
+              <div class="sa-trend-label">{{ m.month.split(' ')[0] }}</div>
+            </div>
+          </div>
+          <div class="sa-trend-legend">
+            <span class="sa-legend-dot" style="background:#0f766e"></span> Revenue
+            <span class="sa-legend-dot" style="background:#6366f1;margin-left:14px"></span> Tenants
+          </div>
+        </div>
+
+        <!-- ── Product analytics row ───────────────────────────────── -->
+        <div class="sa-analytics-section-title"><i class="bi bi-lightning-charge"></i> Product Analytics</div>
+        <div class="sa-analytics-grid-2" style="margin-top:0">
+          <!-- DAU/WAU/MAU -->
+          <div class="sa-widget">
+            <div class="sa-widget-header"><span><i class="bi bi-people-fill"></i> Active Users</span></div>
+            <div class="sa-kpi-mini-grid">
+              <div class="sa-kpi-mini">
+                <div class="sa-kpi-mini-val">{{ analyticsData.product.dau | number }}</div>
+                <div class="sa-kpi-mini-lbl">DAU</div>
+              </div>
+              <div class="sa-kpi-mini">
+                <div class="sa-kpi-mini-val">{{ analyticsData.product.wau | number }}</div>
+                <div class="sa-kpi-mini-lbl">WAU</div>
+              </div>
+              <div class="sa-kpi-mini">
+                <div class="sa-kpi-mini-val">{{ analyticsData.product.mau | number }}</div>
+                <div class="sa-kpi-mini-lbl">MAU</div>
+              </div>
+              <div class="sa-kpi-mini">
+                <div class="sa-kpi-mini-val">{{ analyticsData.product.dauToMau }}%</div>
+                <div class="sa-kpi-mini-lbl">DAU/MAU</div>
+              </div>
+              <div class="sa-kpi-mini">
+                <div class="sa-kpi-mini-val">{{ analyticsData.product.totalUsers | number }}</div>
+                <div class="sa-kpi-mini-lbl">Total Users</div>
+              </div>
+              <div class="sa-kpi-mini">
+                <div class="sa-kpi-mini-val">{{ analyticsData.product.totalEmployees | number }}</div>
+                <div class="sa-kpi-mini-lbl">Employees</div>
+              </div>
+            </div>
+          </div>
+          <!-- Feature adoption -->
+          <div class="sa-widget">
+            <div class="sa-widget-header"><span><i class="bi bi-check2-all"></i> Feature Adoption</span></div>
+            <div class="sa-plan-dist">
+              <div class="sa-pd-row" *ngFor="let f of analyticsData.product.featureAdoption">
+                <div class="sa-pd-meta">
+                  <span class="sa-muted-sm">{{ f.feature }}</span>
+                  <span class="sa-pd-count">{{ f.adoptionPct }}%</span>
+                </div>
+                <div class="sa-pd-bar-wrap">
+                  <div class="sa-pd-bar" [style.width.%]="f.adoptionPct"
+                       [style.background]="f.adoptionPct >= 70 ? '#10b981' : f.adoptionPct >= 40 ? '#3b82f6' : '#9ca3af'"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Plan distribution -->
+        <div class="sa-widget sa-widget-full" style="margin-top:20px">
+          <div class="sa-widget-header">
+            <span><i class="bi bi-layers"></i> Subscription Distribution</span>
+          </div>
+          <div class="sa-plan-dist">
+            <div class="sa-pd-row" *ngFor="let p of planDistribution">
+              <div class="sa-pd-meta">
+                <span class="sa-plan-badge" [ngClass]="p.badgeClass">{{ p.plan }}</span>
+                <span class="sa-pd-count">{{ p.count }} tenants</span>
+              </div>
+              <div class="sa-pd-bar-wrap">
+                <div class="sa-pd-bar" [style.width.%]="p.pct" [style.background]="p.barColor"></div>
+              </div>
+              <span class="sa-pd-pct">{{ p.pct }}%</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ══════════════════════════ INTEGRATIONS ═══════════════════════════ -->
+    <section *ngIf="activeSection==='integrations'">
+      <div class="sa-page-header">
+        <div>
+          <h2><i class="bi bi-plug"></i> Integrations</h2>
+          <p>Connect the platform to external identity providers, HR tools and communication services.</p>
+        </div>
+        <div class="sa-page-header-actions">
+          <button class="btn-sa-primary-lg" (click)="loadIntegrations()"><i class="bi bi-arrow-clockwise"></i> Refresh</button>
+        </div>
+      </div>
+
+      <div *ngIf="integrationsLoading" class="sa-loading"><i class="bi bi-hourglass-split"></i> Loading integrations...</div>
+
+      <div *ngIf="!integrationsLoading">
+        <ng-container *ngFor="let cat of integrationCategories">
+          <div class="sa-integ-category-title"><i class="bi bi-grid"></i> {{ catLabel(cat) }}</div>
+          <div class="sa-integ-grid">
+            <div class="sa-integ-card" *ngFor="let integ of integrationsByCategory[cat]"
+                 [class.sa-integ-enabled]="integ.enabled"
+                 [class.sa-integ-failed]="integ.syncStatus==='FAILED'">
+              <div class="sa-integ-head">
+                <div class="sa-integ-identity">
+                  <div class="sa-integ-icon"><i class="bi bi-plug-fill"></i></div>
+                  <div>
+                    <div class="sa-integ-name">{{ integ.name }}</div>
+                    <div class="sa-muted-sm">{{ integ.description }}</div>
+                  </div>
+                </div>
+                <button class="btn-sa-toggle" [class.active]="integ.enabled" (click)="toggleIntegration(integ, !integ.enabled)">
+                  {{ integ.enabled ? 'ON' : 'OFF' }}
+                </button>
+              </div>
+
+              <!-- Status row -->
+              <div class="sa-integ-status-row">
+                <span class="sa-sync-badge" [ngClass]="syncStatusClass(integ.syncStatus)">{{ integ.syncStatus }}</span>
+                <span class="sa-muted-sm" *ngIf="integ.lastSyncAt">Last sync: {{ integ.lastSyncAt | date:'MMM d, HH:mm' }}</span>
+                <span class="sa-muted-sm" *ngIf="!integ.lastSyncAt && integ.enabled">Never synced</span>
+                <span class="sa-fail-count" *ngIf="integ.failedSyncs > 0">{{ integ.failedSyncs }} failed</span>
+              </div>
+
+              <!-- Error message -->
+              <div class="sa-integ-error" *ngIf="integ.lastSyncError">
+                <i class="bi bi-exclamation-triangle"></i> {{ integ.lastSyncError }}
+              </div>
+
+              <!-- Actions -->
+              <div class="sa-integ-actions">
+                <button class="btn-sa-sm btn-sa-info"    (click)="openCredentials(integ)" title="Configure"><i class="bi bi-gear"></i></button>
+                <button class="btn-sa-sm btn-sa-neutral" (click)="testConnection(integ)"  title="Test connection" [disabled]="!integ.enabled"><i class="bi bi-wifi"></i></button>
+                <button class="btn-sa-sm btn-sa-primary" (click)="syncIntegration(integ)" title="Sync now" [disabled]="!integ.enabled"><i class="bi bi-arrow-clockwise"></i></button>
+                <button class="btn-sa-sm btn-sa-neutral" (click)="loadLogs(integ)"        title="View logs"><i class="bi bi-journal-text"></i></button>
+              </div>
+
+              <!-- Logs accordion -->
+              <div class="sa-integ-logs" *ngIf="integrationLogs[integ.id]">
+                <pre class="sa-logs-pre">{{ integrationLogs[integ.id] }}</pre>
+              </div>
+            </div>
+          </div>
+        </ng-container>
+        <div class="sa-empty" *ngIf="!integrations.length">
+          <i class="bi bi-plug" style="font-size:2rem;color:#d1d5db;display:block;margin-bottom:8px"></i>
+          No integrations found.
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<!-- ─── TENANT CREATE / EDIT MODAL ───────────────────────────────────────── -->
+<div class="sa-modal-overlay" *ngIf="showTenantModal" (click)="closeTenantModal()"></div>
+<div class="sa-modal" *ngIf="showTenantModal">
+  <div class="sa-modal-header">
+    <h3><i class="bi bi-building"></i> {{ editingTenant ? 'Edit Tenant' : 'Create Tenant' }}</h3>
+    <button class="sa-close-btn" (click)="closeTenantModal()"><i class="bi bi-x-lg"></i></button>
+  </div>
+  <div class="sa-modal-body">
+    <div class="sa-form-grid">
+      <div class="sa-form-group" *ngIf="!editingTenant">
+        <label>Tenant Code *</label>
+        <input class="sa-input" type="text" placeholder="e.g. acme" [(ngModel)]="tenantForm.tenantCode" />
+      </div>
+      <div class="sa-form-group">
+        <label>Company Name *</label>
+        <input class="sa-input" type="text" [(ngModel)]="tenantForm.companyName" />
+      </div>
+      <div class="sa-form-group">
+        <label>Admin Email *</label>
+        <input class="sa-input" type="email" [(ngModel)]="tenantForm.adminEmail" />
+      </div>
+      <div class="sa-form-group">
+        <label>Admin Password {{ editingTenant ? '(leave blank to keep)' : '*' }}</label>
+        <input class="sa-input" type="password" [(ngModel)]="tenantForm.adminPassword" />
+      </div>
+      <div class="sa-form-group">
+        <label>Plan</label>
+        <select class="sa-input" [(ngModel)]="tenantForm.plan">
+          <option value="FREE">Free</option>
+          <option value="STARTER">Starter</option>
+          <option value="PROFESSIONAL">Professional</option>
+          <option value="ENTERPRISE">Enterprise</option>
+        </select>
+      </div>
+      <div class="sa-form-group">
+        <label>Status</label>
+        <select class="sa-input" [(ngModel)]="tenantForm.status">
+          <option value="PENDING">Pending</option>
+          <option value="ACTIVE">Active</option>
+          <option value="TRIAL">Trial</option>
+          <option value="SUSPENDED">Suspended</option>
+          <option value="CANCELLED">Cancelled</option>
+        </select>
+      </div>
+      <div class="sa-form-group">
+        <label>Industry</label>
+        <input class="sa-input" type="text" [(ngModel)]="tenantForm.industry" />
+      </div>
+      <div class="sa-form-group">
+        <label>Company Size</label>
+        <select class="sa-input" [(ngModel)]="tenantForm.companySize">
+          <option value="">—</option>
+          <option value="1-10">1–10</option>
+          <option value="11-50">11–50</option>
+          <option value="51-200">51–200</option>
+          <option value="201-500">201–500</option>
+          <option value="500+">500+</option>
+        </select>
+      </div>
+      <div class="sa-form-group">
+        <label>Country</label>
+        <input class="sa-input" type="text" [(ngModel)]="tenantForm.country" />
+      </div>
+      <div class="sa-form-group">
+        <label>Currency</label>
+        <input class="sa-input" type="text" [(ngModel)]="tenantForm.currency" />
+      </div>
+      <div class="sa-form-group">
+        <label>Timezone</label>
+        <input class="sa-input" type="text" [(ngModel)]="tenantForm.timezone" />
+      </div>
+      <div class="sa-form-group">
+        <label>Language</label>
+        <input class="sa-input" type="text" [(ngModel)]="tenantForm.language" />
+      </div>
+      <div class="sa-form-group">
+        <label>Domain</label>
+        <input class="sa-input" type="text" [(ngModel)]="tenantForm.domain" />
+      </div>
+      <div class="sa-form-group">
+        <label>Subdomain</label>
+        <input class="sa-input" type="text" [(ngModel)]="tenantForm.subdomain" />
+      </div>
+      <div class="sa-form-group">
+        <label>Logo URL</label>
+        <input class="sa-input" type="url" [(ngModel)]="tenantForm.logoUrl" />
+      </div>
+      <div class="sa-form-group">
+        <label>Owner Name</label>
+        <input class="sa-input" type="text" [(ngModel)]="tenantForm.ownerName" />
+      </div>
+      <div class="sa-form-group">
+        <label>Owner Email</label>
+        <input class="sa-input" type="email" [(ngModel)]="tenantForm.ownerEmail" />
+      </div>
+      <div class="sa-form-group">
+        <label>Phone</label>
+        <input class="sa-input" type="text" [(ngModel)]="tenantForm.phone" />
+      </div>
+      <div class="sa-form-group">
+        <label>Billing Cycle</label>
+        <select class="sa-input" [(ngModel)]="tenantForm.billingCycle">
+          <option value="MONTHLY">Monthly</option>
+          <option value="ANNUAL">Annual</option>
+        </select>
+      </div>
+      <div class="sa-form-group">
+        <label>Max Users</label>
+        <input class="sa-input" type="number" [(ngModel)]="tenantForm.maxUsers" />
+      </div>
+      <div class="sa-form-group">
+        <label>Max Employees</label>
+        <input class="sa-input" type="number" [(ngModel)]="tenantForm.maxEmployees" />
+      </div>
+      <div class="sa-form-group">
+        <label>Coupon Code</label>
+        <input class="sa-input" type="text" [(ngModel)]="tenantForm.couponCode" />
+      </div>
+      <div class="sa-form-group">
+        <label>Discount %</label>
+        <input class="sa-input" type="number" min="0" max="100" [(ngModel)]="tenantForm.discountPercent" />
+      </div>
+      <div class="sa-form-group sa-form-group-full">
+        <label>Description</label>
+        <textarea class="sa-input sa-textarea" [(ngModel)]="tenantForm.description"></textarea>
+      </div>
+      <div class="sa-form-group sa-form-group-full">
+        <label>Notes (internal)</label>
+        <textarea class="sa-input sa-textarea" [(ngModel)]="tenantForm.notes"></textarea>
+      </div>
+    </div>
+  </div>
+  <div class="sa-modal-footer">
+    <button class="btn-sa-neutral-lg" (click)="closeTenantModal()">Cancel</button>
+    <button class="btn-sa-primary-lg" (click)="saveTenant()" [disabled]="saving">
+      <i class="bi" [class.bi-hourglass-split]="saving" [class.bi-check-lg]="!saving"></i>
+      {{ saving ? 'Saving…' : (editingTenant ? 'Update' : 'Create') }}
+    </button>
+  </div>
+</div>
+
+<!-- ─── PLAN CREATE / EDIT MODAL ──────────────────────────────────────────── -->
+<div class="sa-modal-overlay" *ngIf="showPlanModal" (click)="closePlanModal()"></div>
+<div class="sa-modal" *ngIf="showPlanModal">
+  <div class="sa-modal-header">
+    <h3><i class="bi bi-layers"></i> {{ editingPlan ? 'Edit Plan' : 'Create Plan' }}</h3>
+    <button class="sa-close-btn" (click)="closePlanModal()"><i class="bi bi-x-lg"></i></button>
+  </div>
+  <div class="sa-modal-body">
+    <div class="sa-form-grid">
+      <div class="sa-form-group">
+        <label>Plan Key *</label>
+        <input class="sa-input" type="text" placeholder="e.g. STARTER" [(ngModel)]="planForm.planKey" />
+      </div>
+      <div class="sa-form-group">
+        <label>Display Name *</label>
+        <input class="sa-input" type="text" [(ngModel)]="planForm.name" />
+      </div>
+      <div class="sa-form-group">
+        <label>Monthly Price (cents)</label>
+        <input class="sa-input" type="number" min="0" [(ngModel)]="planForm.monthlyPriceCents" />
+      </div>
+      <div class="sa-form-group">
+        <label>Annual Price (cents)</label>
+        <input class="sa-input" type="number" min="0" [(ngModel)]="planForm.annualPriceCents" />
+      </div>
+      <div class="sa-form-group">
+        <label>Setup Fee (cents)</label>
+        <input class="sa-input" type="number" min="0" [(ngModel)]="planForm.setupFeeCents" />
+      </div>
+      <div class="sa-form-group">
+        <label>Trial Days</label>
+        <input class="sa-input" type="number" min="0" [(ngModel)]="planForm.trialDays" />
+      </div>
+      <div class="sa-form-group">
+        <label>Currency</label>
+        <input class="sa-input" type="text" [(ngModel)]="planForm.currency" />
+      </div>
+      <div class="sa-form-group">
+        <label>Min Users</label>
+        <input class="sa-input" type="number" min="1" [(ngModel)]="planForm.minUsers" />
+      </div>
+      <div class="sa-form-group">
+        <label>Max Users</label>
+        <input class="sa-input" type="number" min="1" [(ngModel)]="planForm.maxUsers" />
+      </div>
+      <div class="sa-form-group">
+        <label>Max Employees</label>
+        <input class="sa-input" type="number" min="1" [(ngModel)]="planForm.maxEmployees" />
+      </div>
+      <div class="sa-form-group">
+        <label>Max Storage (MB)</label>
+        <input class="sa-input" type="number" min="0" [(ngModel)]="planForm.maxStorageMb" />
+      </div>
+      <div class="sa-form-group">
+        <label>API Limit / Month</label>
+        <input class="sa-input" type="number" min="0" [(ngModel)]="planForm.apiLimitPerMonth" />
+      </div>
+      <div class="sa-form-group">
+        <label>Sort Order</label>
+        <input class="sa-input" type="number" [(ngModel)]="planForm.sortOrder" />
+      </div>
+      <div class="sa-form-group">
+        <label>Stripe Monthly Price ID</label>
+        <input class="sa-input" type="text" [(ngModel)]="planForm.stripePriceIdMonthly" />
+      </div>
+      <div class="sa-form-group">
+        <label>Stripe Annual Price ID</label>
+        <input class="sa-input" type="text" [(ngModel)]="planForm.stripePriceIdAnnual" />
+      </div>
+      <div class="sa-form-group sa-form-group-checks">
+        <label class="sa-check-label"><input type="checkbox" [(ngModel)]="planForm.enabled" /> Enabled</label>
+        <label class="sa-check-label"><input type="checkbox" [(ngModel)]="planForm.hidden" /> Hidden</label>
+        <label class="sa-check-label"><input type="checkbox" [(ngModel)]="planForm.popular" /> Popular</label>
+        <label class="sa-check-label"><input type="checkbox" [(ngModel)]="planForm.publicPlan" /> Public</label>
+      </div>
+      <div class="sa-form-group sa-form-group-full">
+        <label>Description</label>
+        <textarea class="sa-input sa-textarea" [(ngModel)]="planForm.description"></textarea>
+      </div>
+      <div class="sa-form-group sa-form-group-full">
+        <label>Features (comma-separated keys)</label>
+        <textarea class="sa-input sa-textarea" [(ngModel)]="planForm.features" placeholder="employee_management,leave,attendance,payroll"></textarea>
+      </div>
+    </div>
+  </div>
+  <div class="sa-modal-footer">
+    <button class="btn-sa-neutral-lg" (click)="closePlanModal()">Cancel</button>
+    <button class="btn-sa-primary-lg" (click)="savePlan()" [disabled]="saving">
+      <i class="bi" [class.bi-hourglass-split]="saving" [class.bi-check-lg]="!saving"></i>
+      {{ saving ? 'Saving…' : (editingPlan ? 'Update' : 'Create') }}
+    </button>
+  </div>
+</div>
+
+<!-- ─── FEATURE FLAG CREATE / EDIT MODAL ─────────────────────────────────── -->
+<div class="sa-modal-overlay" *ngIf="showFeatureModal" (click)="closeFeatureModal()"></div>
+<div class="sa-modal" *ngIf="showFeatureModal">
+  <div class="sa-modal-header">
+    <h3><i class="bi bi-toggles"></i> {{ editingFeature ? 'Edit Feature Flag' : 'Create Feature Flag' }}</h3>
+    <button class="sa-close-btn" (click)="closeFeatureModal()"><i class="bi bi-x-lg"></i></button>
+  </div>
+  <div class="sa-modal-body">
+    <div class="sa-form-grid">
+      <div class="sa-form-group">
+        <label>Feature Key *</label>
+        <input class="sa-input" type="text" placeholder="e.g. performance_management" [(ngModel)]="featureForm.featureKey" />
+      </div>
+      <div class="sa-form-group">
+        <label>Display Name *</label>
+        <input class="sa-input" type="text" [(ngModel)]="featureForm.featureName" />
+      </div>
+      <div class="sa-form-group">
+        <label>Module</label>
+        <input class="sa-input" type="text" placeholder="e.g. HR, Payroll, Recruitment" [(ngModel)]="featureForm.module" />
+      </div>
+      <div class="sa-form-group">
+        <label>Rollout % (0 = off, 100 = all)</label>
+        <input class="sa-input" type="number" min="0" max="100" [(ngModel)]="featureForm.rolloutPercent" />
+      </div>
+      <div class="sa-form-group">
+        <label>Scheduled Activation</label>
+        <input class="sa-input" type="datetime-local" [(ngModel)]="featureForm.scheduledActivationAt" />
+      </div>
+      <div class="sa-form-group">
+        <label>Scheduled Deactivation</label>
+        <input class="sa-input" type="datetime-local" [(ngModel)]="featureForm.scheduledDeactivationAt" />
+      </div>
+      <div class="sa-form-group sa-form-group-checks">
+        <label class="sa-check-label"><input type="checkbox" [(ngModel)]="featureForm.enabledGlobally" /> Enabled Globally</label>
+        <label class="sa-check-label"><input type="checkbox" [(ngModel)]="featureForm.betaFeature" /> Beta Feature</label>
+      </div>
+      <div class="sa-form-group sa-form-group-full">
+        <label>Description</label>
+        <textarea class="sa-input sa-textarea" [(ngModel)]="featureForm.description"></textarea>
+      </div>
+      <div class="sa-form-group sa-form-group-full">
+        <label>Enabled for Plans (comma-separated keys, e.g. PROFESSIONAL,ENTERPRISE)</label>
+        <input class="sa-input" type="text" [(ngModel)]="featureForm.enabledForPlans" />
+      </div>
+      <div class="sa-form-group sa-form-group-full">
+        <label>Enabled for Tenants (comma-separated tenant codes)</label>
+        <input class="sa-input" type="text" [(ngModel)]="featureForm.enabledForTenants" />
+      </div>
+    </div>
+  </div>
+  <div class="sa-modal-footer">
+    <button class="btn-sa-neutral-lg" (click)="closeFeatureModal()">Cancel</button>
+    <button class="btn-sa-primary-lg" (click)="saveFeature()" [disabled]="saving">
+      <i class="bi" [class.bi-hourglass-split]="saving" [class.bi-check-lg]="!saving"></i>
+      {{ saving ? 'Saving…' : (editingFeature ? 'Update' : 'Create') }}
+    </button>
+  </div>
+</div>
+
+<!-- ─── INVOICE GENERATE MODAL ───────────────────────────────────────────── -->
+<div class="sa-modal-overlay" *ngIf="showInvoiceModal" (click)="closeInvoiceModal()"></div>
+<div class="sa-modal" *ngIf="showInvoiceModal">
+  <div class="sa-modal-header">
+    <h3><i class="bi bi-receipt"></i> Generate Invoice</h3>
+    <button class="sa-close-btn" (click)="closeInvoiceModal()"><i class="bi bi-x-lg"></i></button>
+  </div>
+  <div class="sa-modal-body">
+    <div class="sa-form-grid">
+      <div class="sa-form-group">
+        <label>Tenant Code *</label>
+        <input class="sa-input" type="text" [(ngModel)]="invoiceForm['tenantCodeInput']" placeholder="e.g. acme" />
+      </div>
+      <div class="sa-form-group">
+        <label>Currency</label>
+        <input class="sa-input" type="text" [(ngModel)]="invoiceForm.currency" />
+      </div>
+      <div class="sa-form-group">
+        <label>Amount (cents)</label>
+        <input class="sa-input" type="number" min="0" [(ngModel)]="invoiceForm.amountCents" />
+      </div>
+      <div class="sa-form-group">
+        <label>Tax (cents)</label>
+        <input class="sa-input" type="number" min="0" [(ngModel)]="invoiceForm.taxAmountCents" />
+      </div>
+      <div class="sa-form-group sa-form-group-full">
+        <label>Description</label>
+        <input class="sa-input" type="text" [(ngModel)]="invoiceForm.description" />
+      </div>
+    </div>
+  </div>
+  <div class="sa-modal-footer">
+    <button class="btn-sa-neutral-lg" (click)="closeInvoiceModal()">Cancel</button>
+    <button class="btn-sa-primary-lg" (click)="generateInvoice()" [disabled]="saving">
+      <i class="bi" [class.bi-hourglass-split]="saving" [class.bi-check-lg]="!saving"></i>
+      {{ saving ? 'Generating…' : 'Generate' }}
+    </button>
+  </div>
+</div>
+
+<!-- ─── PLATFORM USER CREATE MODAL ───────────────────────────────────────── -->
+<div class="sa-modal-overlay" *ngIf="showPlatformUserModal" (click)="closePlatformUserModal()"></div>
+<div class="sa-modal" *ngIf="showPlatformUserModal">
+  <div class="sa-modal-header">
+    <h3><i class="bi bi-shield-person"></i> Create Platform User</h3>
+    <button class="sa-close-btn" (click)="closePlatformUserModal()"><i class="bi bi-x-lg"></i></button>
+  </div>
+  <div class="sa-modal-body">
+    <div class="sa-form-grid">
+      <div class="sa-form-group">
+        <label>Username *</label>
+        <input class="sa-input" type="text" [(ngModel)]="platformUserForm.username" />
+      </div>
+      <div class="sa-form-group">
+        <label>Display Name</label>
+        <input class="sa-input" type="text" [(ngModel)]="platformUserForm.displayName" />
+      </div>
+      <div class="sa-form-group">
+        <label>Password *</label>
+        <input class="sa-input" type="password" [(ngModel)]="platformUserForm.password" />
+      </div>
+      <div class="sa-form-group">
+        <label>Role</label>
+        <select class="sa-input" [(ngModel)]="platformUserForm.role">
+          <option value="SUPER_ADMIN">Super Admin</option>
+          <option value="ADMIN">Admin</option>
+          <option value="HR">HR</option>
+          <option value="MANAGER">Manager</option>
+          <option value="RECRUITER">Recruiter</option>
+        </select>
+      </div>
+    </div>
+  </div>
+  <div class="sa-modal-footer">
+    <button class="btn-sa-neutral-lg" (click)="closePlatformUserModal()">Cancel</button>
+    <button class="btn-sa-primary-lg" (click)="createPlatformUser()" [disabled]="saving">
+      <i class="bi" [class.bi-hourglass-split]="saving" [class.bi-check-lg]="!saving"></i>
+      {{ saving ? 'Creating…' : 'Create User' }}
+    </button>
+  </div>
+</div>
+
+<!-- ─── ROLE CREATE / EDIT MODAL ─────────────────────────────────────────── -->
+<div class="sa-modal-overlay" *ngIf="showRoleModal" (click)="closeRoleModal()"></div>
+<div class="sa-modal" *ngIf="showRoleModal">
+  <div class="sa-modal-header">
+    <h3><i class="bi bi-key"></i> {{ editingRole ? 'Edit Role' : 'Create Role' }}</h3>
+    <button class="sa-close-btn" (click)="closeRoleModal()"><i class="bi bi-x-lg"></i></button>
+  </div>
+  <div class="sa-modal-body">
+    <div class="sa-form-grid">
+      <div class="sa-form-group">
+        <label>Role Name *</label>
+        <input class="sa-input" type="text" [(ngModel)]="roleForm.roleName" [disabled]="!!editingRole?.systemRole" />
+      </div>
+      <div class="sa-form-group">
+        <label>Description</label>
+        <input class="sa-input" type="text" [(ngModel)]="roleForm.description" />
+      </div>
+      <div class="sa-form-group sa-form-group-full">
+        <label>Permissions</label>
+        <div class="sa-perm-checklist">
+          <label class="sa-perm-check" *ngFor="let perm of ALL_PERMISSIONS">
+            <input type="checkbox" [checked]="hasRoleFormPermission(perm)" (change)="toggleRolePermission(perm)" />
+            <span>{{ formatPermLabel(perm) }}</span>
+          </label>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="sa-modal-footer">
+    <button class="btn-sa-neutral-lg" (click)="closeRoleModal()">Cancel</button>
+    <button class="btn-sa-primary-lg" (click)="saveRole()" [disabled]="saving">
+      <i class="bi" [class.bi-hourglass-split]="saving" [class.bi-check-lg]="!saving"></i>
+      {{ saving ? 'Saving…' : (editingRole ? 'Update' : 'Create') }}
+    </button>
+  </div>
+</div>
+
+<!-- ─── CREDENTIALS MODAL ────────────────────────────────────────────────── -->
+<div class="sa-modal-overlay" *ngIf="showCredentialsModal" (click)="closeCredentialsModal()"></div>
+<div class="sa-modal" *ngIf="showCredentialsModal">
+  <div class="sa-modal-header">
+    <h3><i class="bi bi-gear"></i> Configure {{ editingIntegration?.name }}</h3>
+    <button class="sa-close-btn" (click)="closeCredentialsModal()"><i class="bi bi-x-lg"></i></button>
+  </div>
+  <div class="sa-modal-body">
+    <div class="sa-form-grid">
+      <div class="sa-form-group sa-form-group-full">
+        <label>Configuration (JSON)</label>
+        <textarea class="sa-input sa-textarea" rows="4" [(ngModel)]="credentialsForm.configJson"
+                  placeholder='{ "clientId": "", "tenantId": "" }'></textarea>
+      </div>
+      <div class="sa-form-group sa-form-group-full">
+        <label>Credentials / Secrets (JSON — stored encrypted, never returned)</label>
+        <textarea class="sa-input sa-textarea" rows="4" [(ngModel)]="credentialsForm.credentialsJson"
+                  placeholder='{ "clientSecret": "", "apiKey": "" }'></textarea>
+      </div>
+    </div>
+  </div>
+  <div class="sa-modal-footer">
+    <button class="btn-sa-neutral-lg" (click)="closeCredentialsModal()">Cancel</button>
+    <button class="btn-sa-primary-lg" (click)="saveCredentials()" [disabled]="saving">
+      <i class="bi" [class.bi-hourglass-split]="saving" [class.bi-check-lg]="!saving"></i>
+      {{ saving ? 'Saving…' : 'Save Configuration' }}
+    </button>
+  </div>
+</div>
+
+<!-- ─── BILLING DETAIL SLIDE PANEL ──────────────────────────────────────── -->
+<aside class="sa-billing-panel" *ngIf="selectedTenant">
+  <div class="sa-billing-header">
+    <h3><i class="bi bi-credit-card"></i> Billing Detail</h3>
+    <button class="sa-close-btn" (click)="closeBillingPanel()"><i class="bi bi-x-lg"></i></button>
+  </div>
+  <div class="sa-billing-loading" *ngIf="billingLoading"><i class="bi bi-hourglass-split"></i> Loading...</div>
+  <div *ngIf="billingDetail && !billingLoading">
+    <div class="sa-billing-section">
+      <div class="sa-billing-row"><span>Tenant Code</span><strong>{{ billingDetail.tenantCode }}</strong></div>
+      <div class="sa-billing-row"><span>Company</span><strong>{{ billingDetail.companyName }}</strong></div>
+    </div>
+    <div class="sa-billing-section">
+      <div class="sa-billing-section-label">Subscription</div>
+      <div class="sa-billing-row"><span>Plan</span><span class="sa-plan-badge" [ngClass]="planClass(billingDetail.plan)">{{ billingDetail.plan }}</span></div>
+      <div class="sa-billing-row"><span>Status</span><span class="sa-status-badge" [ngClass]="statusClass(billingDetail.status)">{{ billingDetail.status }}</span></div>
+      <div class="sa-billing-row"><span>Max Users</span><strong>{{ billingDetail.maxUsers }}</strong></div>
+      <div class="sa-billing-row"><span>Sub. ends</span><strong>{{ (billingDetail.subscriptionEndsAt | date:'MMM d, y') || 'N/A' }}</strong></div>
+      <div class="sa-billing-row"><span>Trial ends</span><strong>{{ (billingDetail.trialEndsAt | date:'MMM d, y') || 'N/A' }}</strong></div>
+    </div>
+    <div class="sa-billing-section">
+      <div class="sa-billing-section-label">Stripe IDs</div>
+      <div class="sa-billing-row"><span>Customer</span><code class="sa-code-sm">{{ billingDetail.stripeCustomerId || '—' }}</code></div>
+      <div class="sa-billing-row"><span>Subscription</span><code class="sa-code-sm">{{ billingDetail.stripeSubscriptionId || '—' }}</code></div>
+      <div class="sa-billing-row"><span>Price ID</span><code class="sa-code-sm">{{ billingDetail.stripePriceId || '—' }}</code></div>
+    </div>
+    <div class="sa-billing-actions">
+      <div class="sa-trial-extend">
+        <label>Extend trial</label>
+        <input type="number" class="sa-input-sm" [(ngModel)]="trialDays" min="1" max="365" />
+        <span>days</span>
+        <button class="btn-sa-sm btn-sa-primary" (click)="extendTrial(billingDetail.tenantCode)"><i class="bi bi-plus-circle"></i></button>
+      </div>
+      <button class="btn-sa-action btn-sa-warning" (click)="suspend(billingDetail.tenantCode)"          *ngIf="billingDetail.status==='ACTIVE'"><i class="bi bi-pause-fill"></i> Suspend Tenant</button>
+      <button class="btn-sa-action btn-sa-success" (click)="activate(billingDetail.tenantCode)"         *ngIf="billingDetail.status!=='ACTIVE'"><i class="bi bi-play-fill"></i> Activate Tenant</button>
+      <button class="btn-sa-action btn-sa-danger"  (click)="cancelSubscription(billingDetail.tenantCode)" *ngIf="billingDetail.plan!=='FREE'"><i class="bi bi-x-circle"></i> Cancel Subscription</button>
+    </div>
+  </div>
+</aside>
+
+<ng-template #loadingTpl>
+  <div class="sa-loading"><i class="bi bi-hourglass-split"></i> Loading...</div>
+</ng-template>
